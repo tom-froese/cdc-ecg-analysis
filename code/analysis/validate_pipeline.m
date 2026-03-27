@@ -7,27 +7,14 @@ function results = validate_pipeline()
 %   1. LUDB  (Tier 1: full manual, fs = 500 Hz, lead II, n = 200)
 %   2. QTDB  (Tier 1: full manual, fs = 250 Hz, q1c annotator, n ~ 105)
 %
-% Two levels of analysis are reported:
+% Two levels of analysis:
 %   - Beat-level:    per-beat agreement (full transparency)
 %   - Subject-level: per-subject median CDC agreement (analysis-relevant)
 %
-% The critical outcome is subject-level CDC agreement, since subject-level
-% median CDC is what enters all downstream analyses.
-%
-% QTDB note: The QT Database contains 15-minute recordings but only
-% 30-100 beats per record were manually annotated, concentrated in the
-% final 5 minutes (Laguna et al., Comput. Cardiol. 1997). The automatic
-% detector runs on the full signal but comparison is restricted to the
-% annotated segment (+/- 2 seconds buffer).
-%
-% Outputs:
-%   results - Struct with per-database and pooled agreement statistics
-%   Console output suitable for Supplementary Table
-%   CSV:    results/validation_results.csv
-%   Figure: results/figures/SI_Fig_validation_bland_altman.{pdf,png,fig}
-%
-% Usage:
-%   results = validate_pipeline();
+% QTDB note: Each 15-min recording has only 30-100 manually annotated beats,
+% concentrated in the final 5 minutes (Laguna et al., Comput. Cardiol. 1997).
+% The auto detector runs on the full signal but comparison is restricted to
+% the annotated segment (+/- 2 s buffer).
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit, March 2026
 
@@ -38,58 +25,42 @@ function results = validate_pipeline()
 
     paths = config();
 
-    %% ================================================================
-    %  VALIDATE LUDB
-    %  ================================================================
+    % --- LUDB ---
     fprintf('────────────────────────────────────────────────────────────\n');
     fprintf('VALIDATING LUDB (Tier 1: full manual, fs=500 Hz)\n');
     fprintf('────────────────────────────────────────────────────────────\n');
-
     ludb = validate_ludb(paths);
 
-    %% ================================================================
-    %  VALIDATE QTDB
-    %  ================================================================
+    % --- QTDB ---
     fprintf('\n────────────────────────────────────────────────────────────\n');
     fprintf('VALIDATING QTDB (Tier 1: full manual, fs=250 Hz)\n');
-    fprintf('  Note: only 30-100 beats per record were manually annotated\n');
-    fprintf('  (final 5 min of 15-min recordings; Laguna et al. 1997).\n');
+    fprintf('  Note: 30-100 beats/record manually annotated (final 5 min).\n');
     fprintf('  Auto detector restricted to annotated segment.\n');
     fprintf('────────────────────────────────────────────────────────────\n');
-
     qtdb = validate_qtdb(paths);
 
-    %% ================================================================
-    %  POOLED RESULTS
-    %  ================================================================
+    % --- POOLED ---
     fprintf('\n────────────────────────────────────────────────────────────\n');
     fprintf('POOLED RESULTS\n');
     fprintf('────────────────────────────────────────────────────────────\n');
-
     pooled = pool_results(ludb, qtdb);
 
-    %% ================================================================
-    %  SUMMARY TABLES
-    %  ================================================================
+    % --- TABLES ---
     fprintf('\n============================================================\n');
-    fprintf('TABLE 1: Beat-level agreement (Auto vs Manual)\n');
+    fprintf('TABLE 1: Beat-level agreement\n');
     fprintf('============================================================\n\n');
     print_beat_level_table(ludb, qtdb, pooled);
 
     fprintf('\n============================================================\n');
     fprintf('TABLE 2: Subject-level agreement (median CDC per subject)\n');
     fprintf('============================================================\n\n');
-    print_subject_level_table(ludb, qtdb);
+    print_subject_level_table(ludb, qtdb, pooled);
 
-    %% ================================================================
-    %  BLAND-ALTMAN PLOTS
-    %  ================================================================
+    % --- FIGURE ---
     fprintf('\nGenerating Bland-Altman plots...\n');
     plot_bland_altman(ludb, qtdb, paths);
 
-    %% ================================================================
-    %  SAVE RESULTS
-    %  ================================================================
+    % --- SAVE ---
     results.ludb   = ludb;
     results.qtdb   = qtdb;
     results.pooled = pooled;
@@ -113,15 +84,14 @@ function res = validate_ludb(paths)
     lead_name = 'ii';
     n_subjects = 200;
 
-    r_tol = round(0.075 * fs);
-    t_tol = round(0.100 * fs);
+    r_tol = round(0.075 * fs);   % +/-75 ms
 
+    % Accumulators
     all_r_err = []; all_t_err = [];
-    all_cdc_manual = []; all_cdc_auto = [];
-    n_manual_r = 0; n_matched_r = 0; n_auto_r = 0;
-    n_matched_t = 0; n_records = 0; n_auto_t_fail = 0;
-
-    subj_cdc_manual = []; subj_cdc_auto = [];
+    all_cdc_man = []; all_cdc_aut = [];
+    n_man_r = 0; n_aut_r = 0; n_match_r = 0;
+    n_match_t = 0; n_recs = 0; n_tfail = 0;
+    subj_man = []; subj_aut = [];
 
     for subj = 1:n_subjects
         hea_file = fullfile(base_path, 'data', [num2str(subj) '.hea']);
@@ -134,53 +104,49 @@ function res = validate_ludb(paths)
         end
 
         try
+            % Load signal
             [~, n_samp, n_sig, gains, baselines, sig_names, fmt] = ...
                 read_wfdb_header(hea_file);
-            lead_idx = find_lead_index(sig_names, lead_name);
-            if isempty(lead_idx), continue; end
-
+            li = find_lead(sig_names, lead_name);
+            if isempty(li), continue; end
             raw = read_wfdb_signal(dat_file, n_samp, n_sig, fmt);
-            ecg_raw = (raw(:, lead_idx) - baselines(lead_idx)) / gains(lead_idx);
+            ecg = (raw(:, li) - baselines(li)) / gains(li);
 
-            [ann_samples, ann_symbols] = read_wfdb_annotations(ann_file, 'ludb');
-            [man_r, man_t] = extract_rt_pairs(ann_samples, ann_symbols);
-            if length(man_r) < 3, continue; end
+            % Load manual annotations
+            [as, ay] = read_wfdb_annotations(ann_file, 'ludb');
+            [mr, mt] = extract_rt_pairs(as, ay);
+            if length(mr) < 3, continue; end
 
-            ecg_filt = bandpass_filter(ecg_raw, fs, 0.5, 40);
-            auto_r = detect_r_peaks(ecg_filt, fs);
-            if isempty(auto_r), continue; end
+            % Run auto pipeline
+            ef = bandpass_filter(ecg, fs, 0.5, 40);
+            ar = detect_r_peaks(ef, fs);
+            if isempty(ar), continue; end
 
-            auto_t = nan(size(auto_r));
-            for b = 1:length(auto_r)
-                [te, ~, ~, ~] = detect_t_end(ecg_filt, auto_r, b, fs);
-                if ~isnan(te)
-                    auto_t(b) = te;
-                else
-                    n_auto_t_fail = n_auto_t_fail + 1;
-                end
+            at = nan(size(ar));
+            for b = 1:length(ar)
+                [te, ~, ~, ~] = detect_t_end(ef, ar, b, fs);
+                if ~isnan(te), at(b) = te; else, n_tfail = n_tfail + 1; end
             end
 
-            n_manual_r = n_manual_r + length(man_r);
-            n_auto_r   = n_auto_r + length(auto_r);
+            % Beat-level comparison
+            n_man_r = n_man_r + length(mr);
+            n_aut_r = n_aut_r + length(ar);
+            [re, te2, cm, ca, nmr, nmt] = ...
+                do_match(mr, mt, ar, at, r_tol, fs);
+            all_r_err = [all_r_err; re];
+            all_t_err = [all_t_err; te2];
+            all_cdc_man = [all_cdc_man; cm];
+            all_cdc_aut = [all_cdc_aut; ca];
+            n_match_r = n_match_r + nmr;
+            n_match_t = n_match_t + nmt;
+            n_recs = n_recs + 1;
 
-            [r_err, t_err, cdc_man, cdc_aut, n_mr, n_mt] = ...
-                match_and_compare(man_r, man_t, auto_r, auto_t, r_tol, t_tol, fs);
-
-            all_r_err      = [all_r_err; r_err];
-            all_t_err      = [all_t_err; t_err];
-            all_cdc_manual = [all_cdc_manual; cdc_man];
-            all_cdc_auto   = [all_cdc_auto;   cdc_aut];
-            n_matched_r = n_matched_r + n_mr;
-            n_matched_t = n_matched_t + n_mt;
-            n_records   = n_records + 1;
-
-            % --- Subject-level median CDC ---
-            man_cdc_subj = compute_median_cdc(man_r, man_t, fs);
-            aut_cdc_subj = compute_median_cdc_auto(auto_r, auto_t, fs);
-
-            if ~isnan(man_cdc_subj) && ~isnan(aut_cdc_subj)
-                subj_cdc_manual(end+1) = man_cdc_subj;
-                subj_cdc_auto(end+1)   = aut_cdc_subj;
+            % Subject-level median CDC
+            sm = med_cdc(mr, mt, fs);
+            sa = med_cdc_auto(ar, at, fs);
+            if ~isnan(sm) && ~isnan(sa)
+                subj_man(end+1) = sm;
+                subj_aut(end+1) = sa;
             end
 
         catch ME
@@ -188,26 +154,14 @@ function res = validate_ludb(paths)
         end
     end
 
-    fprintf('  Records processed: %d\n', n_records);
-    fprintf('  Manual R-peaks: %d, Auto R-peaks: %d\n', n_manual_r, n_auto_r);
-    fprintf('  R-peak matches: %d (sensitivity: %.1f%%)\n', ...
-        n_matched_r, 100 * n_matched_r / max(n_manual_r, 1));
-    fprintf('  T-end matches (beat-level): %d, Auto T-end failures: %d\n', ...
-        n_matched_t, n_auto_t_fail);
+    fprintf('  Records: %d\n', n_recs);
+    fprintf('  Manual R: %d, Auto R: %d, Matched: %d (%.1f%%)\n', ...
+        n_man_r, n_aut_r, n_match_r, 100*n_match_r/max(n_man_r,1));
+    fprintf('  T-end matches: %d, T-end failures: %d\n', n_match_t, n_tfail);
 
-    res = compute_agreement(all_r_err, all_t_err, all_cdc_manual, all_cdc_auto);
-    res.database = 'LUDB';
-    res.n_records = n_records;
-    res.n_manual_r = n_manual_r;
-    res.n_auto_r = n_auto_r;
-    res.n_matched_r = n_matched_r;
-    res.n_matched_t = n_matched_t;
-    res.r_sensitivity = 100 * n_matched_r / max(n_manual_r, 1);
-    res.subj = compute_subject_agreement(subj_cdc_manual(:), subj_cdc_auto(:));
-    res.subj_cdc_manual = subj_cdc_manual(:);
-    res.subj_cdc_auto   = subj_cdc_auto(:);
-
-    print_agreement(res);
+    res = make_res('LUDB', all_r_err, all_t_err, all_cdc_man, all_cdc_aut, ...
+        n_recs, n_man_r, n_aut_r, n_match_r, n_match_t, subj_man(:), subj_aut(:));
+    print_res(res);
 end
 
 
@@ -218,183 +172,175 @@ function res = validate_qtdb(paths)
 
     base_path = paths.raw_qtdb;
     fs = 250;
-    records = get_qtdb_records();
+    records = qtdb_records();
 
     r_tol = round(0.075 * fs);
-    t_tol = round(0.100 * fs);
 
     all_r_err = []; all_t_err = [];
-    all_cdc_manual = []; all_cdc_auto = [];
-    n_manual_r = 0; n_matched_r = 0; n_auto_r = 0;
-    n_matched_t = 0; n_records = 0; n_auto_t_fail = 0;
+    all_cdc_man = []; all_cdc_aut = [];
+    n_man_r = 0; n_aut_r = 0; n_match_r = 0;
+    n_match_t = 0; n_recs = 0; n_tfail = 0;
+    subj_man = []; subj_aut = [];
 
-    subj_cdc_manual = []; subj_cdc_auto = [];
+    fprintf('  Processing %d QTDB records (annotated segment only + 30 s buffer)...\n', length(records));
 
     for i = 1:length(records)
-        record = records{i};
-        hea_file = fullfile(base_path, [record '.hea']);
-        dat_file = fullfile(base_path, [record '.dat']);
+        rec = records{i};
+        fprintf('    [%3d/%d] %s ... ', i, length(records), rec);
 
+        hea_file = fullfile(base_path, [rec '.hea']);
+        dat_file = fullfile(base_path, [rec '.dat']);
         if ~exist(hea_file, 'file') || ~exist(dat_file, 'file')
+            fprintf('missing files → skip\n');
             continue;
         end
 
-        ann_file = '';
-        for ann_ext = {'q1c', 'pu0', 'qt1', 'man'}
-            candidate = fullfile(base_path, [record '.' ann_ext{1}]);
-            if exist(candidate, 'file')
-                ann_file = candidate;
-                break;
-            end
+        % Find annotation file
+        af = '';
+        for ext = {'q1c', 'pu0', 'qt1', 'man'}
+            c = fullfile(base_path, [rec '.' ext{1}]);
+            if exist(c, 'file'), af = c; break; end
         end
-        if isempty(ann_file), continue; end
+        if isempty(af)
+            fprintf('no annotations → skip\n');
+            continue;
+        end
 
         try
-            [fs_rec, n_samp, n_sig, gains, baselines, sig_names, fmt] = ...
-                read_wfdb_header(hea_file);
-            lead_idx = 1;
-            raw = read_wfdb_signal(dat_file, n_samp, n_sig, fmt);
-            ecg_raw = (raw(:, lead_idx) - baselines(lead_idx)) / gains(lead_idx);
-
-            if fs_rec > 0 && ~isnan(fs_rec)
-                fs_actual = fs_rec;
+            [fsr, n_samp, n_sig, gains, baselines, ~, fmt] = read_wfdb_header(hea_file);
+            if fsr > 0 && ~isnan(fsr)
+                fsa = fsr;
             else
-                fs_actual = fs;
+                fsa = fs;
             end
 
-            if any(~isfinite(ecg_raw))
-                fprintf('  QTDB %s: non-finite signal values, skipping\n', record);
+            raw = read_wfdb_signal(dat_file, n_samp, n_sig, fmt);
+            ecg = (raw(:,1) - baselines(1)) / gains(1);
+
+            if any(~isfinite(ecg))
+                fprintf('non-finite → skip\n');
                 continue;
             end
 
-            [ann_samples, ann_symbols] = read_wfdb_annotations(ann_file, 'qtdb');
-            [man_r, man_t] = extract_rt_pairs(ann_samples, ann_symbols);
-            if length(man_r) < 3, continue; end
+            [as, ay] = read_wfdb_annotations(af, 'qtdb');
+            [mr, mt] = extract_rt_pairs(as, ay);
+            if length(mr) < 3
+                fprintf('too few manual beats → skip\n');
+                continue;
+            end
 
-            % --- RESTRICT to annotated segment (+/- 2 s buffer) ---
-            seg_start = max(1, man_r(1) - round(2 * fs_actual));
-            seg_end   = min(length(ecg_raw), man_r(end) + round(2 * fs_actual));
+            % Crop to annotated segment + buffer
+            buffer = round(30 * fsa);
+            seg_s = max(1, mr(1) - buffer);
+            seg_e = min(length(ecg), mr(end) + buffer);
+            ecg_seg = ecg(seg_s:seg_e);
 
-            % Run auto pipeline on full signal
-            ecg_filt = bandpass_filter(ecg_raw, fs_actual, 0.5, 40);
-            auto_r_full = detect_r_peaks(ecg_filt, fs_actual);
-            if isempty(auto_r_full), continue; end
+            ef = bandpass_filter(ecg_seg, fsa, 0.5, 40);
+            ar_seg = detect_r_peaks(ef, fsa);   % LOCAL indices in cropped ef
 
-            % Keep only auto R-peaks within annotated segment
-            in_segment = auto_r_full >= seg_start & auto_r_full <= seg_end;
-            auto_r = auto_r_full(in_segment);
-            if length(auto_r) < 3, continue; end
+            if isempty(ar_seg)
+                fprintf('no R-peaks → skip\n');
+                continue;
+            end
 
-            % Detect T-ends using full context for RR intervals
-            auto_t = nan(size(auto_r));
-            seg_indices = find(in_segment);
-            for k = 1:length(seg_indices)
-                bi = seg_indices(k);
-                [te, ~, ~, ~] = detect_t_end(ecg_filt, auto_r_full, bi, fs_actual);
-                if ~isnan(te)
-                    auto_t(k) = te;
+            ar_full = ar_seg + (seg_s - 1);     % global indices
+
+            in_seg = ar_full >= mr(1) & ar_full <= mr(end);
+            ar = ar_full(in_seg);
+            if length(ar) < 3
+                fprintf('too few auto beats → skip\n');
+                continue;
+            end
+
+            % === T-END DETECTION - NOW USING CORRECT LOCAL INDICES ===
+            at = nan(size(ar));
+            seg_idx = find(in_seg);
+            for k = 1:length(ar)
+                local_bi = seg_idx(k);                    % local index in ar_seg / ef
+                [te_local, ~, ~, ~] = detect_t_end(ef, ar_seg, local_bi, fsa);
+                if ~isnan(te_local)
+                    at(k) = te_local + (seg_s - 1);       % store global index
                 else
-                    n_auto_t_fail = n_auto_t_fail + 1;
+                    n_tfail = n_tfail + 1;
                 end
             end
 
-            n_manual_r = n_manual_r + length(man_r);
-            n_auto_r   = n_auto_r + length(auto_r);
+            % Beat-level comparison
+            n_man_r = n_man_r + length(mr);
+            n_aut_r = n_aut_r + length(ar);
+            [re, te2, cm, ca, nmr, nmt] = do_match(mr, mt, ar, at, r_tol, fsa);
 
-            [r_err, t_err, cdc_man, cdc_aut, n_mr, n_mt] = ...
-                match_and_compare(man_r, man_t, auto_r, auto_t, ...
-                                  r_tol, t_tol, fs_actual);
+            all_r_err = [all_r_err; re];
+            all_t_err = [all_t_err; te2];
+            all_cdc_man = [all_cdc_man; cm];
+            all_cdc_aut = [all_cdc_aut; ca];
+            n_match_r = n_match_r + nmr;
+            n_match_t = n_match_t + nmt;
+            n_recs = n_recs + 1;
 
-            all_r_err      = [all_r_err; r_err];
-            all_t_err      = [all_t_err; t_err];
-            all_cdc_manual = [all_cdc_manual; cdc_man];
-            all_cdc_auto   = [all_cdc_auto;   cdc_aut];
-            n_matched_r = n_matched_r + n_mr;
-            n_matched_t = n_matched_t + n_mt;
-            n_records   = n_records + 1;
-
-            % Record-level median CDC (matched beats only)
-            if length(cdc_man) >= 3 && length(cdc_aut) >= 3
-                subj_cdc_manual(end+1) = median(cdc_man);
-                subj_cdc_auto(end+1)   = median(cdc_aut);
+            if length(cm) >= 3 && length(ca) >= 3
+                subj_man(end+1) = median(cm);
+                subj_aut(end+1) = median(ca);
             end
+
+            fprintf('OK (%d matched beats, %d T-ends)\n', nmr, nmt);
 
         catch ME
-            fprintf('  QTDB %s: %s\n', record, ME.message);
+            fprintf('ERROR: %s\n', ME.message);
         end
     end
 
-    fprintf('  Records processed: %d\n', n_records);
-    fprintf('  Manual R-peaks: %d, Auto R-peaks (in segment): %d\n', ...
-        n_manual_r, n_auto_r);
-    fprintf('  R-peak matches: %d (sensitivity: %.1f%%)\n', ...
-        n_matched_r, 100 * n_matched_r / max(n_manual_r, 1));
-    fprintf('  T-end matches (beat-level): %d, Auto T-end failures: %d\n', ...
-        n_matched_t, n_auto_t_fail);
+    fprintf('  Records: %d\n', n_recs);
+    fprintf('  Manual R: %d, Auto R (segment): %d, Matched: %d (%.1f%%)\n', ...
+        n_man_r, n_aut_r, n_match_r, 100*n_match_r/max(n_man_r,1));
+    fprintf('  T-end matches: %d, T-end failures: %d\n', n_match_t, n_tfail);
 
-    res = compute_agreement(all_r_err, all_t_err, all_cdc_manual, all_cdc_auto);
-    res.database = 'QTDB';
-    res.n_records = n_records;
-    res.n_manual_r = n_manual_r;
-    res.n_auto_r = n_auto_r;
-    res.n_matched_r = n_matched_r;
-    res.n_matched_t = n_matched_t;
-    res.r_sensitivity = 100 * n_matched_r / max(n_manual_r, 1);
-    res.subj = compute_subject_agreement(subj_cdc_manual(:), subj_cdc_auto(:));
-    res.subj_cdc_manual = subj_cdc_manual(:);
-    res.subj_cdc_auto   = subj_cdc_auto(:);
-
-    print_agreement(res);
+    res = make_res('QTDB', all_r_err, all_t_err, all_cdc_man, all_cdc_aut, ...
+        n_recs, n_man_r, n_aut_r, n_match_r, n_match_t, subj_man(:), subj_aut(:));
+    print_res(res);
 end
 
-
 %% ========================================================================
-%  MATCHING
+%  BEAT MATCHING
 %  ========================================================================
-function [r_err, t_err, cdc_man, cdc_aut, n_matched_r, n_matched_t] = ...
-    match_and_compare(man_r, man_t, auto_r, auto_t, r_tol, ~, fs)
+function [r_err, t_err, cdc_m, cdc_a, nm_r, nm_t] = ...
+    do_match(man_r, man_t, aut_r, aut_t, r_tol, fs)
 
-    r_err = []; t_err = [];
-    cdc_man = []; cdc_aut = [];
-    n_matched_r = 0; n_matched_t = 0;
+    r_err = []; t_err = []; cdc_m = []; cdc_a = [];
+    nm_r = 0; nm_t = 0;
+    matched = nan(length(man_r), 1);
 
-    matched_auto_idx = nan(length(man_r), 1);
-
+    % Match each manual R to nearest auto R within tolerance
     for i = 1:length(man_r)
-        diffs = abs(auto_r - man_r(i));
-        [min_diff, best_idx] = min(diffs);
-        if min_diff <= r_tol
-            if ~ismember(best_idx, matched_auto_idx(1:i-1))
-                matched_auto_idx(i) = best_idx;
-                n_matched_r = n_matched_r + 1;
-                r_err(end+1, 1) = (auto_r(best_idx) - man_r(i)) / fs * 1000;
-            end
+        d = abs(aut_r - man_r(i));
+        [md, bi] = min(d);
+        if md <= r_tol && ~ismember(bi, matched(1:i-1))
+            matched(i) = bi;
+            nm_r = nm_r + 1;
+            r_err(end+1, 1) = (aut_r(bi) - man_r(i)) / fs * 1000;
         end
     end
 
-    for i = 1:length(man_r)
-        ai = matched_auto_idx(i);
-        if isnan(ai), continue; end
+    % Compare T-ends and CDC for consecutive matched pairs
+    for i = 1:length(man_r)-1
+        ai = matched(i);
+        ai_next = matched(i+1);
+        if isnan(ai) || isnan(ai_next), continue; end
         if i > length(man_t) || isnan(man_t(i)), continue; end
-        if isnan(auto_t(ai)), continue; end
-        if i >= length(man_r), continue; end
+        if isnan(aut_t(ai)), continue; end
 
-        next_ai = matched_auto_idx(i + 1);
-        if isnan(next_ai), continue; end
+        m_rt = (man_t(i) - man_r(i)) / fs;
+        m_rr = (man_r(i+1) - man_r(i)) / fs;
+        a_rt = (aut_t(ai) - aut_r(ai)) / fs;
+        a_rr = (aut_r(ai_next) - aut_r(ai)) / fs;
 
-        man_rt = (man_t(i) - man_r(i)) / fs;
-        man_rr = (man_r(i+1) - man_r(i)) / fs;
-        aut_rt = (auto_t(ai) - auto_r(ai)) / fs;
-        aut_rr = (auto_r(next_ai) - auto_r(ai)) / fs;
+        if m_rr <= 0 || a_rr <= 0 || m_rt <= 0 || a_rt <= 0, continue; end
+        if m_rt >= m_rr || a_rt >= a_rr, continue; end
 
-        if man_rr <= 0 || aut_rr <= 0, continue; end
-        if man_rt <= 0 || aut_rt <= 0, continue; end
-        if man_rt >= man_rr || aut_rt >= aut_rr, continue; end
-
-        t_err(end+1, 1) = (auto_t(ai) - man_t(i)) / fs * 1000;
-        cdc_man(end+1, 1) = man_rt / man_rr;
-        cdc_aut(end+1, 1) = aut_rt / aut_rr;
-        n_matched_t = n_matched_t + 1;
+        t_err(end+1, 1) = (aut_t(ai) - man_t(i)) / fs * 1000;
+        cdc_m(end+1, 1) = m_rt / m_rr;
+        cdc_a(end+1, 1) = a_rt / a_rr;
+        nm_t = nm_t + 1;
     end
 end
 
@@ -402,443 +348,324 @@ end
 %% ========================================================================
 %  SUBJECT-LEVEL CDC HELPERS
 %  ========================================================================
-function med_cdc = compute_median_cdc(r_peaks, t_ends, fs)
-% Median CDC from annotation pairs with quality filters
-    n = min(length(r_peaks)-1, length(t_ends));
-    if n < 2, med_cdc = NaN; return; end
-
-    cdc_vals = [];
+function mc = med_cdc(rp, te, fs)
+    n = min(length(rp)-1, length(te));
+    if n < 2, mc = NaN; return; end
+    v = [];
     for i = 1:n
-        rt = (t_ends(i) - r_peaks(i)) / fs;
-        rr = (r_peaks(i+1) - r_peaks(i)) / fs;
+        rt = (te(i) - rp(i)) / fs;
+        rr = (rp(i+1) - rp(i)) / fs;
         if rr > 0 && rt > 0 && rt < rr
             c = rt / rr;
-            if c > 0.2 && c < 0.6
-                cdc_vals(end+1) = c;
-            end
+            if c > 0.2 && c < 0.6, v(end+1) = c; end
         end
     end
-    if isempty(cdc_vals)
-        med_cdc = NaN;
-    else
-        med_cdc = median(cdc_vals);
-    end
+    if isempty(v), mc = NaN; else, mc = median(v); end
 end
 
-
-function med_cdc = compute_median_cdc_auto(auto_r, auto_t, fs)
-% Median CDC from automatic detections (all valid beats)
-    valid = find(~isnan(auto_t));
-    if length(valid) < 2, med_cdc = NaN; return; end
-
-    cdc_vals = [];
-    for k = 1:length(valid)-1
-        bi = valid(k);
-        % Find next auto R-peak (not necessarily in valid list)
-        if bi < length(auto_r)
-            rt = (auto_t(bi) - auto_r(bi)) / fs;
-            rr = (auto_r(bi+1) - auto_r(bi)) / fs;
+function mc = med_cdc_auto(ar, at, fs)
+    vi = find(~isnan(at));
+    if length(vi) < 2, mc = NaN; return; end
+    v = [];
+    for k = 1:length(vi)-1
+        bi = vi(k);
+        if bi < length(ar)
+            rt = (at(bi) - ar(bi)) / fs;
+            rr = (ar(bi+1) - ar(bi)) / fs;
             if rr > 0 && rt > 0 && rt < rr
                 c = rt / rr;
-                if c > 0.2 && c < 0.6
-                    cdc_vals(end+1) = c;
-                end
+                if c > 0.2 && c < 0.6, v(end+1) = c; end
             end
         end
     end
-    if isempty(cdc_vals)
-        med_cdc = NaN;
-    else
-        med_cdc = median(cdc_vals);
-    end
+    if isempty(v), mc = NaN; else, mc = median(v); end
 end
 
 
 %% ========================================================================
-%  AGREEMENT STATISTICS
+%  AGREEMENT STATS
 %  ========================================================================
-function res = compute_agreement(r_err_ms, t_err_ms, cdc_man, cdc_aut)
-    res.r_n = length(r_err_ms);
-    res.r_mae = mean(abs(r_err_ms));
-    res.r_bias = mean(r_err_ms);
-    res.r_std = std(r_err_ms);
-    res.r_loa_lo = res.r_bias - 1.96 * res.r_std;
-    res.r_loa_hi = res.r_bias + 1.96 * res.r_std;
+function res = make_res(db, r_err, t_err, cm, ca, nr, nmr, nar, nxr, nxt, sm, sa)
+    res.database = db;
+    res.n_records = nr;
+    res.n_manual_r = nmr; res.n_auto_r = nar;
+    res.n_matched_r = nxr; res.n_matched_t = nxt;
+    res.r_sensitivity = 100 * nxr / max(nmr, 1);
 
-    res.t_n = length(t_err_ms);
-    res.t_mae = mean(abs(t_err_ms));
-    res.t_bias = mean(t_err_ms);
-    res.t_std = std(t_err_ms);
-    res.t_loa_lo = res.t_bias - 1.96 * res.t_std;
-    res.t_loa_hi = res.t_bias + 1.96 * res.t_std;
+    res.r_n = length(r_err); res.r_mae = mn(abs(r_err)); res.r_bias = mn(r_err);
+    res.r_std = sd(r_err);
+    res.r_loa_lo = res.r_bias - 1.96*res.r_std;
+    res.r_loa_hi = res.r_bias + 1.96*res.r_std;
 
-    cdc_err = cdc_aut - cdc_man;
-    res.cdc_n = length(cdc_err);
-    res.cdc_mae = mean(abs(cdc_err));
-    res.cdc_bias = mean(cdc_err);
-    res.cdc_std = std(cdc_err);
-    res.cdc_loa_lo = res.cdc_bias - 1.96 * res.cdc_std;
-    res.cdc_loa_hi = res.cdc_bias + 1.96 * res.cdc_std;
-    if res.cdc_n >= 3
-        res.cdc_corr = corr(cdc_man, cdc_aut);
-    else
-        res.cdc_corr = NaN;
-    end
+    res.t_n = length(t_err); res.t_mae = mn(abs(t_err)); res.t_bias = mn(t_err);
+    res.t_std = sd(t_err);
+    res.t_loa_lo = res.t_bias - 1.96*res.t_std;
+    res.t_loa_hi = res.t_bias + 1.96*res.t_std;
 
-    res.r_err_ms = r_err_ms;
-    res.t_err_ms = t_err_ms;
-    res.cdc_man = cdc_man;
-    res.cdc_aut = cdc_aut;
+    ce = ca - cm;
+    res.cdc_n = length(ce); res.cdc_mae = mn(abs(ce)); res.cdc_bias = mn(ce);
+    res.cdc_std = sd(ce);
+    res.cdc_loa_lo = res.cdc_bias - 1.96*res.cdc_std;
+    res.cdc_loa_hi = res.cdc_bias + 1.96*res.cdc_std;
+    if res.cdc_n >= 3, res.cdc_corr = corr(cm, ca); else, res.cdc_corr = NaN; end
+
+    res.r_err_ms = r_err; res.t_err_ms = t_err;
+    res.cdc_man = cm; res.cdc_aut = ca;
+
+    % Subject-level
+    res.subj_cdc_manual = sm; res.subj_cdc_auto = sa;
+    se = sa - sm;
+    res.subj_n = length(se); res.subj_mae = mn(abs(se)); res.subj_bias = mn(se);
+    res.subj_std = sd(se); res.subj_median_ae = mdn(abs(se));
+    res.subj_loa_lo = res.subj_bias - 1.96*res.subj_std;
+    res.subj_loa_hi = res.subj_bias + 1.96*res.subj_std;
+    if res.subj_n >= 3, res.subj_corr = corr(sm, sa); else, res.subj_corr = NaN; end
+end
+
+function v = mn(x)
+    if isempty(x), v = NaN; else, v = mean(x); end
+end
+
+function v = sd(x)
+    if isempty(x), v = NaN; else, v = std(x); end
+end
+
+function v = mdn(x)
+    if isempty(x), v = NaN; else, v = median(x); end
 end
 
 
-function s = compute_subject_agreement(man_med, aut_med)
-    s.n = length(man_med);
-    err = aut_med - man_med;
-    s.mae = mean(abs(err));
-    s.bias = mean(err);
-    s.std = std(err);
-    s.loa_lo = s.bias - 1.96 * s.std;
-    s.loa_hi = s.bias + 1.96 * s.std;
-    s.median_ae = median(abs(err));
-    if s.n >= 3
-        s.corr = corr(man_med, aut_med);
-    else
-        s.corr = NaN;
-    end
-    fprintf('\n  --- Subject-level CDC (median per subject, N=%d) ---\n', s.n);
+%% ========================================================================
+%  POOL
+%  ========================================================================
+function p = pool_results(a, b)
+    re = [a.r_err_ms; b.r_err_ms];
+    te = [a.t_err_ms; b.t_err_ms];
+    cm = [a.cdc_man; b.cdc_man];
+    ca = [a.cdc_aut; b.cdc_aut];
+    sm = [a.subj_cdc_manual; b.subj_cdc_manual];
+    sa = [a.subj_cdc_auto;   b.subj_cdc_auto];
+    p = make_res('Pooled', re, te, cm, ca, ...
+        a.n_records+b.n_records, a.n_manual_r+b.n_manual_r, ...
+        a.n_auto_r+b.n_auto_r, a.n_matched_r+b.n_matched_r, ...
+        a.n_matched_t+b.n_matched_t, sm, sa);
+
+    fprintf('\n  --- Pooled subject-level (N=%d) ---\n', p.subj_n);
     fprintf('  MAE=%.4f, Bias=%+.4f, LoA=[%.4f, %.4f], r=%.3f\n', ...
-        s.mae, s.bias, s.loa_lo, s.loa_hi, s.corr);
-    fprintf('  Median AE=%.4f\n', s.median_ae);
+        p.subj_mae, p.subj_bias, p.subj_loa_lo, p.subj_loa_hi, p.subj_corr);
 end
 
 
 %% ========================================================================
-%  POOL RESULTS
+%  BLAND-ALTMAN FIGURE (optimized + self-contained)
 %  ========================================================================
-function pooled = pool_results(ludb, qtdb)
-    r_err_all = [ludb.r_err_ms; qtdb.r_err_ms];
-    t_err_all = [ludb.t_err_ms; qtdb.t_err_ms];
-    cdc_man_all = [ludb.cdc_man; qtdb.cdc_man];
-    cdc_aut_all = [ludb.cdc_aut; qtdb.cdc_aut];
+function plot_bland_altman(a, b, paths)
+    fprintf('    Generating Bland-Altman panels... ');
+    fig = figure('Position', [50 100 1600 900], 'Color', 'w', 'Visible', 'on');
+    c1 = [0.20 0.47 0.76]; c2 = [0.85 0.40 0.25]; ms = 6;
 
-    pooled.r_n = length(r_err_all);
-    pooled.r_mae = mean(abs(r_err_all));
-    pooled.r_bias = mean(r_err_all);
-    pooled.r_std = std(r_err_all);
-    pooled.r_loa_lo = pooled.r_bias - 1.96 * pooled.r_std;
-    pooled.r_loa_hi = pooled.r_bias + 1.96 * pooled.r_std;
+    % a: R-peak
+    subplot(2,2,1); hold on;
+    n1 = length(a.r_err_ms);
+    n2 = length(b.r_err_ms);
+    if n1 > 0, scatter((1:n1)', a.r_err_ms, ms, c1, 'filled', 'MarkerFaceAlpha', 0.4); end
+    if n2 > 0, scatter(n1+(1:n2)', b.r_err_ms, ms, c2, 'filled', 'MarkerFaceAlpha', 0.4); end
+    d = [a.r_err_ms; b.r_err_ms]; ba_lines(d);
+    ylabel('R-peak error (ms)'); xlabel('Beat index');
+    title('a  R-peak (beat-level)', 'FontWeight', 'bold');
+    set(gca, 'FontSize', 10, 'Box', 'on'); ann(d, []);
 
-    pooled.t_n = length(t_err_all);
-    pooled.t_mae = mean(abs(t_err_all));
-    pooled.t_bias = mean(t_err_all);
-    pooled.t_std = std(t_err_all);
-    pooled.t_loa_lo = pooled.t_bias - 1.96 * pooled.t_std;
-    pooled.t_loa_hi = pooled.t_bias + 1.96 * pooled.t_std;
+    % b: T-end
+    subplot(2,2,2); hold on;
+    if length(a.t_err_ms) > 0 && length(a.cdc_man) == length(a.t_err_ms)
+        scatter(a.cdc_man, a.t_err_ms, ms, c1, 'filled', 'MarkerFaceAlpha', 0.4);
+    end
+    if length(b.t_err_ms) > 0 && length(b.cdc_man) == length(b.t_err_ms)
+        scatter(b.cdc_man, b.t_err_ms, ms, c2, 'filled', 'MarkerFaceAlpha', 0.4);
+    end
+    d = [a.t_err_ms; b.t_err_ms]; ba_lines(d);
+    xlabel('Manual CDC'); ylabel('T-end error (ms)');
+    title('b  T-end (beat-level)', 'FontWeight', 'bold');
+    set(gca, 'FontSize', 10, 'Box', 'on'); ann(d, []);
 
-    cdc_err_all = cdc_aut_all - cdc_man_all;
-    pooled.cdc_n = length(cdc_err_all);
-    pooled.cdc_mae = mean(abs(cdc_err_all));
-    pooled.cdc_bias = mean(cdc_err_all);
-    pooled.cdc_std = std(cdc_err_all);
-    pooled.cdc_loa_lo = pooled.cdc_bias - 1.96 * pooled.cdc_std;
-    pooled.cdc_loa_hi = pooled.cdc_bias + 1.96 * pooled.cdc_std;
-    if pooled.cdc_n >= 3
-        pooled.cdc_corr = corr(cdc_man_all, cdc_aut_all);
+    % c: CDC beat-level
+    subplot(2,2,3); hold on;
+    cm = [a.cdc_man; b.cdc_man]; ca = [a.cdc_aut; b.cdc_aut];
+    if length(cm) == length(ca) && ~isempty(cm)
+        mx = (cm+ca)/2; df = ca-cm;
+        n1c = length(a.cdc_man);
+        if n1c > 0
+            scatter(mx(1:n1c), df(1:n1c), ms, c1, 'filled', 'MarkerFaceAlpha', 0.4, 'DisplayName', 'LUDB');
+        end
+        if length(b.cdc_man) > 0
+            scatter(mx(n1c+1:end), df(n1c+1:end), ms, c2, 'filled', 'MarkerFaceAlpha', 0.4, 'DisplayName', 'QTDB');
+        end
+        ba_lines(df);
+        r_val = corr(cm, ca);
     else
-        pooled.cdc_corr = NaN;
+        df = []; r_val = NaN;
     end
-
-    pooled.n_matched_r = ludb.n_matched_r + qtdb.n_matched_r;
-    pooled.n_manual_r = ludb.n_manual_r + qtdb.n_manual_r;
-    pooled.r_sensitivity = 100 * pooled.n_matched_r / max(pooled.n_manual_r, 1);
-    pooled.n_matched_t = ludb.n_matched_t + qtdb.n_matched_t;
-
-    pooled.r_err_ms = r_err_all;
-    pooled.t_err_ms = t_err_all;
-    pooled.cdc_man = cdc_man_all;
-    pooled.cdc_aut = cdc_aut_all;
-
-    subj_man_all = [ludb.subj_cdc_manual; qtdb.subj_cdc_manual];
-    subj_aut_all = [ludb.subj_cdc_auto;   qtdb.subj_cdc_auto];
-    pooled.subj = compute_subject_agreement(subj_man_all, subj_aut_all);
-    pooled.subj_cdc_manual = subj_man_all;
-    pooled.subj_cdc_auto   = subj_aut_all;
-end
-
-
-%% ========================================================================
-%  BLAND-ALTMAN PLOTS (4 panels: 3 beat-level + 1 subject-level)
-%  ========================================================================
-function plot_bland_altman(ludb, qtdb, paths)
-
-    fig = figure('Position', [50 100 1600 900], 'Color', 'w');
-
-    col_ludb = [0.20, 0.47, 0.76];
-    col_qtdb = [0.85, 0.40, 0.25];
-    ms = 6;
-
-    % ---- Panel a: R-peak ----
-    subplot(2, 2, 1); hold on;
-    n_l = length(ludb.r_err_ms);
-    if n_l > 0
-        scatter(1:n_l, ludb.r_err_ms, ms, col_ludb, 'filled', 'MarkerFaceAlpha', 0.4);
-    end
-    if ~isempty(qtdb.r_err_ms)
-        scatter(n_l+(1:length(qtdb.r_err_ms)), qtdb.r_err_ms, ms, col_qtdb, ...
-            'filled', 'MarkerFaceAlpha', 0.4);
-    end
-    all_r = [ludb.r_err_ms; qtdb.r_err_ms];
-    add_ba_lines(all_r);
-    ylabel('R-peak error (ms): Auto − Manual');
-    xlabel('Beat index');
-    title('a  R-peak timing (beat-level)', 'FontWeight', 'bold');
-    set(gca, 'FontSize', 10, 'Box', 'on');
-    annotate_panel(mean(all_r), mean(abs(all_r)), []);
-
-    % ---- Panel b: T-end ----
-    subplot(2, 2, 2); hold on;
-    if ~isempty(ludb.t_err_ms)
-        scatter(ludb.cdc_man, ludb.t_err_ms, ms, col_ludb, 'filled', 'MarkerFaceAlpha', 0.4);
-    end
-    if ~isempty(qtdb.t_err_ms)
-        scatter(qtdb.cdc_man, qtdb.t_err_ms, ms, col_qtdb, 'filled', 'MarkerFaceAlpha', 0.4);
-    end
-    all_t = [ludb.t_err_ms; qtdb.t_err_ms];
-    add_ba_lines(all_t);
-    xlabel('Manual CDC');
-    ylabel('T-end error (ms): Auto − Manual');
-    title('b  T-end timing (beat-level)', 'FontWeight', 'bold');
-    set(gca, 'FontSize', 10, 'Box', 'on');
-    annotate_panel(mean(all_t), mean(abs(all_t)), []);
-
-    % ---- Panel c: CDC beat-level ----
-    subplot(2, 2, 3); hold on;
-    cdc_man_all = [ludb.cdc_man; qtdb.cdc_man];
-    cdc_aut_all = [ludb.cdc_aut; qtdb.cdc_aut];
-    cdc_mean = (cdc_man_all + cdc_aut_all) / 2;
-    cdc_diff = cdc_aut_all - cdc_man_all;
-    n_l_c = length(ludb.cdc_man);
-    if n_l_c > 0
-        scatter(cdc_mean(1:n_l_c), cdc_diff(1:n_l_c), ms, col_ludb, ...
-            'filled', 'MarkerFaceAlpha', 0.4, 'DisplayName', 'LUDB');
-    end
-    if ~isempty(qtdb.cdc_man)
-        scatter(cdc_mean(n_l_c+1:end), cdc_diff(n_l_c+1:end), ms, col_qtdb, ...
-            'filled', 'MarkerFaceAlpha', 0.4, 'DisplayName', 'QTDB');
-    end
-    add_ba_lines(cdc_diff);
-    xlabel('Mean CDC (Manual + Auto) / 2');
-    ylabel('\DeltaCDC: Auto − Manual');
+    xlabel('Mean CDC'); ylabel('\DeltaCDC');
     title('c  CDC (beat-level)', 'FontWeight', 'bold');
     legend('Location', 'southeast', 'FontSize', 8);
-    set(gca, 'FontSize', 10, 'Box', 'on');
-    annotate_panel(mean(cdc_diff), mean(abs(cdc_diff)), corr(cdc_man_all, cdc_aut_all));
+    set(gca, 'FontSize', 10, 'Box', 'on'); ann(df, r_val);
 
-    % ---- Panel d: CDC subject-level ----
-    subplot(2, 2, 4); hold on;
-    subj_man_all = [ludb.subj_cdc_manual; qtdb.subj_cdc_manual];
-    subj_aut_all = [ludb.subj_cdc_auto;   qtdb.subj_cdc_auto];
-    subj_mean = (subj_man_all + subj_aut_all) / 2;
-    subj_diff = subj_aut_all - subj_man_all;
-    n_l_s = length(ludb.subj_cdc_manual);
-    if n_l_s > 0
-        scatter(subj_mean(1:n_l_s), subj_diff(1:n_l_s), 25, col_ludb, ...
-            'filled', 'MarkerFaceAlpha', 0.6, 'DisplayName', 'LUDB');
+    % d: CDC subject-level
+    subplot(2,2,4); hold on;
+    sm = [a.subj_cdc_manual; b.subj_cdc_manual];
+    sa = [a.subj_cdc_auto;   b.subj_cdc_auto];
+    if length(sm) == length(sa) && ~isempty(sm)
+        mx2 = (sm+sa)/2; df2 = sa-sm;
+        n1s = length(a.subj_cdc_manual);
+        if n1s > 0
+            scatter(mx2(1:n1s), df2(1:n1s), 25, c1, 'filled', 'MarkerFaceAlpha', 0.6, 'DisplayName', 'LUDB');
+        end
+        if length(b.subj_cdc_manual) > 0
+            scatter(mx2(n1s+1:end), df2(n1s+1:end), 25, c2, 'filled', 'MarkerFaceAlpha', 0.6, 'DisplayName', 'QTDB');
+        end
+        ba_lines(df2);
+        r_val2 = corr(sm, sa);
+    else
+        df2 = []; r_val2 = NaN;
     end
-    if ~isempty(qtdb.subj_cdc_manual)
-        scatter(subj_mean(n_l_s+1:end), subj_diff(n_l_s+1:end), 25, col_qtdb, ...
-            'filled', 'MarkerFaceAlpha', 0.6, 'DisplayName', 'QTDB');
-    end
-    add_ba_lines(subj_diff);
-    xlabel('Mean median CDC (Manual + Auto) / 2');
-    ylabel('\DeltaCDC: Auto − Manual');
+    xlabel('Mean median CDC'); ylabel('\DeltaCDC');
     title('d  CDC (subject-level median)', 'FontWeight', 'bold');
     legend('Location', 'southeast', 'FontSize', 8);
-    set(gca, 'FontSize', 10, 'Box', 'on');
-    annotate_panel(mean(subj_diff), mean(abs(subj_diff)), corr(subj_man_all, subj_aut_all));
-
-    % --- Save with proper page sizing ---
-    set(fig, 'PaperUnits', 'centimeters');
-    set(fig, 'PaperPosition', [0 0 40 22]);
-    set(fig, 'PaperSize', [40 22]);
-
-    out_pdf = fullfile(paths.figures, 'SI_Fig_validation_bland_altman.pdf');
-    out_png = fullfile(paths.figures, 'SI_Fig_validation_bland_altman.png');
-    out_fig = fullfile(paths.figures, 'SI_Fig_validation_bland_altman.fig');
-
-    print(fig, out_pdf, '-dpdf', '-painters');
-    print(fig, out_png, '-dpng', '-r300');
-    savefig(fig, out_fig);
-
-    fprintf('  Saved: %s  (vector)\n', out_pdf);
-    fprintf('  Saved: %s  (raster, 300 dpi)\n', out_png);
-    fprintf('  Saved: %s  (editable)\n', out_fig);
+    set(gca, 'FontSize', 10, 'Box', 'on'); ann(df2, r_val2);
 end
-
-
-function add_ba_lines(data)
-    yline(mean(data), 'k-', 'LineWidth', 1.2);
-    yline(mean(data) + 1.96*std(data), 'k--', 'LineWidth', 0.8);
-    yline(mean(data) - 1.96*std(data), 'k--', 'LineWidth', 0.8);
-    yline(0, 'Color', [0.6 0.6 0.6], 'LineStyle', ':');
-end
-
-
-function annotate_panel(bias_val, mae_val, r_val)
-    if abs(bias_val) < 1
-        text(0.03, 0.95, sprintf('Bias: %+.4f', bias_val), ...
-            'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-        text(0.03, 0.87, sprintf('MAE: %.4f', mae_val), ...
-            'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-    else
-        text(0.03, 0.95, sprintf('Bias: %+.1f ms', bias_val), ...
-            'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-        text(0.03, 0.87, sprintf('MAE: %.1f ms', mae_val), ...
-            'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-    end
-    if ~isempty(r_val) && ~isnan(r_val)
-        text(0.03, 0.79, sprintf('r = %.3f', r_val), ...
-            'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-    end
-end
-
 
 %% ========================================================================
 %  PRINT FUNCTIONS
 %  ========================================================================
-function print_agreement(res)
-    fprintf('\n  --- %s Beat-level Agreement ---\n', res.database);
-    fprintf('  R-peak:  N=%d, MAE=%.1f ms, Bias=%+.1f ms, LoA=[%.1f, %.1f] ms\n', ...
-        res.r_n, res.r_mae, res.r_bias, res.r_loa_lo, res.r_loa_hi);
-    fprintf('  T-end:   N=%d, MAE=%.1f ms, Bias=%+.1f ms, LoA=[%.1f, %.1f] ms\n', ...
-        res.t_n, res.t_mae, res.t_bias, res.t_loa_lo, res.t_loa_hi);
-    fprintf('  CDC:     N=%d, MAE=%.4f, Bias=%+.4f, LoA=[%.4f, %.4f], r=%.3f\n', ...
-        res.cdc_n, res.cdc_mae, res.cdc_bias, res.cdc_loa_lo, res.cdc_loa_hi, res.cdc_corr);
-    fprintf('  R-peak sensitivity: %.1f%%\n', res.r_sensitivity);
+function print_res(r)
+    fprintf('\n  --- %s Beat-level ---\n', r.database);
+    fprintf('  R:   N=%d, MAE=%.1f ms, Bias=%+.1f ms, LoA=[%.1f, %.1f]\n', ...
+        r.r_n, r.r_mae, r.r_bias, r.r_loa_lo, r.r_loa_hi);
+    fprintf('  T:   N=%d, MAE=%.1f ms, Bias=%+.1f ms, LoA=[%.1f, %.1f]\n', ...
+        r.t_n, r.t_mae, r.t_bias, r.t_loa_lo, r.t_loa_hi);
+    fprintf('  CDC: N=%d, MAE=%.4f, Bias=%+.4f, r=%.3f\n', ...
+        r.cdc_n, r.cdc_mae, r.cdc_bias, r.cdc_corr);
+    fprintf('  Sensitivity: %.1f%%\n', r.r_sensitivity);
+    fprintf('\n  --- %s Subject-level (N=%d) ---\n', r.database, r.subj_n);
+    fprintf('  MAE=%.4f, Bias=%+.4f, LoA=[%.4f, %.4f], r=%.3f, MedAE=%.4f\n', ...
+        r.subj_mae, r.subj_bias, r.subj_loa_lo, r.subj_loa_hi, r.subj_corr, r.subj_median_ae);
 end
 
+function print_beat_level_table(a, b, p)
+    hdr = '%-10s | %6s | %8s | %9s | %22s | %6s';
+    fmt_ms  = '  %-8s | %6d | %6.1f ms | %+7.1f ms | [%+7.1f, %+7.1f] ms |      -';
+    fmt_cdc = '  %-8s | %6d | %8.4f | %+9.4f | [%+8.4f, %+8.4f] | %6.3f';
+    sep = repmat('-', 1, 72);
 
-function print_beat_level_table(ludb, qtdb, pooled)
-    fprintf('%-12s | %6s | %8s | %8s | %20s | %6s\n', ...
-        'Metric', 'N', 'MAE', 'Bias', '95%% LoA', 'r');
-    fprintf('%s\n', repmat('-', 1, 72));
-    fprintf('%-12s\n', 'R-PEAK');
-    pr('LUDB',   ludb.r_n,   ludb.r_mae,   ludb.r_bias,   ludb.r_loa_lo,   ludb.r_loa_hi,   NaN, 'ms');
-    pr('QTDB',   qtdb.r_n,   qtdb.r_mae,   qtdb.r_bias,   qtdb.r_loa_lo,   qtdb.r_loa_hi,   NaN, 'ms');
-    pr('Pooled', pooled.r_n, pooled.r_mae, pooled.r_bias, pooled.r_loa_lo, pooled.r_loa_hi, NaN, 'ms');
-    fprintf('%s\n', repmat('-', 1, 72));
-    fprintf('%-12s\n', 'T-END');
-    pr('LUDB',   ludb.t_n,   ludb.t_mae,   ludb.t_bias,   ludb.t_loa_lo,   ludb.t_loa_hi,   NaN, 'ms');
-    pr('QTDB',   qtdb.t_n,   qtdb.t_mae,   qtdb.t_bias,   qtdb.t_loa_lo,   qtdb.t_loa_hi,   NaN, 'ms');
-    pr('Pooled', pooled.t_n, pooled.t_mae, pooled.t_bias, pooled.t_loa_lo, pooled.t_loa_hi, NaN, 'ms');
-    fprintf('%s\n', repmat('-', 1, 72));
-    fprintf('%-12s\n', 'CDC');
-    pr('LUDB',   ludb.cdc_n,   ludb.cdc_mae,   ludb.cdc_bias,   ludb.cdc_loa_lo,   ludb.cdc_loa_hi,   ludb.cdc_corr,   'cdc');
-    pr('QTDB',   qtdb.cdc_n,   qtdb.cdc_mae,   qtdb.cdc_bias,   qtdb.cdc_loa_lo,   qtdb.cdc_loa_hi,   qtdb.cdc_corr,   'cdc');
-    pr('Pooled', pooled.cdc_n, pooled.cdc_mae, pooled.cdc_bias, pooled.cdc_loa_lo, pooled.cdc_loa_hi, pooled.cdc_corr, 'cdc');
-    fprintf('%s\n', repmat('-', 1, 72));
-    fprintf('\nR-peak sensitivity: LUDB=%.1f%%, QTDB=%.1f%%, Pooled=%.1f%%\n', ...
-        ludb.r_sensitivity, qtdb.r_sensitivity, pooled.r_sensitivity);
+    fprintf([hdr '\n'], 'Metric', 'N', 'MAE', 'Bias', '95% LoA', 'r');
+    fprintf('%s\nR-PEAK\n', sep);
+    fprintf([fmt_ms '\n'], 'LUDB', a.r_n, a.r_mae, a.r_bias, a.r_loa_lo, a.r_loa_hi);
+    fprintf([fmt_ms '\n'], 'QTDB', b.r_n, b.r_mae, b.r_bias, b.r_loa_lo, b.r_loa_hi);
+    fprintf([fmt_ms '\n'], 'Pooled', p.r_n, p.r_mae, p.r_bias, p.r_loa_lo, p.r_loa_hi);
+    fprintf('%s\nT-END\n', sep);
+    fprintf([fmt_ms '\n'], 'LUDB', a.t_n, a.t_mae, a.t_bias, a.t_loa_lo, a.t_loa_hi);
+    fprintf([fmt_ms '\n'], 'QTDB', b.t_n, b.t_mae, b.t_bias, b.t_loa_lo, b.t_loa_hi);
+    fprintf([fmt_ms '\n'], 'Pooled', p.t_n, p.t_mae, p.t_bias, p.t_loa_lo, p.t_loa_hi);
+    fprintf('%s\nCDC\n', sep);
+    fprintf([fmt_cdc '\n'], 'LUDB', a.cdc_n, a.cdc_mae, a.cdc_bias, a.cdc_loa_lo, a.cdc_loa_hi, a.cdc_corr);
+    fprintf([fmt_cdc '\n'], 'QTDB', b.cdc_n, b.cdc_mae, b.cdc_bias, b.cdc_loa_lo, b.cdc_loa_hi, b.cdc_corr);
+    fprintf([fmt_cdc '\n'], 'Pooled', p.cdc_n, p.cdc_mae, p.cdc_bias, p.cdc_loa_lo, p.cdc_loa_hi, p.cdc_corr);
+    fprintf('%s\n', sep);
+    fprintf('Sensitivity: LUDB=%.1f%%, QTDB=%.1f%%, Pooled=%.1f%%\n', ...
+        a.r_sensitivity, b.r_sensitivity, p.r_sensitivity);
 end
 
-function pr(label, n, mae, bias, loa_lo, loa_hi, r_val, unit)
-    if strcmp(unit, 'ms')
-        fprintf('  %-10s | %6d | %6.1f ms | %+6.1f ms | [%+6.1f, %+6.1f] ms |      -\n', ...
-            label, n, mae, bias, loa_lo, loa_hi);
-    else
-        fprintf('  %-10s | %6d | %8.4f | %+8.4f | [%+7.4f, %+7.4f] | %6.3f\n', ...
-            label, n, mae, bias, loa_lo, loa_hi, r_val);
-    end
-end
-
-function print_subject_level_table(ludb, qtdb)
-    fprintf('%-12s | %6s | %8s | %8s | %20s | %6s | %8s\n', ...
-        'Database', 'N', 'MAE', 'Bias', '95%% LoA', 'r', 'Med AE');
-    fprintf('%s\n', repmat('-', 1, 80));
-    s = ludb.subj;
-    fprintf('  %-10s | %6d | %8.4f | %+8.4f | [%+7.4f, %+7.4f] | %6.3f | %8.4f\n', ...
-        'LUDB', s.n, s.mae, s.bias, s.loa_lo, s.loa_hi, s.corr, s.median_ae);
-    s = qtdb.subj;
-    fprintf('  %-10s | %6d | %8.4f | %+8.4f | [%+7.4f, %+7.4f] | %6.3f | %8.4f\n', ...
-        'QTDB', s.n, s.mae, s.bias, s.loa_lo, s.loa_hi, s.corr, s.median_ae);
-    fprintf('%s\n', repmat('-', 1, 80));
-    fprintf('\nContext: between-group CDC differences from hierarchical model:\n');
-    fprintf('  HC vs CN:   Delta_CDC ~ 0.040  (subject-level MAE should be << this)\n');
-    fprintf('  HC vs Path: Delta_CDC ~ 0.088  (subject-level MAE should be << this)\n');
+function print_subject_level_table(a, b, p)
+    fprintf('%-10s | %5s | %8s | %9s | %22s | %6s | %8s\n', ...
+        'Database', 'N', 'MAE', 'Bias', '95% LoA', 'r', 'MedAE');
+    sep = repmat('-', 1, 78);
+    fprintf('%s\n', sep);
+    fmt = '  %-8s | %5d | %8.4f | %+9.4f | [%+8.4f, %+8.4f] | %6.3f | %8.4f';
+    fprintf([fmt '\n'], 'LUDB', a.subj_n, a.subj_mae, a.subj_bias, a.subj_loa_lo, a.subj_loa_hi, a.subj_corr, a.subj_median_ae);
+    fprintf([fmt '\n'], 'QTDB', b.subj_n, b.subj_mae, b.subj_bias, b.subj_loa_lo, b.subj_loa_hi, b.subj_corr, b.subj_median_ae);
+    fprintf([fmt '\n'], 'Pooled', p.subj_n, p.subj_mae, p.subj_bias, p.subj_loa_lo, p.subj_loa_hi, p.subj_corr, p.subj_median_ae);
+    fprintf('%s\n', sep);
+    fprintf('\nContext (between-group CDC differences):\n');
+    fprintf('  HC vs CN:   ~0.040   (subject MAE should be << this)\n');
+    fprintf('  HC vs Path: ~0.088   (subject MAE should be << this)\n');
 end
 
 
 %% ========================================================================
 %  SAVE CSV
 %  ========================================================================
-function save_results_csv(ludb, qtdb, pooled, paths)
-    fid = fopen(fullfile(paths.results, 'validation_results.csv'), 'w');
-    fprintf(fid, 'level,database,metric,n,mae,bias,loa_lo,loa_hi,corr,sensitivity_pct\n');
+function save_results_csv(a, b, p, paths)
+    f = fopen(fullfile(paths.results, 'validation_results.csv'), 'w');
+    fprintf(f, 'level,database,metric,n,mae,bias,loa_lo,loa_hi,corr,sensitivity\n');
+    wr_beat(f, a); wr_beat(f, b); wr_beat(f, p);
+    wr_subj(f, 'LUDB', a); wr_subj(f, 'QTDB', b); wr_subj(f, 'Pooled', p);
+    fclose(f);
+end
 
-    % Beat-level
-    fprintf(fid, 'beat,LUDB,R-peak,%d,%.2f,%.2f,%.2f,%.2f,,%.1f\n', ludb.r_n, ludb.r_mae, ludb.r_bias, ludb.r_loa_lo, ludb.r_loa_hi, ludb.r_sensitivity);
-    fprintf(fid, 'beat,LUDB,T-end,%d,%.2f,%.2f,%.2f,%.2f,,\n', ludb.t_n, ludb.t_mae, ludb.t_bias, ludb.t_loa_lo, ludb.t_loa_hi);
-    fprintf(fid, 'beat,LUDB,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', ludb.cdc_n, ludb.cdc_mae, ludb.cdc_bias, ludb.cdc_loa_lo, ludb.cdc_loa_hi, ludb.cdc_corr);
-    fprintf(fid, 'beat,QTDB,R-peak,%d,%.2f,%.2f,%.2f,%.2f,,%.1f\n', qtdb.r_n, qtdb.r_mae, qtdb.r_bias, qtdb.r_loa_lo, qtdb.r_loa_hi, qtdb.r_sensitivity);
-    fprintf(fid, 'beat,QTDB,T-end,%d,%.2f,%.2f,%.2f,%.2f,,\n', qtdb.t_n, qtdb.t_mae, qtdb.t_bias, qtdb.t_loa_lo, qtdb.t_loa_hi);
-    fprintf(fid, 'beat,QTDB,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', qtdb.cdc_n, qtdb.cdc_mae, qtdb.cdc_bias, qtdb.cdc_loa_lo, qtdb.cdc_loa_hi, qtdb.cdc_corr);
-    fprintf(fid, 'beat,Pooled,R-peak,%d,%.2f,%.2f,%.2f,%.2f,,%.1f\n', pooled.r_n, pooled.r_mae, pooled.r_bias, pooled.r_loa_lo, pooled.r_loa_hi, pooled.r_sensitivity);
-    fprintf(fid, 'beat,Pooled,T-end,%d,%.2f,%.2f,%.2f,%.2f,,\n', pooled.t_n, pooled.t_mae, pooled.t_bias, pooled.t_loa_lo, pooled.t_loa_hi);
-    fprintf(fid, 'beat,Pooled,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', pooled.cdc_n, pooled.cdc_mae, pooled.cdc_bias, pooled.cdc_loa_lo, pooled.cdc_loa_hi, pooled.cdc_corr);
+function wr_beat(f, r)
+    fprintf(f, 'beat,%s,R-peak,%d,%.2f,%.2f,%.2f,%.2f,,%.1f\n', r.database, r.r_n, r.r_mae, r.r_bias, r.r_loa_lo, r.r_loa_hi, r.r_sensitivity);
+    fprintf(f, 'beat,%s,T-end,%d,%.2f,%.2f,%.2f,%.2f,,\n', r.database, r.t_n, r.t_mae, r.t_bias, r.t_loa_lo, r.t_loa_hi);
+    fprintf(f, 'beat,%s,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', r.database, r.cdc_n, r.cdc_mae, r.cdc_bias, r.cdc_loa_lo, r.cdc_loa_hi, r.cdc_corr);
+end
 
-    % Subject-level
-    s = ludb.subj;
-    fprintf(fid, 'subject,LUDB,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', s.n, s.mae, s.bias, s.loa_lo, s.loa_hi, s.corr);
-    s = qtdb.subj;
-    fprintf(fid, 'subject,QTDB,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', s.n, s.mae, s.bias, s.loa_lo, s.loa_hi, s.corr);
-    s = pooled.subj;
-    fprintf(fid, 'subject,Pooled,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', s.n, s.mae, s.bias, s.loa_lo, s.loa_hi, s.corr);
-
-    fclose(fid);
+function wr_subj(f, lab, r)
+    fprintf(f, 'subject,%s,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', lab, r.subj_n, r.subj_mae, r.subj_bias, r.subj_loa_lo, r.subj_loa_hi, r.subj_corr);
 end
 
 
 %% ========================================================================
 %  HELPERS
 %  ========================================================================
-function idx = find_lead_index(sig_names, lead_name)
+function idx = find_lead(names, target)
     idx = [];
-    for i = 1:length(sig_names)
-        if strcmpi(strtrim(sig_names{i}), lower(lead_name))
-            idx = i; return;
-        end
+    for i = 1:length(names)
+        if strcmpi(strtrim(names{i}), target), idx = i; return; end
     end
-    variants = {lead_name, upper(lead_name), 'II', 'ii'};
-    for v = 1:length(variants)
-        for i = 1:length(sig_names)
-            if strcmpi(strtrim(sig_names{i}), variants{v})
-                idx = i; return;
-            end
-        end
+    for i = 1:length(names)
+        if strcmpi(strtrim(names{i}), 'II'), idx = i; return; end
     end
-    if isempty(idx) && ~isempty(sig_names), idx = 1; end
+    if isempty(idx) && ~isempty(names), idx = 1; end
 end
 
-function records = get_qtdb_records()
-    records = [{'sel100','sel102','sel103','sel104','sel114','sel116', ...
-                'sel117','sel123','sel213','sel221','sel223','sel230', ...
-                'sel231','sel232','sel233'}, ...  % arrhythmia
-               {'sel301','sel302','sel306','sel307','sel308','sel310'}, ...  % ST change
-               {'sel803','sel808','sel811','sel820','sel821','sel840', ...
-                'sel847','sel853','sel871','sel872','sel873','sel883','sel891'}, ...  % SVA
-               {'sel16265','sel16272','sel16273','sel16420','sel16483', ...
-                'sel16539','sel16773','sel16786','sel16795','sel17453'}, ...  % healthy
-               {'sele0104','sele0106','sele0107','sele0110','sele0111', ...
-                'sele0112','sele0114','sele0116','sele0121','sele0122', ...
-                'sele0124','sele0126','sele0129','sele0133','sele0136', ...
-                'sele0166','sele0170','sele0203','sele0210','sele0211', ...
-                'sele0303','sele0405','sele0406','sele0409','sele0411', ...
-                'sele0509','sele0603','sele0604','sele0606','sele0607', ...
-                'sele0609','sele0612','sele0704'}, ...  % European ST-T
-               {'sel30','sel31','sel32','sel33','sel34','sel35', ...
-                'sel36','sel37','sel38','sel39','sel40','sel41', ...
-                'sel42','sel43','sel44','sel45','sel46','sel47', ...
-                'sel48','sel49','sel50','sel51','sel52','sel17152'}, ...  % sudden death
-               {'sel14046','sel14157','sel14172','sel15814'}];  % long-term
+function r = qtdb_records()
+    r = {'sel100','sel102','sel103','sel104','sel114','sel116','sel117','sel123', ...
+         'sel213','sel221','sel223','sel230','sel231','sel232','sel233', ...
+         'sel301','sel302','sel306','sel307','sel308','sel310', ...
+         'sel803','sel808','sel811','sel820','sel821','sel840','sel847', ...
+         'sel853','sel871','sel872','sel873','sel883','sel891', ...
+         'sel16265','sel16272','sel16273','sel16420','sel16483', ...
+         'sel16539','sel16773','sel16786','sel16795','sel17453', ...
+         'sele0104','sele0106','sele0107','sele0110','sele0111','sele0112', ...
+         'sele0114','sele0116','sele0121','sele0122','sele0124','sele0126', ...
+         'sele0129','sele0133','sele0136','sele0166','sele0170','sele0203', ...
+         'sele0210','sele0211','sele0303','sele0405','sele0406','sele0409', ...
+         'sele0411','sele0509','sele0603','sele0604','sele0606','sele0607', ...
+         'sele0609','sele0612','sele0704', ...
+         'sel30','sel31','sel32','sel33','sel34','sel35','sel36','sel37', ...
+         'sel38','sel39','sel40','sel41','sel42','sel43','sel44','sel45', ...
+         'sel46','sel47','sel48','sel49','sel50','sel51','sel52','sel17152', ...
+         'sel14046','sel14157','sel14172','sel15814'};
+end
+
+function ba_lines(d)
+    if isempty(d), return; end
+    yline(mean(d), 'k-', 'LineWidth', 1.2);
+    yline(mean(d)+1.96*std(d), 'k--', 'LineWidth', 0.8);
+    yline(mean(d)-1.96*std(d), 'k--', 'LineWidth', 0.8);
+    yline(0, 'Color', [0.6 0.6 0.6], 'LineStyle', ':');
+end
+
+function ann(d, r_val)
+    if isempty(d), return; end
+    b = mean(d); m = mean(abs(d));
+    if abs(b) < 1
+        text(0.03, 0.95, sprintf('Bias: %+.4f', b), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
+        text(0.03, 0.87, sprintf('MAE: %.4f', m), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
+    else
+        text(0.03, 0.95, sprintf('Bias: %+.1f ms', b), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
+        text(0.03, 0.87, sprintf('MAE: %.1f ms', m), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
+    end
+    if ~isempty(r_val) && ~isnan(r_val)
+        text(0.03, 0.79, sprintf('r = %.3f', r_val), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
+    end
 end
