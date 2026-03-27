@@ -1,0 +1,29 @@
+# MATLAB
+*.asv
+*.m~
+*.mex*
+*.mlappinstall
+*.mltbx
+*.mat
+
+# Data - raw databases (download from PhysioNet)
+data/raw/
+
+# Large preprocessed CSVs (hosted on Zenodo)
+# Small CSVs (< 1 MB) can be committed directly
+data/preprocessed/ptbxl_beats.csv
+data/preprocessed/fantasia_beats.csv
+data/preprocessed/autonomic_aging_beats.csv
+data/preprocessed/code15_beats.csv
+
+# Results - generated outputs (reproducible from code)
+results/figures/
+results/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
