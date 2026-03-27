@@ -1,0 +1,530 @@
+record_id,unique_subject_id,source_database,source_subset,group,age,sex,fs,recording_id,beat_idx,r_sample,t_end_sample,next_r_sample,annotation_method
+patient002,PTBDB_patient002,PTBDB,Myocardial infarction,pathological,58,F,1000,s0015lre,1,1417,1736,2143,manual_t_auto_r
+patient003,PTBDB_patient003,PTBDB,Myocardial infarction,pathological,63,M,1000,s0017lre,1,890,1222,1241,manual_t_auto_r
+patient004,PTBDB_patient004,PTBDB,Myocardial infarction,pathological,69,M,1000,s0020are,1,773,1070,1509,manual_t_auto_r
+patient004,PTBDB_patient004,PTBDB,Myocardial infarction,pathological,69,M,1000,s0020bre,1,992,1316,1730,manual_t_auto_r
+patient005,PTBDB_patient005,PTBDB,Myocardial infarction,pathological,74,M,1000,s0021are,1,1056,1295,1683,manual_t_auto_r
+patient005,PTBDB_patient005,PTBDB,Myocardial infarction,pathological,74,M,1000,s0021bre,1,795,1064,1425,manual_t_auto_r
+patient005,PTBDB_patient005,PTBDB,Myocardial infarction,pathological,74,M,1000,s0025lre,1,628,881,1215,manual_t_auto_r
+patient005,PTBDB_patient005,PTBDB,Myocardial infarction,pathological,74,M,1000,s0031lre,1,876,1159,1529,manual_t_auto_r
+patient005,PTBDB_patient005,PTBDB,Myocardial infarction,pathological,74,M,1000,s0101lre,1,1164,1512,2111,manual_t_auto_r
+patient006,PTBDB_patient006,PTBDB,Myocardial infarction,pathological,62,F,1000,s0022lre,1,1233,1532,1900,manual_t_auto_r
+patient006,PTBDB_patient006,PTBDB,Myocardial infarction,pathological,62,F,1000,s0027lre,1,1405,1736,2173,manual_t_auto_r
+patient006,PTBDB_patient006,PTBDB,Myocardial infarction,pathological,62,F,1000,s0064lre,1,858,1179,1634,manual_t_auto_r
+patient007,PTBDB_patient007,PTBDB,Myocardial infarction,pathological,70,M,1000,s0026lre,1,840,1167,1644,manual_t_auto_r
+patient007,PTBDB_patient007,PTBDB,Myocardial infarction,pathological,70,M,1000,s0029lre,1,842,1174,1663,manual_t_auto_r
+patient007,PTBDB_patient007,PTBDB,Myocardial infarction,pathological,70,M,1000,s0038lre,1,1406,1741,2251,manual_t_auto_r
+patient007,PTBDB_patient007,PTBDB,Myocardial infarction,pathological,70,M,1000,s0078lre,1,1349,1738,2520,manual_t_auto_r
+patient008,PTBDB_patient008,PTBDB,Myocardial infarction,pathological,60,M,1000,s0028lre,1,1224,1598,2245,manual_t_auto_r
+patient008,PTBDB_patient008,PTBDB,Myocardial infarction,pathological,60,M,1000,s0037lre,1,1534,1920,2526,manual_t_auto_r
+patient008,PTBDB_patient008,PTBDB,Myocardial infarction,pathological,60,M,1000,s0068lre,1,2086,2473,2809,manual_t_auto_r
+patient009,PTBDB_patient009,PTBDB,Myocardial infarction,pathological,66,M,1000,s0035_re,1,1007,1320,1707,manual_t_auto_r
+patient010,PTBDB_patient010,PTBDB,Myocardial infarction,pathological,46,M,1000,s0036lre,1,774,1099,1440,manual_t_auto_r
+patient010,PTBDB_patient010,PTBDB,Myocardial infarction,pathological,46,M,1000,s0042lre,1,1080,1434,1831,manual_t_auto_r
+patient010,PTBDB_patient010,PTBDB,Myocardial infarction,pathological,46,M,1000,s0061lre,1,1270,1592,1974,manual_t_auto_r
+patient011,PTBDB_patient011,PTBDB,Myocardial infarction,pathological,62,F,1000,s0039lre,1,979,1307,1662,manual_t_auto_r
+patient011,PTBDB_patient011,PTBDB,Myocardial infarction,pathological,62,F,1000,s0044lre,1,1001,1318,1760,manual_t_auto_r
+patient011,PTBDB_patient011,PTBDB,Myocardial infarction,pathological,62,F,1000,s0049lre,1,792,1107,1450,manual_t_auto_r
+patient011,PTBDB_patient011,PTBDB,Myocardial infarction,pathological,62,F,1000,s0067lre,1,1287,1609,2190,manual_t_auto_r
+patient012,PTBDB_patient012,PTBDB,Myocardial infarction,pathological,67,M,1000,s0043lre,1,1497,1889,2624,manual_t_auto_r
+patient012,PTBDB_patient012,PTBDB,Myocardial infarction,pathological,67,M,1000,s0050lre,1,978,1305,1932,manual_t_auto_r
+patient013,PTBDB_patient013,PTBDB,Myocardial infarction,pathological,71,F,1000,s0045lre,1,1064,1376,1768,manual_t_auto_r
+patient013,PTBDB_patient013,PTBDB,Myocardial infarction,pathological,71,F,1000,s0051lre,1,1438,1737,2169,manual_t_auto_r
+patient013,PTBDB_patient013,PTBDB,Myocardial infarction,pathological,71,F,1000,s0072lre,1,1133,1447,1842,manual_t_auto_r
+patient014,PTBDB_patient014,PTBDB,Myocardial infarction,pathological,75,M,1000,s0046lre,1,1348,1669,2063,manual_t_auto_r
+patient014,PTBDB_patient014,PTBDB,Myocardial infarction,pathological,75,M,1000,s0056lre,1,1623,1974,2432,manual_t_auto_r
+patient014,PTBDB_patient014,PTBDB,Myocardial infarction,pathological,75,M,1000,s0071lre,1,1206,1526,1960,manual_t_auto_r
+patient015,PTBDB_patient015,PTBDB,Myocardial infarction,pathological,68,F,1000,s0047lre,1,1707,2014,2233,manual_t_auto_r
+patient015,PTBDB_patient015,PTBDB,Myocardial infarction,pathological,68,F,1000,s0057lre,1,1333,1658,2069,manual_t_auto_r
+patient015,PTBDB_patient015,PTBDB,Myocardial infarction,pathological,68,F,1000,s0152lre,1,1670,1977,2563,manual_t_auto_r
+patient016,PTBDB_patient016,PTBDB,Myocardial infarction,pathological,63,M,1000,s0052lre,1,601,934,1572,manual_t_auto_r
+patient016,PTBDB_patient016,PTBDB,Myocardial infarction,pathological,63,M,1000,s0060lre,1,1054,1395,1871,manual_t_auto_r
+patient016,PTBDB_patient016,PTBDB,Myocardial infarction,pathological,63,M,1000,s0076lre,1,948,1287,2016,manual_t_auto_r
+patient017,PTBDB_patient017,PTBDB,Myocardial infarction,pathological,60,M,1000,s0053lre,1,1214,1497,1848,manual_t_auto_r
+patient017,PTBDB_patient017,PTBDB,Myocardial infarction,pathological,60,M,1000,s0063lre,1,1193,1492,1963,manual_t_auto_r
+patient017,PTBDB_patient017,PTBDB,Myocardial infarction,pathological,60,M,1000,s0075lre,1,1391,1710,2360,manual_t_auto_r
+patient018,PTBDB_patient018,PTBDB,Myocardial infarction,pathological,52,M,1000,s0054lre,1,996,1254,1506,manual_t_auto_r
+patient018,PTBDB_patient018,PTBDB,Myocardial infarction,pathological,52,M,1000,s0059lre,1,1286,1624,2049,manual_t_auto_r
+patient018,PTBDB_patient018,PTBDB,Myocardial infarction,pathological,52,M,1000,s0082lre,1,915,1265,1777,manual_t_auto_r
+patient019,PTBDB_patient019,PTBDB,Myocardial infarction,pathological,57,M,1000,s0058lre,1,1329,1636,1999,manual_t_auto_r
+patient019,PTBDB_patient019,PTBDB,Myocardial infarction,pathological,57,M,1000,s0070lre,1,1302,1597,1975,manual_t_auto_r
+patient019,PTBDB_patient019,PTBDB,Myocardial infarction,pathological,57,M,1000,s0077lre,1,1263,1605,2061,manual_t_auto_r
+patient020,PTBDB_patient020,PTBDB,Myocardial infarction,pathological,54,F,1000,s0062lre,1,824,1213,1660,manual_t_auto_r
+patient020,PTBDB_patient020,PTBDB,Myocardial infarction,pathological,54,F,1000,s0069lre,1,1281,1680,2362,manual_t_auto_r
+patient020,PTBDB_patient020,PTBDB,Myocardial infarction,pathological,54,F,1000,s0079lre,1,1459,1777,2238,manual_t_auto_r
+patient021,PTBDB_patient021,PTBDB,Myocardial infarction,pathological,67,M,1000,s0065lre,1,1207,1544,1955,manual_t_auto_r
+patient021,PTBDB_patient021,PTBDB,Myocardial infarction,pathological,67,M,1000,s0073lre,1,1119,1441,1766,manual_t_auto_r
+patient021,PTBDB_patient021,PTBDB,Myocardial infarction,pathological,67,M,1000,s0097lre,1,1343,1676,1957,manual_t_auto_r
+patient022,PTBDB_patient022,PTBDB,Myocardial infarction,pathological,43,M,1000,s0066lre,1,1351,1689,2164,manual_t_auto_r
+patient022,PTBDB_patient022,PTBDB,Myocardial infarction,pathological,43,M,1000,s0074lre,1,1583,1696,2120,manual_t_auto_r
+patient022,PTBDB_patient022,PTBDB,Myocardial infarction,pathological,43,M,1000,s0149lre,1,1131,1463,2066,manual_t_auto_r
+patient023,PTBDB_patient023,PTBDB,Myocardial infarction,pathological,69,M,1000,s0080lre,1,1061,1409,1671,manual_t_auto_r
+patient023,PTBDB_patient023,PTBDB,Myocardial infarction,pathological,69,M,1000,s0081lre,1,1018,1368,2119,manual_t_auto_r
+patient023,PTBDB_patient023,PTBDB,Myocardial infarction,pathological,69,M,1000,s0085lre,1,1212,1591,1872,manual_t_auto_r
+patient023,PTBDB_patient023,PTBDB,Myocardial infarction,pathological,69,M,1000,s0103lre,1,1599,1994,2849,manual_t_auto_r
+patient024,PTBDB_patient024,PTBDB,Myocardial infarction,pathological,52,M,1000,s0083lre,1,1549,1890,2474,manual_t_auto_r
+patient024,PTBDB_patient024,PTBDB,Myocardial infarction,pathological,52,M,1000,s0084lre,1,1217,1542,2166,manual_t_auto_r
+patient024,PTBDB_patient024,PTBDB,Myocardial infarction,pathological,52,M,1000,s0086lre,1,1682,2022,2564,manual_t_auto_r
+patient024,PTBDB_patient024,PTBDB,Myocardial infarction,pathological,52,M,1000,s0094lre,1,949,1281,1689,manual_t_auto_r
+patient025,PTBDB_patient025,PTBDB,Myocardial infarction,pathological,76,M,1000,s0091lre,1,2006,2367,2733,manual_t_auto_r
+patient025,PTBDB_patient025,PTBDB,Myocardial infarction,pathological,76,M,1000,s0150lre,1,1143,1529,1886,manual_t_auto_r
+patient026,PTBDB_patient026,PTBDB,Myocardial infarction,pathological,74,F,1000,s0088lre,1,1132,1486,1933,manual_t_auto_r
+patient026,PTBDB_patient026,PTBDB,Myocardial infarction,pathological,74,F,1000,s0095lre,1,1632,1974,2365,manual_t_auto_r
+patient027,PTBDB_patient027,PTBDB,Myocardial infarction,pathological,53,M,1000,s0089lre,1,813,1093,1404,manual_t_auto_r
+patient028,PTBDB_patient028,PTBDB,Myocardial infarction,pathological,49,M,1000,s0090lre,1,599,954,1604,manual_t_auto_r
+patient028,PTBDB_patient028,PTBDB,Myocardial infarction,pathological,49,M,1000,s0093lre,1,834,1205,1951,manual_t_auto_r
+patient028,PTBDB_patient028,PTBDB,Myocardial infarction,pathological,49,M,1000,s0108lre,1,538,914,1725,manual_t_auto_r
+patient029,PTBDB_patient029,PTBDB,Myocardial infarction,pathological,49,M,1000,s0092lre,1,861,1151,1481,manual_t_auto_r
+patient029,PTBDB_patient029,PTBDB,Myocardial infarction,pathological,49,M,1000,s0098lre,1,3947,4310,4662,manual_t_auto_r
+patient029,PTBDB_patient029,PTBDB,Myocardial infarction,pathological,49,M,1000,s0122lre,1,1034,1366,1722,manual_t_auto_r
+patient030,PTBDB_patient030,PTBDB,Myocardial infarction,pathological,63,M,1000,s0099lre,1,1052,1397,1764,manual_t_auto_r
+patient030,PTBDB_patient030,PTBDB,Myocardial infarction,pathological,63,M,1000,s0107lre,1,1341,1749,2415,manual_t_auto_r
+patient030,PTBDB_patient030,PTBDB,Myocardial infarction,pathological,63,M,1000,s0117lre,1,1330,1752,2416,manual_t_auto_r
+patient030,PTBDB_patient030,PTBDB,Myocardial infarction,pathological,63,M,1000,s0153lre,1,1203,1584,2004,manual_t_auto_r
+patient031,PTBDB_patient031,PTBDB,Myocardial infarction,pathological,65,M,1000,s0100lre,1,1277,1575,1932,manual_t_auto_r
+patient031,PTBDB_patient031,PTBDB,Myocardial infarction,pathological,65,M,1000,s0104lre,1,858,1164,1543,manual_t_auto_r
+patient031,PTBDB_patient031,PTBDB,Myocardial infarction,pathological,65,M,1000,s0114lre,1,902,1202,1577,manual_t_auto_r
+patient031,PTBDB_patient031,PTBDB,Myocardial infarction,pathological,65,M,1000,s0127lre,1,1159,1479,1934,manual_t_auto_r
+patient032,PTBDB_patient032,PTBDB,Myocardial infarction,pathological,49,M,1000,s0102lre,1,1092,1386,1696,manual_t_auto_r
+patient032,PTBDB_patient032,PTBDB,Myocardial infarction,pathological,49,M,1000,s0106lre,1,1350,1635,2038,manual_t_auto_r
+patient032,PTBDB_patient032,PTBDB,Myocardial infarction,pathological,49,M,1000,s0115lre,1,1166,1528,1950,manual_t_auto_r
+patient032,PTBDB_patient032,PTBDB,Myocardial infarction,pathological,49,M,1000,s0165lre,1,826,1163,1548,manual_t_auto_r
+patient033,PTBDB_patient033,PTBDB,Myocardial infarction,pathological,60,M,1000,s0105lre,1,1367,1663,2135,manual_t_auto_r
+patient033,PTBDB_patient033,PTBDB,Myocardial infarction,pathological,60,M,1000,s0113lre,1,790,1122,1721,manual_t_auto_r
+patient033,PTBDB_patient033,PTBDB,Myocardial infarction,pathological,60,M,1000,s0121lre,1,1281,1613,2284,manual_t_auto_r
+patient033,PTBDB_patient033,PTBDB,Myocardial infarction,pathological,60,M,1000,s0157lre,1,1020,1359,1286,manual_t_auto_r
+patient034,PTBDB_patient034,PTBDB,Myocardial infarction,pathological,49,M,1000,s0109lre,1,921,1172,1401,manual_t_auto_r
+patient034,PTBDB_patient034,PTBDB,Myocardial infarction,pathological,49,M,1000,s0118lre,1,1291,1567,1936,manual_t_auto_r
+patient034,PTBDB_patient034,PTBDB,Myocardial infarction,pathological,49,M,1000,s0123lre,1,1443,1746,2167,manual_t_auto_r
+patient034,PTBDB_patient034,PTBDB,Myocardial infarction,pathological,49,M,1000,s0158lre,1,1340,1647,2140,manual_t_auto_r
+patient035,PTBDB_patient035,PTBDB,Myocardial infarction,pathological,40,M,1000,s0110lre,1,1073,1392,1325,manual_t_auto_r
+patient035,PTBDB_patient035,PTBDB,Myocardial infarction,pathological,40,M,1000,s0119lre,1,1291,1613,2012,manual_t_auto_r
+patient035,PTBDB_patient035,PTBDB,Myocardial infarction,pathological,40,M,1000,s0124lre,1,926,1224,1562,manual_t_auto_r
+patient035,PTBDB_patient035,PTBDB,Myocardial infarction,pathological,40,M,1000,s0145lre,1,721,1062,1408,manual_t_auto_r
+patient036,PTBDB_patient036,PTBDB,Myocardial infarction,pathological,75,M,1000,s0111lre,1,1437,1787,2257,manual_t_auto_r
+patient036,PTBDB_patient036,PTBDB,Myocardial infarction,pathological,75,M,1000,s0116lre,1,2757,3108,3562,manual_t_auto_r
+patient036,PTBDB_patient036,PTBDB,Myocardial infarction,pathological,75,M,1000,s0126lre,1,1266,1627,2064,manual_t_auto_r
+patient037,PTBDB_patient037,PTBDB,Myocardial infarction,pathological,50,M,1000,s0112lre,1,1089,1428,1922,manual_t_auto_r
+patient037,PTBDB_patient037,PTBDB,Myocardial infarction,pathological,50,M,1000,s0120lre,1,1425,1766,2227,manual_t_auto_r
+patient038,PTBDB_patient038,PTBDB,Myocardial infarction,pathological,36,M,1000,s0125lre,1,903,1233,1625,manual_t_auto_r
+patient038,PTBDB_patient038,PTBDB,Myocardial infarction,pathological,36,M,1000,s0128lre,1,1363,1698,2282,manual_t_auto_r
+patient038,PTBDB_patient038,PTBDB,Myocardial infarction,pathological,36,M,1000,s0162lre,1,130,486,405,manual_t_auto_r
+patient039,PTBDB_patient039,PTBDB,Myocardial infarction,pathological,61,M,1000,s0129lre,1,1278,1665,1971,manual_t_auto_r
+patient039,PTBDB_patient039,PTBDB,Myocardial infarction,pathological,61,M,1000,s0134lre,1,1131,1497,1951,manual_t_auto_r
+patient039,PTBDB_patient039,PTBDB,Myocardial infarction,pathological,61,M,1000,s0164lre,1,841,1165,1624,manual_t_auto_r
+patient040,PTBDB_patient040,PTBDB,Myocardial infarction,pathological,51,M,1000,s0130lre,1,1223,1510,1939,manual_t_auto_r
+patient040,PTBDB_patient040,PTBDB,Myocardial infarction,pathological,51,M,1000,s0131lre,1,725,1046,1539,manual_t_auto_r
+patient040,PTBDB_patient040,PTBDB,Myocardial infarction,pathological,51,M,1000,s0133lre,1,1395,1731,2265,manual_t_auto_r
+patient040,PTBDB_patient040,PTBDB,Myocardial infarction,pathological,51,M,1000,s0219lre,1,1588,1938,2404,manual_t_auto_r
+patient041,PTBDB_patient041,PTBDB,Myocardial infarction,pathological,65,M,1000,s0132lre,1,1131,1303,1731,manual_t_auto_r
+patient041,PTBDB_patient041,PTBDB,Myocardial infarction,pathological,65,M,1000,s0136lre,1,1122,1431,1819,manual_t_auto_r
+patient041,PTBDB_patient041,PTBDB,Myocardial infarction,pathological,65,M,1000,s0138lre,1,948,1174,1669,manual_t_auto_r
+patient041,PTBDB_patient041,PTBDB,Myocardial infarction,pathological,65,M,1000,s0276lre,1,869,1193,1380,manual_t_auto_r
+patient042,PTBDB_patient042,PTBDB,Myocardial infarction,pathological,49,M,1000,s0135lre,1,802,1081,1426,manual_t_auto_r
+patient042,PTBDB_patient042,PTBDB,Myocardial infarction,pathological,49,M,1000,s0137lre,1,1255,1553,1899,manual_t_auto_r
+patient042,PTBDB_patient042,PTBDB,Myocardial infarction,pathological,49,M,1000,s0140lre,1,1208,1536,2012,manual_t_auto_r
+patient042,PTBDB_patient042,PTBDB,Myocardial infarction,pathological,49,M,1000,s0347lre,1,1308,1646,2175,manual_t_auto_r
+patient043,PTBDB_patient043,PTBDB,Myocardial infarction,pathological,52,F,1000,s0141lre,1,802,1141,1538,manual_t_auto_r
+patient043,PTBDB_patient043,PTBDB,Myocardial infarction,pathological,52,F,1000,s0144lre,1,1507,1871,2364,manual_t_auto_r
+patient043,PTBDB_patient043,PTBDB,Myocardial infarction,pathological,52,F,1000,s0278lre,1,1497,1838,2191,manual_t_auto_r
+patient044,PTBDB_patient044,PTBDB,Myocardial infarction,pathological,66,F,1000,s0142lre,1,904,1251,1559,manual_t_auto_r
+patient044,PTBDB_patient044,PTBDB,Myocardial infarction,pathological,66,F,1000,s0143lre,1,1115,1472,1784,manual_t_auto_r
+patient044,PTBDB_patient044,PTBDB,Myocardial infarction,pathological,66,F,1000,s0146lre,1,748,1139,1491,manual_t_auto_r
+patient044,PTBDB_patient044,PTBDB,Myocardial infarction,pathological,66,F,1000,s0159lre,1,1710,2115,2657,manual_t_auto_r
+patient045,PTBDB_patient045,PTBDB,Myocardial infarction,pathological,44,M,1000,s0147lre,1,1432,1719,1990,manual_t_auto_r
+patient045,PTBDB_patient045,PTBDB,Myocardial infarction,pathological,44,M,1000,s0148lre,1,742,1068,1461,manual_t_auto_r
+patient045,PTBDB_patient045,PTBDB,Myocardial infarction,pathological,44,M,1000,s0155lre,1,963,1384,1359,manual_t_auto_r
+patient045,PTBDB_patient045,PTBDB,Myocardial infarction,pathological,44,M,1000,s0217lre,1,919,1208,1619,manual_t_auto_r
+patient046,PTBDB_patient046,PTBDB,Myocardial infarction,pathological,64,F,1000,s0156lre,1,1035,1378,1601,manual_t_auto_r
+patient046,PTBDB_patient046,PTBDB,Myocardial infarction,pathological,64,F,1000,s0161lre,1,1250,1544,1850,manual_t_auto_r
+patient046,PTBDB_patient046,PTBDB,Myocardial infarction,pathological,64,F,1000,s0168lre,1,979,1279,1671,manual_t_auto_r
+patient046,PTBDB_patient046,PTBDB,Myocardial infarction,pathological,64,F,1000,s0184lre,1,205,510,1009,manual_t_auto_r
+patient047,PTBDB_patient047,PTBDB,Myocardial infarction,pathological,86,M,1000,s0160lre,1,1332,1604,2058,manual_t_auto_r
+patient047,PTBDB_patient047,PTBDB,Myocardial infarction,pathological,86,M,1000,s0163lre,1,1112,1398,1897,manual_t_auto_r
+patient047,PTBDB_patient047,PTBDB,Myocardial infarction,pathological,86,M,1000,s0167lre,1,1130,1449,2167,manual_t_auto_r
+patient048,PTBDB_patient048,PTBDB,Myocardial infarction,pathological,64,M,1000,s0171lre,1,865,1189,1476,manual_t_auto_r
+patient048,PTBDB_patient048,PTBDB,Myocardial infarction,pathological,64,M,1000,s0172lre,1,1418,1767,2170,manual_t_auto_r
+patient048,PTBDB_patient048,PTBDB,Myocardial infarction,pathological,64,M,1000,s0180lre,1,870,1296,1669,manual_t_auto_r
+patient048,PTBDB_patient048,PTBDB,Myocardial infarction,pathological,64,M,1000,s0277lre,1,1367,1717,2248,manual_t_auto_r
+patient049,PTBDB_patient049,PTBDB,Myocardial infarction,pathological,42,F,1000,s0173lre,1,1141,1464,1922,manual_t_auto_r
+patient049,PTBDB_patient049,PTBDB,Myocardial infarction,pathological,42,F,1000,s0178lre,1,1017,1348,1806,manual_t_auto_r
+patient049,PTBDB_patient049,PTBDB,Myocardial infarction,pathological,42,F,1000,s0186lre,1,1125,1523,1980,manual_t_auto_r
+patient049,PTBDB_patient049,PTBDB,Myocardial infarction,pathological,42,F,1000,s0314lre,1,1504,1839,2241,manual_t_auto_r
+patient050,PTBDB_patient050,PTBDB,Myocardial infarction,pathological,44,F,1000,s0174lre,1,1243,1582,1971,manual_t_auto_r
+patient050,PTBDB_patient050,PTBDB,Myocardial infarction,pathological,44,F,1000,s0177lre,1,1624,1967,2556,manual_t_auto_r
+patient050,PTBDB_patient050,PTBDB,Myocardial infarction,pathological,44,F,1000,s0185lre,1,997,1344,1837,manual_t_auto_r
+patient050,PTBDB_patient050,PTBDB,Myocardial infarction,pathological,44,F,1000,s0215lre,1,1558,1912,2510,manual_t_auto_r
+patient051,PTBDB_patient051,PTBDB,Myocardial infarction,pathological,55,F,1000,s0179lre,1,1230,1536,1879,manual_t_auto_r
+patient051,PTBDB_patient051,PTBDB,Myocardial infarction,pathological,55,F,1000,s0181lre,1,951,1335,2138,manual_t_auto_r
+patient051,PTBDB_patient051,PTBDB,Myocardial infarction,pathological,55,F,1000,s0187lre,1,981,1370,2109,manual_t_auto_r
+patient051,PTBDB_patient051,PTBDB,Myocardial infarction,pathological,55,F,1000,s0213lre,1,1243,1611,2331,manual_t_auto_r
+patient052,PTBDB_patient052,PTBDB,Myocardial infarction,pathological,44,M,1000,s0190lre,1,431,724,1221,manual_t_auto_r
+patient053,PTBDB_patient053,PTBDB,Myocardial infarction,pathological,66,M,1000,s0191lre,1,1215,1584,1963,manual_t_auto_r
+patient054,PTBDB_patient054,PTBDB,Myocardial infarction,pathological,47,M,1000,s0192lre,1,783,1101,1542,manual_t_auto_r
+patient054,PTBDB_patient054,PTBDB,Myocardial infarction,pathological,47,M,1000,s0195lre,1,684,1000,1391,manual_t_auto_r
+patient054,PTBDB_patient054,PTBDB,Myocardial infarction,pathological,47,M,1000,s0197lre,1,775,1145,1621,manual_t_auto_r
+patient054,PTBDB_patient054,PTBDB,Myocardial infarction,pathological,47,M,1000,s0218lre,1,1303,1653,2276,manual_t_auto_r
+patient055,PTBDB_patient055,PTBDB,Myocardial infarction,pathological,66,F,1000,s0194lre,1,811,1109,1105,manual_t_auto_r
+patient056,PTBDB_patient056,PTBDB,Myocardial infarction,pathological,48,F,1000,s0196lre,1,1470,1532,2003,manual_t_auto_r
+patient057,PTBDB_patient057,PTBDB,Myocardial infarction,pathological,53,M,1000,s0198lre,1,1308,1609,2118,manual_t_auto_r
+patient059,PTBDB_patient059,PTBDB,Myocardial infarction,pathological,63,F,1000,s0208lre,1,1390,1687,2084,manual_t_auto_r
+patient060,PTBDB_patient060,PTBDB,Myocardial infarction,pathological,54,M,1000,s0209lre,1,1024,1325,1710,manual_t_auto_r
+patient061,PTBDB_patient061,PTBDB,Myocardial infarction,pathological,37,M,1000,s0210lre,1,873,1160,1615,manual_t_auto_r
+patient062,PTBDB_patient062,PTBDB,Myocardial infarction,pathological,68,F,1000,s0212lre,1,724,1092,1519,manual_t_auto_r
+patient064,PTBDB_patient064,PTBDB,Myocardial infarction,pathological,72,M,1000,s0220lre,1,859,1172,1538,manual_t_auto_r
+patient065,PTBDB_patient065,PTBDB,Myocardial infarction,pathological,52,M,1000,s0221lre,1,923,1274,1797,manual_t_auto_r
+patient065,PTBDB_patient065,PTBDB,Myocardial infarction,pathological,52,M,1000,s0226lre,1,785,1122,1630,manual_t_auto_r
+patient065,PTBDB_patient065,PTBDB,Myocardial infarction,pathological,52,M,1000,s0229lre,1,1222,1576,2085,manual_t_auto_r
+patient065,PTBDB_patient065,PTBDB,Myocardial infarction,pathological,52,M,1000,s0282lre,1,1517,1902,2667,manual_t_auto_r
+patient066,PTBDB_patient066,PTBDB,Myocardial infarction,pathological,68,M,1000,s0225lre,1,1273,1598,2048,manual_t_auto_r
+patient066,PTBDB_patient066,PTBDB,Myocardial infarction,pathological,68,M,1000,s0231lre,1,753,1092,1641,manual_t_auto_r
+patient066,PTBDB_patient066,PTBDB,Myocardial infarction,pathological,68,M,1000,s0280lre,1,522,876,1362,manual_t_auto_r
+patient067,PTBDB_patient067,PTBDB,Myocardial infarction,pathological,59,M,1000,s0227lre,1,472,686,899,manual_t_auto_r
+patient067,PTBDB_patient067,PTBDB,Myocardial infarction,pathological,59,M,1000,s0230lre,1,1560,1873,2234,manual_t_auto_r
+patient067,PTBDB_patient067,PTBDB,Myocardial infarction,pathological,59,M,1000,s0283lre,1,755,1114,1706,manual_t_auto_r
+patient068,PTBDB_patient068,PTBDB,Myocardial infarction,pathological,44,M,1000,s0228lre,1,524,825,1227,manual_t_auto_r
+patient069,PTBDB_patient069,PTBDB,Myocardial infarction,pathological,62,M,1000,s0232lre,1,1333,1696,2276,manual_t_auto_r
+patient069,PTBDB_patient069,PTBDB,Myocardial infarction,pathological,62,M,1000,s0233lre,1,800,1149,1757,manual_t_auto_r
+patient069,PTBDB_patient069,PTBDB,Myocardial infarction,pathological,62,M,1000,s0234lre,1,932,1301,1889,manual_t_auto_r
+patient069,PTBDB_patient069,PTBDB,Myocardial infarction,pathological,62,M,1000,s0284lre,1,778,1149,1759,manual_t_auto_r
+patient070,PTBDB_patient070,PTBDB,Myocardial infarction,pathological,52,M,1000,s0235lre,1,695,1008,1433,manual_t_auto_r
+patient072,PTBDB_patient072,PTBDB,Myocardial infarction,pathological,40,M,1000,s0237lre,1,424,749,665,manual_t_auto_r
+patient072,PTBDB_patient072,PTBDB,Myocardial infarction,pathological,40,M,1000,s0240lre,1,1061,1444,2071,manual_t_auto_r
+patient072,PTBDB_patient072,PTBDB,Myocardial infarction,pathological,40,M,1000,s0244lre,1,1245,1631,2228,manual_t_auto_r
+patient072,PTBDB_patient072,PTBDB,Myocardial infarction,pathological,40,M,1000,s0318lre,1,1133,1494,2110,manual_t_auto_r
+patient073,PTBDB_patient073,PTBDB,Myocardial infarction,pathological,63,M,1000,s0238lre,1,650,989,1578,manual_t_auto_r
+patient073,PTBDB_patient073,PTBDB,Myocardial infarction,pathological,63,M,1000,s0243lre,1,906,1238,1745,manual_t_auto_r
+patient073,PTBDB_patient073,PTBDB,Myocardial infarction,pathological,63,M,1000,s0249lre,1,974,1311,1887,manual_t_auto_r
+patient073,PTBDB_patient073,PTBDB,Myocardial infarction,pathological,63,M,1000,s0252lre,1,762,1086,1697,manual_t_auto_r
+patient074,PTBDB_patient074,PTBDB,Myocardial infarction,pathological,80,F,1000,s0239lre,1,691,1004,1305,manual_t_auto_r
+patient074,PTBDB_patient074,PTBDB,Myocardial infarction,pathological,80,F,1000,s0241lre,1,991,1247,1677,manual_t_auto_r
+patient074,PTBDB_patient074,PTBDB,Myocardial infarction,pathological,80,F,1000,s0245lre,1,597,861,1322,manual_t_auto_r
+patient074,PTBDB_patient074,PTBDB,Myocardial infarction,pathological,80,F,1000,s0406lre,1,1032,1327,1889,manual_t_auto_r
+patient075,PTBDB_patient075,PTBDB,Myocardial infarction,pathological,50,M,1000,s0242lre,1,891,1256,1597,manual_t_auto_r
+patient075,PTBDB_patient075,PTBDB,Myocardial infarction,pathological,50,M,1000,s0246lre,1,658,980,1515,manual_t_auto_r
+patient075,PTBDB_patient075,PTBDB,Myocardial infarction,pathological,50,M,1000,s0248lre,1,364,688,1288,manual_t_auto_r
+patient075,PTBDB_patient075,PTBDB,Myocardial infarction,pathological,50,M,1000,s0327lre,1,770,1079,1532,manual_t_auto_r
+patient076,PTBDB_patient076,PTBDB,Myocardial infarction,pathological,43,M,1000,s0247lre,1,1064,1386,1650,manual_t_auto_r
+patient076,PTBDB_patient076,PTBDB,Myocardial infarction,pathological,43,M,1000,s0250lre,1,867,1158,1574,manual_t_auto_r
+patient076,PTBDB_patient076,PTBDB,Myocardial infarction,pathological,43,M,1000,s0253lre,1,704,1015,1409,manual_t_auto_r
+patient076,PTBDB_patient076,PTBDB,Myocardial infarction,pathological,43,M,1000,s0319lre,1,953,1250,1631,manual_t_auto_r
+patient077,PTBDB_patient077,PTBDB,Myocardial infarction,pathological,65,M,1000,s0251lre,1,863,1151,1385,manual_t_auto_r
+patient077,PTBDB_patient077,PTBDB,Myocardial infarction,pathological,65,M,1000,s0258lre,1,675,1023,1471,manual_t_auto_r
+patient077,PTBDB_patient077,PTBDB,Myocardial infarction,pathological,65,M,1000,s0285lre,1,570,860,1134,manual_t_auto_r
+patient078,PTBDB_patient078,PTBDB,Myocardial infarction,pathological,68,M,1000,s0255lre,1,1528,1811,2408,manual_t_auto_r
+patient078,PTBDB_patient078,PTBDB,Myocardial infarction,pathological,68,M,1000,s0259lre,1,1356,1608,2360,manual_t_auto_r
+patient078,PTBDB_patient078,PTBDB,Myocardial infarction,pathological,68,M,1000,s0262lre,1,1109,1313,1780,manual_t_auto_r
+patient078,PTBDB_patient078,PTBDB,Myocardial infarction,pathological,68,M,1000,s0317lre,1,2005,2231,2707,manual_t_auto_r
+patient079,PTBDB_patient079,PTBDB,Myocardial infarction,pathological,75,M,1000,s0256lre,1,1068,1414,1769,manual_t_auto_r
+patient079,PTBDB_patient079,PTBDB,Myocardial infarction,pathological,75,M,1000,s0257lre,1,640,969,1285,manual_t_auto_r
+patient079,PTBDB_patient079,PTBDB,Myocardial infarction,pathological,75,M,1000,s0263lre,1,1386,1726,2072,manual_t_auto_r
+patient079,PTBDB_patient079,PTBDB,Myocardial infarction,pathological,75,M,1000,s0269lre,1,646,988,1525,manual_t_auto_r
+patient080,PTBDB_patient080,PTBDB,Myocardial infarction,pathological,48,M,1000,s0260lre,1,1224,1507,1833,manual_t_auto_r
+patient080,PTBDB_patient080,PTBDB,Myocardial infarction,pathological,48,M,1000,s0261lre,1,807,1060,1428,manual_t_auto_r
+patient080,PTBDB_patient080,PTBDB,Myocardial infarction,pathological,48,M,1000,s0265lre,1,1202,1558,2251,manual_t_auto_r
+patient080,PTBDB_patient080,PTBDB,Myocardial infarction,pathological,48,M,1000,s0315lre,1,691,1002,1429,manual_t_auto_r
+patient081,PTBDB_patient081,PTBDB,Myocardial infarction,pathological,53,M,1000,s0264lre,1,1500,1811,2296,manual_t_auto_r
+patient081,PTBDB_patient081,PTBDB,Myocardial infarction,pathological,53,M,1000,s0266lre,1,944,1303,1840,manual_t_auto_r
+patient081,PTBDB_patient081,PTBDB,Myocardial infarction,pathological,53,M,1000,s0270lre,1,1508,1830,2363,manual_t_auto_r
+patient081,PTBDB_patient081,PTBDB,Myocardial infarction,pathological,53,M,1000,s0346lre,1,1168,1489,1917,manual_t_auto_r
+patient082,PTBDB_patient082,PTBDB,Myocardial infarction,pathological,65,M,1000,s0267lre,1,757,1126,1617,manual_t_auto_r
+patient082,PTBDB_patient082,PTBDB,Myocardial infarction,pathological,65,M,1000,s0271lre,1,1383,1716,2136,manual_t_auto_r
+patient082,PTBDB_patient082,PTBDB,Myocardial infarction,pathological,65,M,1000,s0279lre,1,1310,1719,2434,manual_t_auto_r
+patient082,PTBDB_patient082,PTBDB,Myocardial infarction,pathological,65,M,1000,s0320lre,1,1044,1473,2099,manual_t_auto_r
+patient083,PTBDB_patient083,PTBDB,Myocardial infarction,pathological,45,M,1000,s0268lre,1,1435,1762,2197,manual_t_auto_r
+patient083,PTBDB_patient083,PTBDB,Myocardial infarction,pathological,45,M,1000,s0272lre,1,935,1191,1538,manual_t_auto_r
+patient083,PTBDB_patient083,PTBDB,Myocardial infarction,pathological,45,M,1000,s0286lre,1,1134,1467,2157,manual_t_auto_r
+patient083,PTBDB_patient083,PTBDB,Myocardial infarction,pathological,45,M,1000,s0290lre,1,1419,1752,2436,manual_t_auto_r
+patient084,PTBDB_patient084,PTBDB,Myocardial infarction,pathological,55,M,1000,s0281lre,1,1168,1530,1949,manual_t_auto_r
+patient084,PTBDB_patient084,PTBDB,Myocardial infarction,pathological,55,M,1000,s0288lre,1,773,1124,1590,manual_t_auto_r
+patient084,PTBDB_patient084,PTBDB,Myocardial infarction,pathological,55,M,1000,s0289lre,1,898,1270,1744,manual_t_auto_r
+patient084,PTBDB_patient084,PTBDB,Myocardial infarction,pathological,55,M,1000,s0313lre,1,1222,1638,2210,manual_t_auto_r
+patient085,PTBDB_patient085,PTBDB,Myocardial infarction,pathological,56,F,1000,s0296lre,1,1325,1658,2178,manual_t_auto_r
+patient085,PTBDB_patient085,PTBDB,Myocardial infarction,pathological,56,F,1000,s0297lre,1,1267,1664,2547,manual_t_auto_r
+patient085,PTBDB_patient085,PTBDB,Myocardial infarction,pathological,56,F,1000,s0298lre,1,982,1375,2317,manual_t_auto_r
+patient085,PTBDB_patient085,PTBDB,Myocardial infarction,pathological,56,F,1000,s0345lre,1,1585,1934,2440,manual_t_auto_r
+patient086,PTBDB_patient086,PTBDB,Myocardial infarction,pathological,66,F,1000,s0316lre,1,1441,1787,2122,manual_t_auto_r
+patient087,PTBDB_patient087,PTBDB,Myocardial infarction,pathological,66,M,1000,s0321lre,1,943,1340,1735,manual_t_auto_r
+patient087,PTBDB_patient087,PTBDB,Myocardial infarction,pathological,66,M,1000,s0326lre,1,734,1046,1445,manual_t_auto_r
+patient087,PTBDB_patient087,PTBDB,Myocardial infarction,pathological,66,M,1000,s0330lre,1,1222,1504,1872,manual_t_auto_r
+patient088,PTBDB_patient088,PTBDB,Myocardial infarction,pathological,54,M,1000,s0339lre,1,1204,1529,1979,manual_t_auto_r
+patient088,PTBDB_patient088,PTBDB,Myocardial infarction,pathological,54,M,1000,s0343lre,1,473,784,1487,manual_t_auto_r
+patient088,PTBDB_patient088,PTBDB,Myocardial infarction,pathological,54,M,1000,s0352lre,1,847,1155,1723,manual_t_auto_r
+patient088,PTBDB_patient088,PTBDB,Myocardial infarction,pathological,54,M,1000,s0413lre,1,988,1266,1642,manual_t_auto_r
+patient089,PTBDB_patient089,PTBDB,Myocardial infarction,pathological,80,F,1000,s0344lre,1,1045,1403,1955,manual_t_auto_r
+patient089,PTBDB_patient089,PTBDB,Myocardial infarction,pathological,80,F,1000,s0355lre,1,2325,2649,3230,manual_t_auto_r
+patient089,PTBDB_patient089,PTBDB,Myocardial infarction,pathological,80,F,1000,s0359lre,1,1612,1959,2552,manual_t_auto_r
+patient089,PTBDB_patient089,PTBDB,Myocardial infarction,pathological,80,F,1000,s0372lre,1,1203,1542,2023,manual_t_auto_r
+patient090,PTBDB_patient090,PTBDB,Myocardial infarction,pathological,51,M,1000,s0348lre,1,925,1268,1845,manual_t_auto_r
+patient090,PTBDB_patient090,PTBDB,Myocardial infarction,pathological,51,M,1000,s0356lre,1,945,1298,1946,manual_t_auto_r
+patient090,PTBDB_patient090,PTBDB,Myocardial infarction,pathological,51,M,1000,s0360lre,1,894,1277,2090,manual_t_auto_r
+patient090,PTBDB_patient090,PTBDB,Myocardial infarction,pathological,51,M,1000,s0418lre,1,725,1089,1745,manual_t_auto_r
+patient091,PTBDB_patient091,PTBDB,Myocardial infarction,pathological,78,F,1000,s0353lre,1,1197,1567,1885,manual_t_auto_r
+patient091,PTBDB_patient091,PTBDB,Myocardial infarction,pathological,78,F,1000,s0357lre,1,869,1184,1573,manual_t_auto_r
+patient091,PTBDB_patient091,PTBDB,Myocardial infarction,pathological,78,F,1000,s0361lre,1,1184,1479,1871,manual_t_auto_r
+patient091,PTBDB_patient091,PTBDB,Myocardial infarction,pathological,78,F,1000,s0408lre,1,869,1235,1684,manual_t_auto_r
+patient092,PTBDB_patient092,PTBDB,Myocardial infarction,pathological,44,F,1000,s0354lre,1,1256,1577,2016,manual_t_auto_r
+patient092,PTBDB_patient092,PTBDB,Myocardial infarction,pathological,44,F,1000,s0358lre,1,1140,1506,1940,manual_t_auto_r
+patient092,PTBDB_patient092,PTBDB,Myocardial infarction,pathological,44,F,1000,s0362lre,1,717,1055,1550,manual_t_auto_r
+patient092,PTBDB_patient092,PTBDB,Myocardial infarction,pathological,44,F,1000,s0411lre,1,1020,1387,1927,manual_t_auto_r
+patient093,PTBDB_patient093,PTBDB,Myocardial infarction,pathological,48,M,1000,s0367lre,1,1198,1510,1855,manual_t_auto_r
+patient093,PTBDB_patient093,PTBDB,Myocardial infarction,pathological,48,M,1000,s0371lre,1,761,1059,1475,manual_t_auto_r
+patient093,PTBDB_patient093,PTBDB,Myocardial infarction,pathological,48,M,1000,s0375lre,1,974,1295,1845,manual_t_auto_r
+patient093,PTBDB_patient093,PTBDB,Myocardial infarction,pathological,48,M,1000,s0378lre,1,1291,1609,2179,manual_t_auto_r
+patient093,PTBDB_patient093,PTBDB,Myocardial infarction,pathological,48,M,1000,s0396lre,1,840,1167,1637,manual_t_auto_r
+patient094,PTBDB_patient094,PTBDB,Myocardial infarction,pathological,71,F,1000,s0368lre,1,1274,1577,1813,manual_t_auto_r
+patient094,PTBDB_patient094,PTBDB,Myocardial infarction,pathological,71,F,1000,s0370lre,1,630,869,1168,manual_t_auto_r
+patient094,PTBDB_patient094,PTBDB,Myocardial infarction,pathological,71,F,1000,s0376lre,1,898,1184,1503,manual_t_auto_r
+patient094,PTBDB_patient094,PTBDB,Myocardial infarction,pathological,71,F,1000,s0412lre,1,692,981,1283,manual_t_auto_r
+patient095,PTBDB_patient095,PTBDB,Myocardial infarction,pathological,46,M,1000,s0369lre,1,1371,1662,2102,manual_t_auto_r
+patient095,PTBDB_patient095,PTBDB,Myocardial infarction,pathological,46,M,1000,s0373lre,1,1119,1453,2092,manual_t_auto_r
+patient095,PTBDB_patient095,PTBDB,Myocardial infarction,pathological,46,M,1000,s0377lre,1,1744,2054,2655,manual_t_auto_r
+patient095,PTBDB_patient095,PTBDB,Myocardial infarction,pathological,46,M,1000,s0417lre,1,1530,1834,2292,manual_t_auto_r
+patient096,PTBDB_patient096,PTBDB,Myocardial infarction,pathological,43,M,1000,s0379lre,1,853,1127,1448,manual_t_auto_r
+patient096,PTBDB_patient096,PTBDB,Myocardial infarction,pathological,43,M,1000,s0381lre,1,876,1185,1540,manual_t_auto_r
+patient096,PTBDB_patient096,PTBDB,Myocardial infarction,pathological,43,M,1000,s0385lre,1,787,1141,1734,manual_t_auto_r
+patient096,PTBDB_patient096,PTBDB,Myocardial infarction,pathological,43,M,1000,s0395lre,1,776,1123,1789,manual_t_auto_r
+patient097,PTBDB_patient097,PTBDB,Myocardial infarction,pathological,68,M,1000,s0380lre,1,668,1001,1193,manual_t_auto_r
+patient097,PTBDB_patient097,PTBDB,Myocardial infarction,pathological,68,M,1000,s0382lre,1,1237,1581,1879,manual_t_auto_r
+patient097,PTBDB_patient097,PTBDB,Myocardial infarction,pathological,68,M,1000,s0384lre,1,2956,3363,4761,manual_t_auto_r
+patient097,PTBDB_patient097,PTBDB,Myocardial infarction,pathological,68,M,1000,s0394lre,1,1128,1476,1804,manual_t_auto_r
+patient098,PTBDB_patient098,PTBDB,Myocardial infarction,pathological,63,F,1000,s0386lre,1,1176,1492,1762,manual_t_auto_r
+patient098,PTBDB_patient098,PTBDB,Myocardial infarction,pathological,63,F,1000,s0389lre,1,1778,2107,2117,manual_t_auto_r
+patient098,PTBDB_patient098,PTBDB,Myocardial infarction,pathological,63,F,1000,s0398lre,1,1626,1673,1995,manual_t_auto_r
+patient098,PTBDB_patient098,PTBDB,Myocardial infarction,pathological,63,F,1000,s0409lre,1,1132,1419,1739,manual_t_auto_r
+patient099,PTBDB_patient099,PTBDB,Myocardial infarction,pathological,52,M,1000,s0387lre,1,1050,1345,1687,manual_t_auto_r
+patient099,PTBDB_patient099,PTBDB,Myocardial infarction,pathological,52,M,1000,s0388lre,1,975,1258,1677,manual_t_auto_r
+patient099,PTBDB_patient099,PTBDB,Myocardial infarction,pathological,52,M,1000,s0397lre,1,928,1264,1823,manual_t_auto_r
+patient099,PTBDB_patient099,PTBDB,Myocardial infarction,pathological,52,M,1000,s0419lre,1,1329,1653,2066,manual_t_auto_r
+patient100,PTBDB_patient100,PTBDB,Myocardial infarction,pathological,72,F,1000,s0399lre,1,1137,1359,1682,manual_t_auto_r
+patient100,PTBDB_patient100,PTBDB,Myocardial infarction,pathological,72,F,1000,s0401lre,1,714,1016,1462,manual_t_auto_r
+patient100,PTBDB_patient100,PTBDB,Myocardial infarction,pathological,72,F,1000,s0407lre,1,1160,1420,1722,manual_t_auto_r
+patient101,PTBDB_patient101,PTBDB,Myocardial infarction,pathological,57,M,1000,s0410lre,1,1122,1351,1493,manual_t_auto_r
+patient102,PTBDB_patient102,PTBDB,Myocardial infarction,pathological,72,F,1000,s0416lre,1,1200,1554,2032,manual_t_auto_r
+patient103,PTBDB_patient103,PTBDB,Myocardial infarction,pathological,52,M,1000,s0332lre,1,879,1290,2009,manual_t_auto_r
+patient104,PTBDB_patient104,PTBDB,Healthy control,healthy,58,M,1000,s0306lre,1,799,1136,1709,manual_t_auto_r
+patient105,PTBDB_patient105,PTBDB,Healthy control,healthy,32,F,1000,s0303lre,1,746,1059,1525,manual_t_auto_r
+patient106,PTBDB_patient106,PTBDB,Valvular heart disease,pathological,46,M,1000,s0030_re,1,895,1220,1684,manual_t_auto_r
+patient107,PTBDB_patient107,PTBDB,Valvular heart disease,pathological,41,F,1000,s0199_re,1,1230,1555,1905,manual_t_auto_r
+patient109,PTBDB_patient109,PTBDB,Dysrhythmia,pathological,17,M,1000,s0349lre,1,2982,3397,3290,manual_t_auto_r
+patient110,PTBDB_patient110,PTBDB,Valvular heart disease,pathological,NaN,,1000,s0003_re,1,1422,1792,2233,manual_t_auto_r
+patient111,PTBDB_patient111,PTBDB,Myocardial infarction,pathological,75,M,1000,s0203_re,1,1211,1507,1877,manual_t_auto_r
+patient112,PTBDB_patient112,PTBDB,Dysrhythmia,pathological,59,M,1000,s0169_re,1,1807,2223,3040,manual_t_auto_r
+patient113,PTBDB_patient113,PTBDB,Dysrhythmia,pathological,65,F,1000,s0018lre,1,1463,1763,2001,manual_t_auto_r
+patient114,PTBDB_patient114,PTBDB,Valvular heart disease,pathological,68,F,1000,s0012_re,1,1306,1669,2135,manual_t_auto_r
+patient115,PTBDB_patient115,PTBDB,Heart failure (NYHA 2),pathological,74,F,1000,s0023_re,1,1348,1672,2278,manual_t_auto_r
+patient116,PTBDB_patient116,PTBDB,Healthy control,healthy,54,M,1000,s0302lre,1,1176,1540,2153,manual_t_auto_r
+patient117,PTBDB_patient117,PTBDB,Healthy control,healthy,37,M,1000,s0291lre,1,1368,1687,2253,manual_t_auto_r
+patient117,PTBDB_patient117,PTBDB,Healthy control,healthy,37,M,1000,s0292lre,1,1535,1854,2451,manual_t_auto_r
+patient118,PTBDB_patient118,PTBDB,Heart failure (NYHA 3),pathological,70,M,1000,s0183_re,1,1189,1520,1866,manual_t_auto_r
+patient119,PTBDB_patient119,PTBDB,n/a,pathological,83,,1000,s0001_re,1,1135,1500,1930,manual_t_auto_r
+patient120,PTBDB_patient120,PTBDB,Myocardial infarction,pathological,72,M,1000,s0331lre,1,969,1318,1754,manual_t_auto_r
+patient121,PTBDB_patient121,PTBDB,Healthy control,healthy,69,F,1000,s0311lre,1,1168,1488,1866,manual_t_auto_r
+patient122,PTBDB_patient122,PTBDB,Healthy control,healthy,68,M,1000,s0312lre,1,1651,2000,2581,manual_t_auto_r
+patient125,PTBDB_patient125,PTBDB,n/a,pathological,NaN,,1000,s0006_re,1,901,1191,1588,manual_t_auto_r
+patient126,PTBDB_patient126,PTBDB,Palpitation,pathological,62,M,1000,s0154_re,1,1110,1465,1680,manual_t_auto_r
+patient127,PTBDB_patient127,PTBDB,Cardiomyopathy,pathological,32,F,1000,s0342lre,1,1485,1860,2306,manual_t_auto_r
+patient127,PTBDB_patient127,PTBDB,Cardiomyopathy,pathological,32,F,1000,s0383lre,1,1096,1493,1984,manual_t_auto_r
+patient128,PTBDB_patient128,PTBDB,Myocardial infarction,pathological,63,M,1000,s0182_re,1,1228,1585,2137,manual_t_auto_r
+patient129,PTBDB_patient129,PTBDB,Cardiomyopathy,pathological,53,M,1000,s0189_re,1,864,1192,1475,manual_t_auto_r
+patient130,PTBDB_patient130,PTBDB,Stable angina,pathological,75,M,1000,s0166_re,1,2151,2492,3281,manual_t_auto_r
+patient131,PTBDB_patient131,PTBDB,Healthy control,healthy,26,M,1000,s0273lre,1,1038,1327,1620,manual_t_auto_r
+patient133,PTBDB_patient133,PTBDB,Dysrhythmia,pathological,31,M,1000,s0393lre,1,1262,1615,2358,manual_t_auto_r
+patient135,PTBDB_patient135,PTBDB,Myocardial infarction,pathological,54,F,1000,s0334lre,1,1559,1939,2367,manual_t_auto_r
+patient136,PTBDB_patient136,PTBDB,n/a,pathological,51,M,1000,s0205_re,1,1022,1278,1320,manual_t_auto_r
+patient137,PTBDB_patient137,PTBDB,Cardiomyopathy,pathological,52,M,1000,s0392lre,1,1664,2032,2567,manual_t_auto_r
+patient138,PTBDB_patient138,PTBDB,Myocardial infarction,pathological,84,M,1000,s0005_re,1,1133,1436,1817,manual_t_auto_r
+patient139,PTBDB_patient139,PTBDB,Myocardial infarction,pathological,85,F,1000,s0223_re,1,842,1147,1399,manual_t_auto_r
+patient140,PTBDB_patient140,PTBDB,Myocardial infarction,pathological,75,F,1000,s0019_re,1,1101,1447,1836,manual_t_auto_r
+patient141,PTBDB_patient141,PTBDB,Myocardial infarction,pathological,46,M,1000,s0307lre,1,1455,1785,2223,manual_t_auto_r
+patient142,PTBDB_patient142,PTBDB,Myocardial infarction,pathological,54,M,1000,s0351lre,1,1143,1462,1849,manual_t_auto_r
+patient143,PTBDB_patient143,PTBDB,n/a,pathological,67,M,1000,s0333lre,1,1386,1719,2271,manual_t_auto_r
+patient144,PTBDB_patient144,PTBDB,n/a,pathological,57,F,1000,s0341lre,1,1647,2055,2568,manual_t_auto_r
+patient145,PTBDB_patient145,PTBDB,Myocardial infarction,pathological,63,M,1000,s0201_re,1,1476,1883,2314,manual_t_auto_r
+patient146,PTBDB_patient146,PTBDB,n/a,pathological,20,,1000,s0007_re,1,2276,2553,2924,manual_t_auto_r
+patient147,PTBDB_patient147,PTBDB,Dysrhythmia,pathological,81,M,1000,s0211_re,1,2016,2375,3019,manual_t_auto_r
+patient148,PTBDB_patient148,PTBDB,Myocardial infarction,pathological,58,M,1000,s0335lre,1,1093,1436,1812,manual_t_auto_r
+patient149,PTBDB_patient149,PTBDB,Myocardial infarction,pathological,53,M,1000,s0202are,1,1074,1385,1730,manual_t_auto_r
+patient149,PTBDB_patient149,PTBDB,Myocardial infarction,pathological,53,M,1000,s0202bre,1,894,1208,1500,manual_t_auto_r
+patient150,PTBDB_patient150,PTBDB,Healthy control,healthy,36,M,1000,s0287lre,1,1295,1645,2216,manual_t_auto_r
+patient151,PTBDB_patient151,PTBDB,Dysrhythmia,pathological,66,F,1000,s0206_re,1,1311,1707,2401,manual_t_auto_r
+patient152,PTBDB_patient152,PTBDB,Myocardial infarction,pathological,79,F,1000,s0004_re,1,979,1337,1839,manual_t_auto_r
+patient153,PTBDB_patient153,PTBDB,Dysrhythmia,pathological,52,M,1000,s0391lre,1,1309,1632,2131,manual_t_auto_r
+patient154,PTBDB_patient154,PTBDB,n/a,pathological,NaN,,1000,s0170_re,1,1834,2178,3005,manual_t_auto_r
+patient155,PTBDB_patient155,PTBDB,Healthy control,healthy,37,M,1000,s0301lre,1,810,1138,1564,manual_t_auto_r
+patient156,PTBDB_patient156,PTBDB,Healthy control,healthy,17,M,1000,s0299lre,1,1193,1497,2194,manual_t_auto_r
+patient157,PTBDB_patient157,PTBDB,Dysrhythmia,pathological,87,M,1000,s0338lre,1,1909,2358,3573,manual_t_auto_r
+patient158,PTBDB_patient158,PTBDB,Myocardial infarction,pathological,64,M,1000,s0294lre,1,1130,1526,1951,manual_t_auto_r
+patient158,PTBDB_patient158,PTBDB,Myocardial infarction,pathological,64,M,1000,s0295lre,1,1626,2020,2467,manual_t_auto_r
+patient159,PTBDB_patient159,PTBDB,Hypertrophy,pathological,73,M,1000,s0390lre,1,1200,1506,1912,manual_t_auto_r
+patient160,PTBDB_patient160,PTBDB,Myocardial infarction,pathological,55,M,1000,s0222_re,1,1425,1794,2405,manual_t_auto_r
+patient162,PTBDB_patient162,PTBDB,n/a,pathological,NaN,,1000,s0193_re,1,1201,1521,1940,manual_t_auto_r
+patient163,PTBDB_patient163,PTBDB,Myocardial infarction,pathological,68,F,1000,s0034_re,1,1286,1584,1992,manual_t_auto_r
+patient164,PTBDB_patient164,PTBDB,n/a,pathological,87,F,1000,s0024are,1,1575,1959,2914,manual_t_auto_r
+patient164,PTBDB_patient164,PTBDB,n/a,pathological,87,F,1000,s0024bre,1,807,1188,2165,manual_t_auto_r
+patient165,PTBDB_patient165,PTBDB,Healthy control,healthy,26,M,1000,s0322lre,1,1263,1612,2290,manual_t_auto_r
+patient165,PTBDB_patient165,PTBDB,Healthy control,healthy,26,M,1000,s0323lre,1,1906,2251,2963,manual_t_auto_r
+patient166,PTBDB_patient166,PTBDB,Healthy control,healthy,NaN,M,1000,s0275lre,1,1670,2043,2690,manual_t_auto_r
+patient167,PTBDB_patient167,PTBDB,Cardiomyopathy,pathological,80,F,1000,s0200_re,1,1581,1972,2504,manual_t_auto_r
+patient168,PTBDB_patient168,PTBDB,Dysrhythmia,pathological,75,F,1000,s0032_re,1,1122,1476,1917,manual_t_auto_r
+patient168,PTBDB_patient168,PTBDB,Dysrhythmia,pathological,75,F,1000,s0033_re,1,1523,1856,2255,manual_t_auto_r
+patient169,PTBDB_patient169,PTBDB,Healthy control,healthy,54,F,1000,s0328lre,1,1782,2140,2866,manual_t_auto_r
+patient169,PTBDB_patient169,PTBDB,Healthy control,healthy,54,F,1000,s0329lre,1,2003,2367,3024,manual_t_auto_r
+patient170,PTBDB_patient170,PTBDB,Healthy control,healthy,NaN,M,1000,s0274lre,1,1082,1404,1721,manual_t_auto_r
+patient171,PTBDB_patient171,PTBDB,Bundle branch block,pathological,64,F,1000,s0364lre,1,1187,1567,1935,manual_t_auto_r
+patient172,PTBDB_patient172,PTBDB,Healthy control,healthy,50,M,1000,s0304lre,1,1511,1878,2392,manual_t_auto_r
+patient173,PTBDB_patient173,PTBDB,Healthy control,healthy,57,F,1000,s0305lre,1,1441,1791,2368,manual_t_auto_r
+patient174,PTBDB_patient174,PTBDB,Healthy control,healthy,26,M,1000,s0300lre,1,1361,1687,2175,manual_t_auto_r
+patient174,PTBDB_patient174,PTBDB,Healthy control,healthy,26,M,1000,s0324lre,1,1597,1945,2513,manual_t_auto_r
+patient174,PTBDB_patient174,PTBDB,Healthy control,healthy,26,M,1000,s0325lre,1,1695,2054,2583,manual_t_auto_r
+patient175,PTBDB_patient175,PTBDB,Bundle branch block,pathological,57,F,1000,s0009_re,1,1156,1469,1970,manual_t_auto_r
+patient176,PTBDB_patient176,PTBDB,n/a,pathological,79,F,1000,s0188_re,1,1209,1537,1904,manual_t_auto_r
+patient177,PTBDB_patient177,PTBDB,Dysrhythmia,pathological,35,F,1000,s0366lre,1,2008,2501,3644,manual_t_auto_r
+patient178,PTBDB_patient178,PTBDB,n/a,pathological,85,F,1000,s0011_re,1,1466,1843,1736,manual_t_auto_r
+patient179,PTBDB_patient179,PTBDB,n/a,pathological,77,F,1000,s0176_re,1,1156,1479,1923,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0374lre,1,1281,1594,2230,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0475_re,1,1578,1888,2431,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0476_re,1,1026,1336,1275,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0477_re,1,1641,1961,2562,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0490_re,1,1815,2137,2738,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0545_re,1,1037,1338,1766,manual_t_auto_r
+patient180,PTBDB_patient180,PTBDB,Healthy control,healthy,37,M,1000,s0561_re,1,1784,2123,2689,manual_t_auto_r
+patient181,PTBDB_patient181,PTBDB,n/a,pathological,NaN,,1000,s0204are,1,2006,2329,2602,manual_t_auto_r
+patient181,PTBDB_patient181,PTBDB,n/a,pathological,NaN,,1000,s0204bre,1,1129,1433,1557,manual_t_auto_r
+patient182,PTBDB_patient182,PTBDB,Healthy control,healthy,29,M,1000,s0308lre,1,1265,1615,2120,manual_t_auto_r
+patient183,PTBDB_patient183,PTBDB,Myocardial infarction,pathological,57,F,1000,s0175_re,1,999,1483,1927,manual_t_auto_r
+patient184,PTBDB_patient184,PTBDB,Healthy control,healthy,81,F,1000,s0363lre,1,1090,1411,1789,manual_t_auto_r
+patient185,PTBDB_patient185,PTBDB,Healthy control,healthy,22,F,1000,s0336lre,1,1029,1400,1982,manual_t_auto_r
+patient186,PTBDB_patient186,PTBDB,n/a,pathological,45,M,1000,s0293lre,1,855,1160,1653,manual_t_auto_r
+patient187,PTBDB_patient187,PTBDB,Dysrhythmia,pathological,62,M,1000,s0207_re,1,1212,1510,2011,manual_t_auto_r
+patient188,PTBDB_patient188,PTBDB,Valvular heart disease,pathological,51,M,1000,s0365lre,1,1258,1544,1956,manual_t_auto_r
+patient189,PTBDB_patient189,PTBDB,Myocardial infarction,pathological,61,M,1000,s0309lre,1,989,1388,1883,manual_t_auto_r
+patient190,PTBDB_patient190,PTBDB,n/a,pathological,NaN,,1000,s0040_re,1,1220,1601,2018,manual_t_auto_r
+patient190,PTBDB_patient190,PTBDB,n/a,pathological,NaN,,1000,s0041_re,1,1207,1580,1480,manual_t_auto_r
+patient191,PTBDB_patient191,PTBDB,Stable angina,pathological,60,M,1000,s0340lre,1,1616,1979,2551,manual_t_auto_r
+patient192,PTBDB_patient192,PTBDB,n/a,pathological,63,F,1000,s0048_re,1,1066,1431,1701,manual_t_auto_r
+patient193,PTBDB_patient193,PTBDB,Myocardial infarction,pathological,59,F,1000,s0008_re,1,1878,2217,2904,manual_t_auto_r
+patient194,PTBDB_patient194,PTBDB,n/a,pathological,67,M,1000,s0310lre,1,1693,2035,2530,manual_t_auto_r
+patient195,PTBDB_patient195,PTBDB,Myocardial infarction,pathological,71,F,1000,s0337lre,1,1088,1453,1822,manual_t_auto_r
+patient196,PTBDB_patient196,PTBDB,Unstable angina,pathological,84,F,1000,s0002_re,1,1179,1580,2157,manual_t_auto_r
+patient197,PTBDB_patient197,PTBDB,Myocardial infarction,pathological,51,M,1000,s0350lre,1,1419,1836,2077,manual_t_auto_r
+patient198,PTBDB_patient198,PTBDB,Healthy control,healthy,NaN,F,1000,s0402lre,1,1209,1530,2035,manual_t_auto_r
+patient198,PTBDB_patient198,PTBDB,Healthy control,healthy,NaN,F,1000,s0415lre,1,1532,1864,1776,manual_t_auto_r
+patient199,PTBDB_patient199,PTBDB,Bundle branch block,pathological,NaN,M,1000,s0404lre,1,996,1319,1848,manual_t_auto_r
+patient200,PTBDB_patient200,PTBDB,n/a,pathological,NaN,M,1000,s0405lre,1,1293,1723,2429,manual_t_auto_r
+patient201,PTBDB_patient201,PTBDB,Cardiomyopathy,pathological,39,M,1000,s0420_re,1,1524,1853,2155,manual_t_auto_r
+patient201,PTBDB_patient201,PTBDB,Cardiomyopathy,pathological,39,M,1000,s0423_re,1,1747,1817,2048,manual_t_auto_r
+patient202,PTBDB_patient202,PTBDB,Bundle branch block,pathological,29,M,1000,s0421_re,1,862,1183,1556,manual_t_auto_r
+patient202,PTBDB_patient202,PTBDB,Bundle branch block,pathological,29,M,1000,s0422_re,1,1181,1529,2172,manual_t_auto_r
+patient203,PTBDB_patient203,PTBDB,Bundle branch block,pathological,32,M,1000,s0424_re,1,1338,1709,2451,manual_t_auto_r
+patient204,PTBDB_patient204,PTBDB,Bundle branch block,pathological,67,M,1000,s0425_re,1,1286,1732,2573,manual_t_auto_r
+patient205,PTBDB_patient205,PTBDB,Myocardial infarction,pathological,63,M,1000,s0426_re,1,1608,1962,2501,manual_t_auto_r
+patient206,PTBDB_patient206,PTBDB,Bundle branch block,pathological,32,M,1000,s0427_re,1,1351,1684,2173,manual_t_auto_r
+patient207,PTBDB_patient207,PTBDB,Myocardial infarction,pathological,46,M,1000,s0428_re,1,973,1316,1932,manual_t_auto_r
+patient208,PTBDB_patient208,PTBDB,Bundle branch block,pathological,46,M,1000,s0429_re,1,970,1323,1880,manual_t_auto_r
+patient208,PTBDB_patient208,PTBDB,Bundle branch block,pathological,46,M,1000,s0430_re,1,1250,1526,2222,manual_t_auto_r
+patient209,PTBDB_patient209,PTBDB,Bundle branch block,pathological,51,M,1000,s0431_re,1,1052,1459,2046,manual_t_auto_r
+patient210,PTBDB_patient210,PTBDB,Hypertrophy,pathological,56,M,1000,s0432_re,1,966,1329,1844,manual_t_auto_r
+patient211,PTBDB_patient211,PTBDB,Myocardial infarction,pathological,68,M,1000,s0433_re,1,1155,1435,1730,manual_t_auto_r
+patient212,PTBDB_patient212,PTBDB,Hypertrophy,pathological,66,M,1000,s0434_re,1,1461,1763,2220,manual_t_auto_r
+patient213,PTBDB_patient213,PTBDB,Bundle branch block,pathological,58,M,1000,s0435_re,1,1085,1393,1788,manual_t_auto_r
+patient214,PTBDB_patient214,PTBDB,Healthy control,healthy,35,M,1000,s0436_re,1,963,1253,1553,manual_t_auto_r
+patient215,PTBDB_patient215,PTBDB,Cardiomyopathy,pathological,82,M,1000,s0437_re,1,1279,1663,1941,manual_t_auto_r
+patient216,PTBDB_patient216,PTBDB,Hypertrophy,pathological,73,F,1000,s0438_re,1,1539,1837,2391,manual_t_auto_r
+patient217,PTBDB_patient217,PTBDB,Bundle branch block,pathological,62,F,1000,s0439_re,1,1090,1481,2050,manual_t_auto_r
+patient218,PTBDB_patient218,PTBDB,Dysrhythmia,pathological,70,M,1000,s0440_re,1,733,1181,2229,manual_t_auto_r
+patient219,PTBDB_patient219,PTBDB,Bundle branch block,pathological,66,M,1000,s0441_re,1,643,918,979,manual_t_auto_r
+patient220,PTBDB_patient220,PTBDB,Bundle branch block,pathological,76,M,1000,s0442_re,1,1252,1595,2489,manual_t_auto_r
+patient221,PTBDB_patient221,PTBDB,Hypertrophy,pathological,63,M,1000,s0443_re,1,1634,2013,2637,manual_t_auto_r
+patient222,PTBDB_patient222,PTBDB,Cardiomyopathy,pathological,60,F,1000,s0444_re,1,923,1262,1705,manual_t_auto_r
+patient223,PTBDB_patient223,PTBDB,Myocardial infarction,pathological,56,M,1000,s0445_re,1,1234,1563,2072,manual_t_auto_r
+patient223,PTBDB_patient223,PTBDB,Myocardial infarction,pathological,56,M,1000,s0446_re,1,1468,1806,2324,manual_t_auto_r
+patient224,PTBDB_patient224,PTBDB,Valvular heart disease,pathological,38,F,1000,s0447_re,1,916,1299,1728,manual_t_auto_r
+patient225,PTBDB_patient225,PTBDB,Bundle branch block,pathological,56,F,1000,s0448_re,1,1359,1564,1979,manual_t_auto_r
+patient226,PTBDB_patient226,PTBDB,Myocardial infarction,pathological,62,M,1000,s0449_re,1,1637,2003,2668,manual_t_auto_r
+patient227,PTBDB_patient227,PTBDB,Hypertrophy,pathological,52,M,1000,s0450_re,1,817,1133,1585,manual_t_auto_r
+patient228,PTBDB_patient228,PTBDB,Bundle branch block,pathological,73,M,1000,s0451_re,1,1766,2141,2685,manual_t_auto_r
+patient229,PTBDB_patient229,PTBDB,Healthy control,healthy,55,M,1000,s0452_re,1,1725,2117,2772,manual_t_auto_r
+patient229,PTBDB_patient229,PTBDB,Healthy control,healthy,55,M,1000,s0453_re,1,1885,2276,2987,manual_t_auto_r
+patient230,PTBDB_patient230,PTBDB,Myocardial infarction,pathological,68,M,1000,s0454_re,1,1286,1650,2302,manual_t_auto_r
+patient231,PTBDB_patient231,PTBDB,Myocardial infarction,pathological,57,M,1000,s0455_re,1,1696,2019,1910,manual_t_auto_r
+patient232,PTBDB_patient232,PTBDB,Cardiomyopathy,pathological,70,F,1000,s0456_re,1,1043,1398,1711,manual_t_auto_r
+patient233,PTBDB_patient233,PTBDB,Healthy control,healthy,24,M,1000,s0457_re,1,1578,1939,2606,manual_t_auto_r
+patient233,PTBDB_patient233,PTBDB,Healthy control,healthy,24,M,1000,s0458_re,1,1279,1649,2336,manual_t_auto_r
+patient233,PTBDB_patient233,PTBDB,Healthy control,healthy,24,M,1000,s0459_re,1,1175,1549,2244,manual_t_auto_r
+patient233,PTBDB_patient233,PTBDB,Healthy control,healthy,24,M,1000,s0482_re,1,1261,1600,2311,manual_t_auto_r
+patient233,PTBDB_patient233,PTBDB,Healthy control,healthy,24,M,1000,s0483_re,1,1672,2017,2580,manual_t_auto_r
+patient234,PTBDB_patient234,PTBDB,Healthy control,healthy,34,M,1000,s0460_re,1,1566,1950,2737,manual_t_auto_r
+patient235,PTBDB_patient235,PTBDB,Healthy control,healthy,30,M,1000,s0461_re,1,1462,1811,2342,manual_t_auto_r
+patient236,PTBDB_patient236,PTBDB,Healthy control,healthy,25,F,1000,s0462_re,1,1160,1538,2158,manual_t_auto_r
+patient236,PTBDB_patient236,PTBDB,Healthy control,healthy,25,F,1000,s0463_re,1,1377,1760,2330,manual_t_auto_r
+patient236,PTBDB_patient236,PTBDB,Healthy control,healthy,25,F,1000,s0464_re,1,1526,1897,2563,manual_t_auto_r
+patient237,PTBDB_patient237,PTBDB,Healthy control,healthy,47,M,1000,s0465_re,1,1230,1587,2213,manual_t_auto_r
+patient238,PTBDB_patient238,PTBDB,Healthy control,healthy,29,M,1000,s0466_re,1,1260,1590,2093,manual_t_auto_r
+patient239,PTBDB_patient239,PTBDB,Healthy control,healthy,59,M,1000,s0467_re,1,1252,1572,1902,manual_t_auto_r
+patient240,PTBDB_patient240,PTBDB,Healthy control,healthy,28,M,1000,s0468_re,1,936,1253,1691,manual_t_auto_r
+patient241,PTBDB_patient241,PTBDB,Healthy control,healthy,33,M,1000,s0469_re,1,1770,2114,2836,manual_t_auto_r
+patient241,PTBDB_patient241,PTBDB,Healthy control,healthy,33,M,1000,s0470_re,1,1619,1962,2672,manual_t_auto_r
+patient242,PTBDB_patient242,PTBDB,Healthy control,healthy,28,F,1000,s0471_re,1,964,1278,1796,manual_t_auto_r
+patient243,PTBDB_patient243,PTBDB,Healthy control,healthy,52,F,1000,s0472_re,1,1193,1476,1854,manual_t_auto_r
+patient244,PTBDB_patient244,PTBDB,Healthy control,healthy,44,M,1000,s0473_re,1,1287,1612,2109,manual_t_auto_r
+patient245,PTBDB_patient245,PTBDB,Healthy control,healthy,30,M,1000,s0474_re,1,1546,1868,2313,manual_t_auto_r
+patient245,PTBDB_patient245,PTBDB,Healthy control,healthy,30,M,1000,s0480_re,1,1617,1950,2536,manual_t_auto_r
+patient246,PTBDB_patient246,PTBDB,Healthy control,healthy,54,M,1000,s0478_re,1,1963,2330,2994,manual_t_auto_r
+patient247,PTBDB_patient247,PTBDB,Healthy control,healthy,48,F,1000,s0479_re,1,1264,1602,1926,manual_t_auto_r
+patient248,PTBDB_patient248,PTBDB,Healthy control,healthy,64,M,1000,s0481_re,1,1094,1448,2010,manual_t_auto_r
+patient249,PTBDB_patient249,PTBDB,Myocarditis,pathological,46,M,1000,s0484_re,1,1581,1954,2616,manual_t_auto_r
+patient250,PTBDB_patient250,PTBDB,Hypertrophy,pathological,53,M,1000,s0485_re,1,1307,1680,2430,manual_t_auto_r
+patient251,PTBDB_patient251,PTBDB,Healthy control,healthy,40,M,1000,s0486_re,1,1292,1624,2096,manual_t_auto_r
+patient251,PTBDB_patient251,PTBDB,Healthy control,healthy,40,M,1000,s0503_re,1,1310,1636,2044,manual_t_auto_r
+patient251,PTBDB_patient251,PTBDB,Healthy control,healthy,40,M,1000,s0506_re,1,980,1307,1704,manual_t_auto_r
+patient252,PTBDB_patient252,PTBDB,Healthy control,healthy,54,M,1000,s0487_re,1,1912,2284,2953,manual_t_auto_r
+patient253,PTBDB_patient253,PTBDB,Cardiomyopathy,pathological,62,M,1000,s0488_re,1,1578,1938,2637,manual_t_auto_r
+patient254,PTBDB_patient254,PTBDB,Cardiomyopathy,pathological,57,M,1000,s0489_re,1,906,1183,1559,manual_t_auto_r
+patient255,PTBDB_patient255,PTBDB,Healthy control,healthy,69,M,1000,s0491_re,1,957,1305,1868,manual_t_auto_r
+patient257,PTBDB_patient257,PTBDB,Cardiomyopathy,pathological,68,M,1000,s0493_re,1,1815,2133,2854,manual_t_auto_r
+patient258,PTBDB_patient258,PTBDB,Dysrhythmia,pathological,42,M,1000,s0494_re,1,1241,1596,2303,manual_t_auto_r
+patient259,PTBDB_patient259,PTBDB,Myocardial infarction,pathological,58,F,1000,s0495_re,1,1718,2082,2770,manual_t_auto_r
+patient260,PTBDB_patient260,PTBDB,Healthy control,healthy,NaN,M,1000,s0496_re,1,1649,1956,2671,manual_t_auto_r
+patient261,PTBDB_patient261,PTBDB,Myocardial infarction,pathological,51,M,1000,s0497_re,1,1770,2134,2729,manual_t_auto_r
+patient262,PTBDB_patient262,PTBDB,Cardiomyopathy,pathological,41,F,1000,s0498_re,1,1723,2129,2735,manual_t_auto_r
+patient263,PTBDB_patient263,PTBDB,Healthy control,healthy,37,M,1000,s0499_re,1,1506,1829,2289,manual_t_auto_r
+patient264,PTBDB_patient264,PTBDB,Healthy control,healthy,45,M,1000,s0500_re,1,1442,1797,2462,manual_t_auto_r
+patient265,PTBDB_patient265,PTBDB,Myocardial infarction,pathological,57,M,1000,s0501_re,1,1169,1518,2157,manual_t_auto_r
+patient266,PTBDB_patient266,PTBDB,Healthy control,healthy,68,M,1000,s0502_re,1,1332,1668,2150,manual_t_auto_r
+patient267,PTBDB_patient267,PTBDB,Healthy control,healthy,67,F,1000,s0504_re,1,1729,2141,2844,manual_t_auto_r
+patient268,PTBDB_patient268,PTBDB,Myocardial infarction,pathological,55,M,1000,s0505_re,1,1045,1347,1268,manual_t_auto_r
+patient269,PTBDB_patient269,PTBDB,Myocarditis,pathological,61,M,1000,s0508_re,1,1919,2309,2983,manual_t_auto_r
+patient270,PTBDB_patient270,PTBDB,Myocardial infarction,pathological,60,M,1000,s0507_re,1,1028,1328,1787,manual_t_auto_r
+patient271,PTBDB_patient271,PTBDB,Myocarditis,pathological,41,M,1000,s0509_re,1,1355,1707,2421,manual_t_auto_r
+patient272,PTBDB_patient272,PTBDB,Myocarditis,pathological,61,M,1000,s0510_re,1,987,1306,1920,manual_t_auto_r
+patient273,PTBDB_patient273,PTBDB,Myocardial infarction,pathological,69,M,1000,s0511_re,1,1725,2163,3123,manual_t_auto_r
+patient274,PTBDB_patient274,PTBDB,Myocardial infarction,pathological,57,M,1000,s0512_re,1,1762,2137,2860,manual_t_auto_r
+patient275,PTBDB_patient275,PTBDB,n/a,pathological,48,M,1000,s0513_re,1,802,1119,1551,manual_t_auto_r
+patient276,PTBDB_patient276,PTBDB,Healthy control,healthy,NaN,M,1000,s0526_re,1,1124,1466,1913,manual_t_auto_r
+patient277,PTBDB_patient277,PTBDB,Healthy control,healthy,NaN,M,1000,s0527_re,1,1242,1637,2459,manual_t_auto_r
+patient278,PTBDB_patient278,PTBDB,n/a,pathological,62,M,1000,s0528_re,1,1243,1548,1959,manual_t_auto_r
+patient278,PTBDB_patient278,PTBDB,n/a,pathological,62,M,1000,s0529_re,1,1179,1490,1854,manual_t_auto_r
+patient278,PTBDB_patient278,PTBDB,n/a,pathological,62,M,1000,s0530_re,1,1131,1436,1809,manual_t_auto_r
+patient279,PTBDB_patient279,PTBDB,Healthy control,healthy,35,F,1000,s0531_re,1,2348,2758,3527,manual_t_auto_r
+patient279,PTBDB_patient279,PTBDB,Healthy control,healthy,35,F,1000,s0532_re,1,2065,2501,3412,manual_t_auto_r
+patient279,PTBDB_patient279,PTBDB,Healthy control,healthy,35,F,1000,s0533_re,1,2483,2920,3921,manual_t_auto_r
+patient279,PTBDB_patient279,PTBDB,Healthy control,healthy,35,F,1000,s0534_re,1,2487,2925,3808,manual_t_auto_r
+patient280,PTBDB_patient280,PTBDB,Myocardial infarction,pathological,67,M,1000,s0535_re,1,1819,2180,2742,manual_t_auto_r
+patient281,PTBDB_patient281,PTBDB,n/a,pathological,68,M,1000,s0537_re,1,1200,1561,2010,manual_t_auto_r
+patient282,PTBDB_patient282,PTBDB,Myocardial infarction,pathological,61,M,1000,s0539_re,1,1703,2050,2705,manual_t_auto_r
+patient283,PTBDB_patient283,PTBDB,Myocardial infarction,pathological,82,M,1000,s0542_re,1,1418,1831,2572,manual_t_auto_r
+patient284,PTBDB_patient284,PTBDB,Healthy control,healthy,48,M,1000,s0543_re,1,925,1245,1733,manual_t_auto_r
+patient284,PTBDB_patient284,PTBDB,Healthy control,healthy,48,M,1000,s0551_re,1,1146,1465,2041,manual_t_auto_r
+patient284,PTBDB_patient284,PTBDB,Healthy control,healthy,48,M,1000,s0552_re,1,851,1171,1628,manual_t_auto_r
+patient286,PTBDB_patient286,PTBDB,Dysrhythmia,pathological,56,M,1000,s0546_re,1,1079,1434,1898,manual_t_auto_r
+patient287,PTBDB_patient287,PTBDB,Myocardial infarction,pathological,78,F,1000,s0547_re,1,1105,1444,1745,manual_t_auto_r
+patient287,PTBDB_patient287,PTBDB,Myocardial infarction,pathological,78,F,1000,s0548_re,1,771,1116,1436,manual_t_auto_r
+patient288,PTBDB_patient288,PTBDB,Cardiomyopathy,pathological,67,M,1000,s0549_re,1,1670,2059,2685,manual_t_auto_r
+patient289,PTBDB_patient289,PTBDB,Cardiomyopathy,pathological,69,F,1000,s0550_re,1,1144,1505,1918,manual_t_auto_r
+patient290,PTBDB_patient290,PTBDB,Myocardial infarction,pathological,60,M,1000,s0553_re,1,1862,2269,2739,manual_t_auto_r
+patient291,PTBDB_patient291,PTBDB,Myocardial infarction,pathological,69,M,1000,s0554_re,1,864,1173,1596,manual_t_auto_r
+patient292,PTBDB_patient292,PTBDB,Myocardial infarction,pathological,66,M,1000,s0556_re,1,1289,1611,1788,manual_t_auto_r
+patient293,PTBDB_patient293,PTBDB,Myocardial infarction,pathological,75,M,1000,s0557_re,1,843,1172,1660,manual_t_auto_r
+patient293,PTBDB_patient293,PTBDB,Myocardial infarction,pathological,75,M,1000,s0558_re,1,1047,1379,1878,manual_t_auto_r
+patient294,PTBDB_patient294,PTBDB,Myocardial infarction,pathological,61,F,1000,s0559_re,1,1130,1456,1932,manual_t_auto_r
