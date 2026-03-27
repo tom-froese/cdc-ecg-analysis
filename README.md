@@ -7,7 +7,7 @@ Full reproducibility package for the *Nature Aging* Brief Communication (2026).
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zenodo Data](https://img.shields.io/badge/Data-Zenodo-blue)](https://zenodo.org) 
 
-**One-click reproduction of all figures and tables.**
+**One-click reproduction of all figures.**
 
 ---
 
@@ -41,7 +41,7 @@ cdc-ecg-analysis/
 │   └── tables/            ← generated tables
 ├── setup.m
 ├── config.m
-├── reproduce_paper.m      ← master reproduction script
+├── reproduce_figures.m      ← master reproduction script
 └── README.md
 
 Required software
