@@ -5,7 +5,7 @@ function plot_SI_Fig5()
 % Four-panel figure:
 %   a: Fantasia        — Healthy Controls (n=40, verified volunteers)
 %   b: Autonomic Aging — Healthy Controls (n~1,100, verified volunteers)
-%   c: PTB             — Clinically Normal vs Pathological (manual T-end)
+%   c: PTB             — Healthy Control vs Pathological (manual T-end)
 %   d: PTB-XL          — Clinically Normal vs Pathological (ECGDeli)
 %
 % X-axis: ΔCDC from theoretical optimum (1/e ≈ 0.3679).
@@ -18,9 +18,9 @@ function plot_SI_Fig5()
 %   Red     [0.85 0.25 0.20]  = Pathological
 %
 % Group classification follows the hierarchical model:
-%   Fantasia, Autonomic Aging → all HC (Blue)
-%   PTB, PTB-XL 'healthy'    → CN (Green), not HC
-%   PTB, PTB-XL other        → Pathological (Red)
+%   Fantasia, Autonomic Aging, PTB 'healthy' → HC (Blue)
+%   PTB-XL 'healthy'                         → CN (Green)
+%   PTB, PTB-XL other                        → Pathological (Red)
 %
 % Data source: large_scale_results.mat (via analyze_large_scale.m)
 %
@@ -155,20 +155,20 @@ function plot_SI_Fig5()
     hold off;
 
     %% ================================================================
-    %  PANEL (c): PTB — Clinically Normal vs Pathological
+    %  PANEL (c): PTB — Healthy Control vs Pathological
     %  ================================================================
     ax3 = subplot(4, 1, 3);
     hold on; box on;
 
     ptb = results.ptb;
 
-    if ptb.n_cn >= 3
-        d_cn = ptb.cn_ratios - inv_e;
-        mode_cn_d = ptb.mode_cn - inv_e;
-        histogram(d_cn, edges, 'FaceColor', col_cn, ...
+    if ptb.n_hc >= 3
+        d_hc = ptb.hc_ratios - inv_e;
+        mode_hc_d = ptb.mode_hc - inv_e;
+        histogram(d_hc, edges, 'FaceColor', col_hc, ...
                   'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-        [f, x] = ksdensity(d_cn, 'NumPoints', kde_pts);
-        plot(x, f, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
+        [f, x] = ksdensity(d_hc, 'NumPoints', kde_pts);
+        plot(x, f, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
     end
 
     d_path = ptb.path_ratios - inv_e;
@@ -181,9 +181,9 @@ function plot_SI_Fig5()
     yl = ylim;
     plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
 
-    if ptb.n_cn >= 3 && ~isnan(mode_cn_d)
-        plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
-             'Color', col_cn * 0.7, 'LineWidth', 1.0);
+    if ptb.n_hc >= 3 && ~isnan(mode_hc_d)
+        plot(mode_hc_d * [1 1], [0 yl(2)], '--', ...
+             'Color', col_hc * 0.7, 'LineWidth', 1.0);
     end
     plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
          'Color', col_path * 0.7, 'LineWidth', 1.0);
@@ -195,13 +195,13 @@ function plot_SI_Fig5()
     % Legend
     leg_items = gobjects(2, 1);
     leg_strs = cell(2, 1);
-    if ptb.n_cn >= 3 && ~isnan(ptb.mode_cn)
-        leg_items(1) = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Clinically normal (n=%d, \\Delta=%+.3f)', ...
-                              ptb.n_cn, mode_cn_d);
+    if ptb.n_hc >= 3 && ~isnan(ptb.mode_hc)
+        leg_items(1) = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+        leg_strs{1} = sprintf('Healthy control (n=%d, \\Delta=%+.3f)', ...
+                              ptb.n_hc, mode_hc_d);
     else
-        leg_items(1) = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Clinically normal (n=%d)', ptb.n_cn);
+        leg_items(1) = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+        leg_strs{1} = sprintf('Healthy control (n=%d)', ptb.n_hc);
     end
     leg_items(2) = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg_strs{2} = sprintf('Pathological (n=%d, \\Delta=%+.3f)', ...
@@ -327,8 +327,8 @@ function plot_SI_Fig5()
             fant.n_all, fant.mode_all, fant.mode_all - inv_e);
     fprintf('Autonomic Aging: HC n=%s (mode=%.3f, dCDC=%+.4f)\n', ...
             format_comma(aa.n_all), aa.mode_all, aa.mode_all - inv_e);
-    fprintf('PTB:             CN n=%d, Path n=%d, p=%.2e\n', ...
-            ptb.n_cn, ptb.n_path, ptb.p_value);
+    fprintf('PTB:             HC n=%d, Path n=%d, p=%.2e\n', ...
+            ptb.n_hc, ptb.n_path, ptb.p_value);
     fprintf('PTB-XL:          CN n=%s, Path n=%s, p=%.2e\n', ...
             format_comma(ptbxl.n_cn), format_comma(ptbxl.n_path), ptbxl.p_value);
 end

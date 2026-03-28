@@ -33,8 +33,13 @@ function plot_Fig1()
     %  LOAD DATA
     %  ================================================================
 
-    S = load(fullfile(paths.results, 'hierarchical_results.mat'), 'all_data');
+    S = load(fullfile(paths.results, 'hierarchical_results.mat'), ...
+             'all_data', 'group_modes', 'group_mode_cis', 'inv_e');
     D = S.all_data;
+
+    % Bootstrap mode results (order: HC, CN, Path — matches analyze_hierarchical_model)
+    group_modes    = S.group_modes;
+    group_mode_cis = S.group_mode_cis;
 
     % Derived quantities
     D.delta_CDC = D.CDC - inv_e;              % deviation from optimum
@@ -68,8 +73,27 @@ function plot_Fig1()
     masks  = {is_hc, is_cn, is_path};
     ns     = [n_hc, n_cn, n_path];
 
-    % Legend labels with sample sizes (Nature verbal cues)
-    labels = { ...
+    % Legend labels for panel (a): n, mode, 95% CI, 1/e containment
+    % The thermodynamic prediction concerns the most probable state (mode),
+    % not the mean. Labels report the bootstrap mode with CI.
+    group_names = {'Healthy Control', 'Clinically Normal', 'Pathological'};
+    labels_a = cell(3, 1);
+    for g = 1:3
+        m  = group_modes(g);
+        lo = group_mode_cis(g, 1);
+        hi = group_mode_cis(g, 2);
+        in_ci = inv_e >= lo && inv_e <= hi;
+        if in_ci
+            ci_note = ', 1/\ite\rm \in CI';
+        else
+            ci_note = '';
+        end
+        labels_a{g} = sprintf('%s (\\itn\\rm = %s; mode %.3f [%.3f, %.3f]%s)', ...
+            group_names{g}, format_comma(ns(g)), m, lo, hi, ci_note);
+    end
+
+    % Legend labels for panel (b): n only (diastole panel)
+    labels_b = { ...
         sprintf('Healthy Control (\\itn\\rm = %s)', format_comma(n_hc)), ...
         sprintf('Clinically Normal (\\itn\\rm = %s)', format_comma(n_cn)), ...
         sprintf('Pathological (\\itn\\rm = %s)', format_comma(n_path))};
@@ -78,18 +102,18 @@ function plot_Fig1()
     %  FIGURE SETUP
     %  ================================================================
     %  Nature Aging double-column width: 183 mm.
-    %  Two panels, ~80 mm height.
+    %  Two panels, slightly taller for clean bottom-legend space.
 
     fig_w_cm = 18.3;
-    fig_h_cm = 8.0;
+    fig_h_cm = 9.0;   % ← increased for breathing room below panel (a)
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2 5 fig_w_cm fig_h_cm]);
 
-    % Font sizes for final print dimensions (Nature minimum: 5 pt)
-    ax_fs    = 7;    % tick labels
-    lab_fs   = 8;    % axis labels
-    panel_fs = 10;   % panel labels (a, b)
+    % Font sizes (increased for better readability)
+    ax_fs    = 8;    % tick labels
+    lab_fs   = 9;    % axis labels
+    panel_fs = 11;   % panel labels (a, b)
 
     % Scatter aesthetics
     alpha_dot = 0.08;
@@ -145,10 +169,10 @@ function plot_Fig1()
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-    % Legend moved to southwest with black-rimmed white box
-    leg1 = legend(h_lines, labels, 'Location', 'southwest', ...
-        'FontSize', ax_fs - 0.5, 'Box', 'on');
-    set(leg1, 'Color', 'w', 'EdgeColor', 'k', 'FontSize', ax_fs - 0.5);
+    % Legend moved to bottom of panel (a) – does not occlude lines
+    leg1 = legend(h_lines, labels_a, 'Location', 'southwest', ...
+        'FontSize', ax_fs - 1, 'Box', 'on');
+    set(leg1, 'Color', 'w', 'EdgeColor', 'k', 'FontSize', ax_fs - 1);
 
     text(-0.14, 1.08, '\bfa', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', ...
@@ -191,7 +215,7 @@ function plot_Fig1()
         beta = mdl.Coefficients.Estimate(2);
         p_val = mdl.Coefficients.pValue(2);
         fprintf('  Panel b — %s: slope = %+.2f ms/yr, p = %.2e\n', ...
-            labels{g}, beta, p_val);
+            labels_b{g}, beta, p_val);
     end
 
     xlim(age_lim);
@@ -200,7 +224,7 @@ function plot_Fig1()
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-    leg2 = legend(h_lines2, labels, ...
+    leg2 = legend(h_lines2, labels_b, ...
         'Location', 'northeast', 'FontSize', ax_fs - 0.5, 'Box', 'off');
     leg2.ItemTokenSize = [12 8];
 
@@ -215,25 +239,17 @@ function plot_Fig1()
     %  LAYOUT AND SAVE
     %  ================================================================
 
-    set(ax1, 'Position', [0.08  0.17  0.40  0.73]);
-    set(ax2, 'Position', [0.56  0.17  0.40  0.73]);
-
-    set(fig, 'PaperUnits', 'centimeters');
-    set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
-    set(fig, 'PaperPosition', [0 0 fig_w_cm fig_h_cm]);
+    % Adjusted positions: more vertical space below panel (a) for legend
+    set(ax1, 'Position', [0.085 0.165 0.395 0.715]);
+    set(ax2, 'Position', [0.56  0.165 0.395 0.715]);
 
     out_pdf = fullfile(paths.figures, 'Fig1_cdc_aging.pdf');
     out_png = fullfile(paths.figures, 'Fig1_cdc_aging.png');
     out_fig = fullfile(paths.figures, 'Fig1_cdc_aging.fig');
 
-    print(fig, out_pdf, '-dpdf', '-painters');
-    print(fig, out_png, '-dpng', '-r300');
-    savefig(fig, out_fig);
+    save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
 
-    fprintf('\nFigure 1 saved:\n');
-    fprintf('  %s  (vector, for submission)\n', out_pdf);
-    fprintf('  %s  (raster, 300 dpi)\n', out_png);
-    fprintf('  %s  (editable)\n', out_fig);
+    fprintf('\nFigure 1 saved.\n');
 
     %% ================================================================
     %  SUMMARY STATISTICS (for legend / Methods)
@@ -252,7 +268,7 @@ function plot_Fig1()
     for g = 1:3
         m = masks{g};
         fprintf('  %-20s  %.0f +/- %.0f ms\n', ...
-            char(regexp(labels{g}, '^[^(]+', 'match')), ...
+            group_names{g}, ...
             mean(D.Dias_ms(m)), std(D.Dias_ms(m)));
     end
 end
@@ -261,6 +277,40 @@ end
 %% ========================================================================
 %  HELPERS
 %  ========================================================================
+
+function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
+% SAVE_LARGE_FIGURE - Save figure with many graphic objects without crashing
+%
+% For figures with large scatter plots (>10k points), MATLAB's painters
+% renderer and savefig serialize every point as a vector element, consuming
+% gigabytes of memory and often hanging the process.
+%
+% Strategy:
+%   PNG: exportgraphics (raster, always safe)
+%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
+%        avoids the painters memory explosion while producing a PDF file
+%        that embeds at 300 dpi — sufficient for main figures)
+%   FIG: skipped for large figures (the .fig format stores all graphic
+%        objects and can itself become multi-GB)
+
+    set(fig, 'PaperUnits', 'centimeters');
+    set(fig, 'PaperSize', [w_cm h_cm]);
+    set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
+
+    % PNG — raster, always safe
+    exportgraphics(fig, out_png, 'Resolution', 300);
+    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+
+    % PDF — raster-in-PDF (avoids painters memory explosion)
+    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
+    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+
+    % FIG — skip for large figures
+    fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
+
+    close(fig);
+end
+
 
 function s = format_comma(n)
     s = num2str(n);

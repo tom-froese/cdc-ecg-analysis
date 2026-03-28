@@ -241,9 +241,7 @@ function plot_SI_Fig6()
     out_png = fullfile(paths.figures, 'SI_Fig6_code15.png');
     out_fig = fullfile(paths.figures, 'SI_Fig6_code15.fig');
 
-    print(fig, out_pdf, '-dpdf', '-painters');
-    print(fig, out_png, '-dpng', '-r300');
-    savefig(fig, out_fig);
+    save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
 
     fprintf('\nSupplementary Figure 6 saved:\n');
     fprintf('  %s  (vector)\n', out_pdf);
@@ -306,4 +304,35 @@ function s = format_comma(n)
             idx = idx - 3;
         end
     end
+end
+
+function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
+% SAVE_LARGE_FIGURE - Save figure with many graphic objects without crashing
+%
+% For figures with large scatter plots (>10k points), MATLAB's painters
+% renderer and savefig serialize every point as a vector element, consuming
+% gigabytes of memory and often hanging the process.
+%
+% Strategy:
+%   PNG: exportgraphics (raster, always safe)
+%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
+%        avoids the painters memory explosion while producing a PDF file
+%        that embeds at 300 dpi — sufficient for SI figures)
+%   FIG: skipped for large figures (the .fig format stores all graphic
+%        objects and can itself become multi-GB)
+
+    set(fig, 'PaperUnits', 'centimeters');
+    set(fig, 'PaperSize', [w_cm h_cm]);
+    set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
+
+    % PNG — raster, always safe
+    exportgraphics(fig, out_png, 'Resolution', 300);
+    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+
+    % PDF — raster-in-PDF (avoids painters memory explosion)
+    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
+    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+
+    % FIG — skip for large figures
+    fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
 end

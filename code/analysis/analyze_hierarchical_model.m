@@ -6,8 +6,8 @@ function results = analyze_hierarchical_model()
 %   CDC ~ Age_c * Group * Sex + (1|Dataset)
 %
 % where Group has three levels:
-%   HealthyControl    - Verified healthy volunteers (LUDB, Fantasia, Autonomic Aging)
-%   ClinicallyNormal  - Hospital patients with normal ECG findings (PTB, PTB-XL)
+%   HealthyControl    - Verified healthy volunteers (LUDB, PTB, Fantasia, Autonomic Aging)
+%   ClinicallyNormal  - Hospital patients with normal ECG findings (PTB-XL)
 %   Pathological      - Hospital patients with cardiac pathology
 %
 % Dataset is a random intercept absorbing annotation-method variance and
@@ -49,10 +49,10 @@ function results = analyze_hierarchical_model()
     fprintf('Loading and processing datasets...\n');
 
     ludb_data = process_dataset(paths.csv_ludb, 'LUDB', ...
-        'ApplyFilters', false, 'GroupMap', @map_ludb_group);
+        'ApplyFilters', false, 'GroupMap', @map_volunteer_group);
 
     ptb_data = process_dataset(paths.csv_ptb, 'PTB', ...
-        'ApplyFilters', true, 'GroupMap', @map_clinical_group);
+        'ApplyFilters', true, 'GroupMap', @map_volunteer_group);
 
     ptbxl_data = process_dataset(paths.csv_ptbxl, 'PTB-XL', ...
         'ApplyFilters', true, 'GroupMap', @map_clinical_group, ...
@@ -141,21 +141,46 @@ function results = analyze_hierarchical_model()
         stats.Estimate(idx_sex), stats.SE(idx_sex), stats.pValue(idx_sex));
 
     %% ====================================================================
-    %  Step 4: Observed means and one-sample t-tests against 1/e
+    %  Step 4: Observed statistics per group
     %  ====================================================================
     fprintf('================================================================\n');
-    fprintf('OBSERVED MEANS PER GROUP (at mean age)\n');
+    fprintf('OBSERVED STATISTICS PER GROUP\n');
     fprintf('================================================================\n');
 
     groups = {'HealthyControl', 'ClinicallyNormal', 'Pathological'};
+
+    % --- Means (for reference) ---
+    fprintf('\nMeans:\n');
     for g = 1:length(groups)
         mask = all_data.Group == groups{g};
         fprintf('  %-20s  %.4f +/- %.4f  (N=%d)\n', ...
             groups{g}, mean(all_data.CDC(mask)), std(all_data.CDC(mask)), sum(mask));
     end
-    fprintf('  1/e reference:       %.4f\n\n', inv_e);
+    fprintf('  1/e reference:       %.4f\n', inv_e);
 
-    fprintf('One-sample t-tests: CDC vs 1/e\n');
+    % --- Bootstrap mode with 95% CI ---
+    % The thermodynamic prediction is about the most probable state of the
+    % system (the mode), not the mean. The underlying optimality function
+    % x·ln(1/x) is right-skewed, so the mode is the appropriate statistic
+    % for testing proximity to 1/e.
+    fprintf('\nBootstrap mode (5,000 resamples):\n');
+    n_bootstrap = 5000;
+    group_modes = zeros(length(groups), 1);
+    group_mode_cis = zeros(length(groups), 2);
+    for g = 1:length(groups)
+        mask = all_data.Group == groups{g};
+        cdc_vals = all_data.CDC(mask);
+        [m, ci] = bootstrap_mode(cdc_vals, n_bootstrap);
+        group_modes(g) = m;
+        group_mode_cis(g, :) = ci;
+        contains_inv_e = inv_e >= ci(1) && inv_e <= ci(2);
+        fprintf('  %-20s  mode=%.4f [%.4f, %.4f]  1/e in CI: %s\n', ...
+            groups{g}, m, ci(1), ci(2), yesno(contains_inv_e));
+    end
+    fprintf('  1/e reference:       %.4f\n', inv_e);
+
+    % --- One-sample t-tests (supplementary, on means) ---
+    fprintf('\nOne-sample t-tests: mean CDC vs 1/e (supplementary)\n');
     for g = 1:length(groups)
         mask = all_data.Group == groups{g};
         cdc_vals = all_data.CDC(mask);
@@ -245,6 +270,8 @@ function results = analyze_hierarchical_model()
     results.inv_e     = inv_e;
     results.lme_annot = lme_annot;
     results.lme_hr    = lme_hr;
+    results.group_modes    = group_modes;
+    results.group_mode_cis = group_mode_cis;
 
     % Save as v7.3 (HDF5-based) to preserve MATLAB objects and tables.
     % The default v5 format silently drops LinearMixedModel objects and
@@ -317,10 +344,12 @@ function data = process_dataset(filename, dataset_label, varargin)
         beats.age(beats.age == sentinel) = replacement;
     end
 
-    % Quality filters
+    % Quality filters (beat-level and subject-level minimum beats)
+    excluded_subjects = {};
     if apply_filt
-        [mask, ~] = apply_quality_filters(beats, 'Verbose', false);
+        [mask, filt_report] = apply_quality_filters(beats, 'Verbose', false);
         beats = beats(mask, :);
+        excluded_subjects = filt_report.excluded_subjects;
     end
 
     % Aggregate to subject level using unique_subject_id
@@ -357,8 +386,12 @@ function data = process_dataset(filename, dataset_label, varargin)
         Group{i}     = group_map(get_string_field(rec, 'group'));
     end
 
-    % Exclude subjects with missing data
+    % Exclude subjects with missing data or insufficient beats
     valid = ~isnan(CDC) & ~isnan(HR) & ~isnan(Age) & (Age > 0);
+    if ~isempty(excluded_subjects)
+        too_few_beats = ismember(unique_subjects, excluded_subjects);
+        valid = valid & ~too_few_beats;
+    end
 
     data = table(Age(valid), CDC(valid), HR(valid), ...
                  categorical(Sex(valid)), categorical(Group(valid)), ...
@@ -375,8 +408,8 @@ end
 %  GROUP MAPPING FUNCTIONS
 %  ========================================================================
 
-function label = map_ludb_group(raw_group)
-% LUDB healthy controls are verified volunteers
+function label = map_volunteer_group(raw_group)
+% Databases whose 'healthy' subjects are verified volunteers (LUDB, PTB)
     if strcmpi(raw_group, 'healthy')
         label = 'HealthyControl';
     else
@@ -385,7 +418,7 @@ function label = map_ludb_group(raw_group)
 end
 
 function label = map_clinical_group(raw_group)
-% PTB and PTB-XL 'healthy' means clinically normal ECG, not volunteer status
+% PTB-XL 'healthy' means clinically normal ECG, not volunteer status
     if strcmpi(raw_group, 'healthy')
         label = 'ClinicallyNormal';
     else
@@ -432,4 +465,8 @@ function s = get_string_field(rec, field_name)
     else
         s = char(val);
     end
+end
+
+function s = yesno(b)
+    if b, s = 'YES'; else, s = 'NO'; end
 end

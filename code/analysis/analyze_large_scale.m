@@ -6,21 +6,19 @@ function results = analyze_large_scale()
 %
 %   1. Fantasia        - HC: Database R-peaks, tangent T-end (healthy volunteers)
 %   2. Autonomic Aging - HC: Fully automatic (healthy volunteers)
-%   3. PTB             - CN vs Path: Manual T-end, algorithmic R-peak
+%   3. PTB             - HC vs Path: Manual T-end, algorithmic R-peak
 %   4. PTB-XL          - CN vs Path: ECGDeli validated algorithm
 %
 % Group classification follows the hierarchical model (analyze_hierarchical_model.m):
-%   Healthy Control   (HC)  = Fantasia, Autonomic Aging (all verified volunteers)
-%   Clinically Normal (CN)  = PTB, PTB-XL 'healthy' (hospital patients, normal ECG)
+%   Healthy Control   (HC)  = Fantasia, Autonomic Aging, PTB 'healthy'
+%                             (all verified volunteers per source documentation)
+%   Clinically Normal (CN)  = PTB-XL 'healthy' (hospital patients, normal ECG)
 %   Pathological      (Path) = PTB, PTB-XL 'pathological'
-%
-% PTB "Healthy control" are labelled Clinically Normal despite PhysioNet
-% describing them as "healthy volunteers," for consistency with the
-% hierarchical model's conservative classification.
 %
 % Purpose: Confirm the gold-standard findings at scale. These datasets
 % provide statistical power that the small manually annotated databases
-% cannot. Uniform quality filters are applied to all datasets.
+% cannot. Uniform quality filters are applied to all datasets, including
+% a minimum of 2 valid beats per subject for a meaningful median.
 %
 % Subject aggregation uses unique_subject_id (format: Database_RecordID)
 % for consistency with the hierarchical model pipeline.
@@ -53,20 +51,24 @@ function results = analyze_large_scale()
     fprintf('Applying quality filters...\n\n');
 
     fprintf('  PTB:\n');
-    [ptb_mask, ~] = apply_quality_filters(ptb_beats);
+    [ptb_mask, ptb_filt] = apply_quality_filters(ptb_beats);
     ptb_beats = ptb_beats(ptb_mask, :);
+    ptb_excluded = ptb_filt.excluded_subjects;
 
     fprintf('  PTB-XL:\n');
-    [ptbxl_mask, ~] = apply_quality_filters(ptbxl_beats);
+    [ptbxl_mask, ptbxl_filt] = apply_quality_filters(ptbxl_beats);
     ptbxl_beats = ptbxl_beats(ptbxl_mask, :);
+    ptbxl_excluded = ptbxl_filt.excluded_subjects;
 
     fprintf('  Fantasia:\n');
-    [fan_mask, ~] = apply_quality_filters(fantasia_beats);
+    [fan_mask, fan_filt] = apply_quality_filters(fantasia_beats);
     fantasia_beats = fantasia_beats(fan_mask, :);
+    fan_excluded = fan_filt.excluded_subjects;
 
     fprintf('  Autonomic Aging:\n');
-    [aa_mask, ~] = apply_quality_filters(aa_beats);
+    [aa_mask, aa_filt] = apply_quality_filters(aa_beats);
     aa_beats = aa_beats(aa_mask, :);
+    aa_excluded = aa_filt.excluded_subjects;
 
     fprintf('\nAfter filtering:\n');
     fprintf('  PTB:             %d beats\n', height(ptb_beats));
@@ -80,7 +82,7 @@ function results = analyze_large_scale()
     fprintf('(Database R-peaks, tangent T-end, 2-hour recordings)\n');
     fprintf('================================================================\n');
 
-    fantasia_results = analyze_healthy_cohort(fantasia_beats, 'Fantasia', n_bootstrap, inv_e);
+    fantasia_results = analyze_healthy_cohort(fantasia_beats, 'Fantasia', n_bootstrap, inv_e, fan_excluded);
 
     %% Analysis 2: Autonomic Aging - Healthy volunteers
     fprintf('\n================================================================\n');
@@ -88,15 +90,15 @@ function results = analyze_large_scale()
     fprintf('(Fully automatic, ages 18-92)\n');
     fprintf('================================================================\n');
 
-    aa_results = analyze_healthy_cohort(aa_beats, 'Autonomic Aging', n_bootstrap, inv_e);
+    aa_results = analyze_healthy_cohort(aa_beats, 'Autonomic Aging', n_bootstrap, inv_e, aa_excluded);
 
-    %% Analysis 3: PTB - Clinically normal vs Pathological
+    %% Analysis 3: PTB - Healthy Control vs Pathological
     fprintf('\n================================================================\n');
-    fprintf('PTB: CLINICALLY NORMAL vs PATHOLOGICAL\n');
+    fprintf('PTB: HEALTHY CONTROL vs PATHOLOGICAL\n');
     fprintf('(Manual T-end, algorithmic R-peak)\n');
     fprintf('================================================================\n');
 
-    ptb_results = analyze_cn_vs_pathological(ptb_beats, 'PTB', n_bootstrap, inv_e);
+    ptb_results = analyze_hc_vs_pathological(ptb_beats, 'PTB', n_bootstrap, inv_e, ptb_excluded);
 
     %% Analysis 4: PTB-XL - Clinically normal vs Pathological
     fprintf('\n================================================================\n');
@@ -104,7 +106,7 @@ function results = analyze_large_scale()
     fprintf('(ECGDeli automatic annotation, N ~ 18,000 patients)\n');
     fprintf('================================================================\n');
 
-    ptbxl_results = analyze_cn_vs_pathological(ptbxl_beats, 'PTB-XL', n_bootstrap, inv_e);
+    ptbxl_results = analyze_cn_vs_pathological(ptbxl_beats, 'PTB-XL', n_bootstrap, inv_e, ptbxl_excluded);
 
     %% Integrated summary
     fprintf('\n================================================================\n');
@@ -121,11 +123,11 @@ function results = analyze_large_scale()
             aa_results.mode_all, aa_results.ci_all(1), ...
             aa_results.ci_all(2), aa_results.n_all, aa_results.pct_above);
     fprintf('------------------------------------------------------------------------\n');
-    if ~isnan(ptb_results.mode_cn)
-        fprintf('PTB Clinically normal         %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
-                ptb_results.mode_cn, ptb_results.ci_cn(1), ...
-                ptb_results.ci_cn(2), ptb_results.n_cn, ...
-                ptb_results.pct_cn_above);
+    if ~isnan(ptb_results.mode_hc)
+        fprintf('PTB Healthy control           %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+                ptb_results.mode_hc, ptb_results.ci_hc(1), ...
+                ptb_results.ci_hc(2), ptb_results.n_hc, ...
+                ptb_results.pct_hc_above);
     end
     fprintf('PTB Pathological              %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             ptb_results.mode_path, ptb_results.ci_path(1), ...
@@ -159,7 +161,7 @@ end
 %  DATASET-SPECIFIC ANALYSIS FUNCTIONS
 %  ========================================================================
 
-function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_e)
+function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
 % ANALYZE_HEALTHY_COHORT - Single-group analysis for healthy populations
 %
 % Used for Fantasia and Autonomic Aging: all subjects are healthy
@@ -170,6 +172,13 @@ function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_
 
     [unique_subjects, ~, subject_idx] = unique(beats.unique_subject_id);
     n_subjects = length(unique_subjects);
+
+    % Identify subjects excluded by minimum-beats filter
+    if nargin >= 5 && ~isempty(excluded_subjects)
+        is_excluded = ismember(unique_subjects, excluded_subjects);
+    else
+        is_excluded = false(n_subjects, 1);
+    end
 
     median_ratio = zeros(n_subjects, 1);
     n_beats_per = zeros(n_subjects, 1);
@@ -188,7 +197,7 @@ function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_
         end
     end
 
-    valid = ~isnan(median_ratio) & n_beats_per > 0;
+    valid = ~isnan(median_ratio) & n_beats_per > 0 & ~is_excluded;
     median_ratio = median_ratio(valid);
 
     n_all = length(median_ratio);
@@ -205,17 +214,23 @@ function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_
         'pct_above', pct_above, 'all_ratios', median_ratio);
 end
 
-function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, inv_e)
+function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
 % ANALYZE_CN_VS_PATHOLOGICAL - Two-group analysis: Clinically Normal vs Pathological
 %
-% Used for PTB and PTB-XL. The 'healthy' group label in these databases
-% denotes hospital patients with normal ECG findings — Clinically Normal,
-% not Healthy Control — consistent with the hierarchical model.
+% Used for PTB-XL. The 'healthy' group label denotes hospital patients
+% with normal ECG findings — Clinically Normal, not Healthy Control.
 
     fprintf('Processing %s...\n', dataset_name);
 
     [unique_subjects, ~, subject_idx] = unique(beats.unique_subject_id);
     n_subjects = length(unique_subjects);
+
+    % Identify subjects excluded by minimum-beats filter
+    if nargin >= 5 && ~isempty(excluded_subjects)
+        is_excluded = ismember(unique_subjects, excluded_subjects);
+    else
+        is_excluded = false(n_subjects, 1);
+    end
 
     median_ratio = zeros(n_subjects, 1);
     n_beats_per = zeros(n_subjects, 1);
@@ -236,7 +251,7 @@ function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, 
         group{i} = get_string_field(rec, 'group');
     end
 
-    valid = ~isnan(median_ratio) & n_beats_per > 0;
+    valid = ~isnan(median_ratio) & n_beats_per > 0 & ~is_excluded;
     median_ratio = median_ratio(valid);
     group = group(valid);
 
@@ -282,6 +297,90 @@ function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, 
         'pct_cn_above', pct_cn_above, 'pct_path_above', pct_path_above, ...
         'p_value', p_val, 'effect_size', effect_size, ...
         'cn_ratios', cn_ratios, 'path_ratios', path_ratios);
+end
+
+function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
+% ANALYZE_HC_VS_PATHOLOGICAL - Two-group analysis: Healthy Control vs Pathological
+%
+% Used for PTB. The 'healthy' group label denotes verified healthy
+% volunteers — Healthy Control — per the PhysioNet source documentation.
+
+    fprintf('Processing %s...\n', dataset_name);
+
+    [unique_subjects, ~, subject_idx] = unique(beats.unique_subject_id);
+    n_subjects = length(unique_subjects);
+
+    % Identify subjects excluded by minimum-beats filter
+    if nargin >= 5 && ~isempty(excluded_subjects)
+        is_excluded = ismember(unique_subjects, excluded_subjects);
+    else
+        is_excluded = false(n_subjects, 1);
+    end
+
+    median_ratio = zeros(n_subjects, 1);
+    n_beats_per = zeros(n_subjects, 1);
+    group = cell(n_subjects, 1);
+
+    for i = 1:n_subjects
+        mask = subject_idx == i;
+        rec = beats(mask, :);
+        rt_ms = (rec.t_end_sample - rec.r_sample) ./ rec.fs(1) * 1000;
+        rr_ms = (rec.next_r_sample - rec.r_sample) ./ rec.fs(1) * 1000;
+        valid = (rr_ms > 0) & (rt_ms > 0) & (rt_ms < rr_ms);
+        if sum(valid) >= 1
+            median_ratio(i) = median(rt_ms(valid) ./ rr_ms(valid));
+            n_beats_per(i) = sum(valid);
+        else
+            median_ratio(i) = NaN;
+        end
+        group{i} = get_string_field(rec, 'group');
+    end
+
+    valid = ~isnan(median_ratio) & n_beats_per > 0 & ~is_excluded;
+    median_ratio = median_ratio(valid);
+    group = group(valid);
+
+    hc_ratios   = median_ratio(strcmp(group, 'healthy'));
+    path_ratios = median_ratio(~strcmp(group, 'healthy'));
+    n_hc   = length(hc_ratios);
+    n_path = length(path_ratios);
+
+    fprintf('  Healthy control: n = %d\n', n_hc);
+    fprintf('  Pathological:    n = %d\n', n_path);
+
+    if n_hc >= 3
+        [mode_hc, ci_hc] = bootstrap_mode(hc_ratios, n_bootstrap);
+        pct_hc_above = 100 * sum(hc_ratios > inv_e) / n_hc;
+    else
+        mode_hc = NaN; ci_hc = [NaN NaN]; pct_hc_above = NaN;
+    end
+
+    [mode_path, ci_path] = bootstrap_mode(path_ratios, n_bootstrap);
+    pct_path_above = 100 * sum(path_ratios > inv_e) / n_path;
+
+    fprintf('  HC mode:   %.4f [%.4f, %.4f]\n', mode_hc, ci_hc(1), ci_hc(2));
+    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_path, ci_path(1), ci_path(2));
+
+    if n_hc >= 3 && n_path >= 3
+        [p_val, ~, stats] = ranksum(hc_ratios, path_ratios);
+        fprintf('  Wilcoxon: p = %.2e%s\n', p_val, stars(p_val));
+        if isfield(stats, 'ranksum')
+            U = stats.ranksum - n_hc*(n_hc+1)/2;
+            effect_size = 1 - 2*U/(n_hc*n_path);
+        else
+            effect_size = NaN;
+        end
+        fprintf('  Effect size (rank-biserial r): %.3f\n', effect_size);
+    else
+        p_val = NaN; effect_size = NaN;
+    end
+
+    results = struct('n_hc', n_hc, 'n_path', n_path, ...
+        'mode_hc', mode_hc, 'ci_hc', ci_hc, ...
+        'mode_path', mode_path, 'ci_path', ci_path, ...
+        'pct_hc_above', pct_hc_above, 'pct_path_above', pct_path_above, ...
+        'p_value', p_val, 'effect_size', effect_size, ...
+        'hc_ratios', hc_ratios, 'path_ratios', path_ratios);
 end
 
 %% ========================================================================

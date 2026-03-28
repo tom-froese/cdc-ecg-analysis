@@ -1,5 +1,6 @@
-function results = validate_pipeline()
-% VALIDATE_PIPELINE - Validate automatic annotation pipeline against gold standards
+function results = analyze_gold_standard_validation()
+% ANALYZE_GOLD_STANDARD_VALIDATION - Validate automatic annotation pipeline
+%   against expert manual annotations in gold-standard databases
 %
 % Compares the automatic R-peak (Pan-Tompkins) and T-end (tangent method)
 % detectors against expert manual annotations in two gold-standard databases:
@@ -14,7 +15,13 @@ function results = validate_pipeline()
 % QTDB note: Each 15-min recording has only 30-100 manually annotated beats,
 % concentrated in the final 5 minutes (Laguna et al., Comput. Cardiol. 1997).
 % The auto detector runs on the full signal but comparison is restricted to
-% the annotated segment (+/- 2 s buffer).
+% the annotated segment (+/- 30 s buffer).
+%
+% Outputs:
+%   results/validation_results.mat   - Full results struct
+%   results/validation_results.csv   - Summary table for reproducibility
+%
+% Companion figure: plot_SI_Fig3.m (Bland-Altman plots)
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit, March 2026
 
@@ -56,10 +63,6 @@ function results = validate_pipeline()
     fprintf('============================================================\n\n');
     print_subject_level_table(ludb, qtdb, pooled);
 
-    % --- FIGURE ---
-    fprintf('\nGenerating Bland-Altman plots...\n');
-    plot_bland_altman(ludb, qtdb, paths);
-
     % --- SAVE ---
     results.ludb   = ludb;
     results.qtdb   = qtdb;
@@ -71,6 +74,7 @@ function results = validate_pipeline()
     fprintf('\nValidation complete.\n');
     fprintf('  MAT: %s\n', fullfile(paths.results, 'validation_results.mat'));
     fprintf('  CSV: %s\n', fullfile(paths.results, 'validation_results.csv'));
+    fprintf('\nTo generate the Bland-Altman figure, run: plot_SI_Fig3()\n');
 end
 
 
@@ -252,11 +256,11 @@ function res = validate_qtdb(paths)
                 continue;
             end
 
-            % === T-END DETECTION - NOW USING CORRECT LOCAL INDICES ===
+            % T-end detection using correct local indices
             at = nan(size(ar));
             seg_idx = find(in_seg);
             for k = 1:length(ar)
-                local_bi = seg_idx(k);                    % local index in ar_seg / ef
+                local_bi = seg_idx(k);
                 [te_local, ~, ~, ~] = detect_t_end(ef, ar_seg, local_bi, fsa);
                 if ~isnan(te_local)
                     at(k) = te_local + (seg_s - 1);       % store global index
@@ -299,6 +303,7 @@ function res = validate_qtdb(paths)
         n_recs, n_man_r, n_aut_r, n_match_r, n_match_t, subj_man(:), subj_aut(:));
     print_res(res);
 end
+
 
 %% ========================================================================
 %  BEAT MATCHING
@@ -457,84 +462,6 @@ end
 
 
 %% ========================================================================
-%  BLAND-ALTMAN FIGURE (optimized + self-contained)
-%  ========================================================================
-function plot_bland_altman(a, b, paths)
-    fprintf('    Generating Bland-Altman panels... ');
-    fig = figure('Position', [50 100 1600 900], 'Color', 'w', 'Visible', 'on');
-    c1 = [0.20 0.47 0.76]; c2 = [0.85 0.40 0.25]; ms = 6;
-
-    % a: R-peak
-    subplot(2,2,1); hold on;
-    n1 = length(a.r_err_ms);
-    n2 = length(b.r_err_ms);
-    if n1 > 0, scatter((1:n1)', a.r_err_ms, ms, c1, 'filled', 'MarkerFaceAlpha', 0.4); end
-    if n2 > 0, scatter(n1+(1:n2)', b.r_err_ms, ms, c2, 'filled', 'MarkerFaceAlpha', 0.4); end
-    d = [a.r_err_ms; b.r_err_ms]; ba_lines(d);
-    ylabel('R-peak error (ms)'); xlabel('Beat index');
-    title('a  R-peak (beat-level)', 'FontWeight', 'bold');
-    set(gca, 'FontSize', 10, 'Box', 'on'); ann(d, []);
-
-    % b: T-end
-    subplot(2,2,2); hold on;
-    if length(a.t_err_ms) > 0 && length(a.cdc_man) == length(a.t_err_ms)
-        scatter(a.cdc_man, a.t_err_ms, ms, c1, 'filled', 'MarkerFaceAlpha', 0.4);
-    end
-    if length(b.t_err_ms) > 0 && length(b.cdc_man) == length(b.t_err_ms)
-        scatter(b.cdc_man, b.t_err_ms, ms, c2, 'filled', 'MarkerFaceAlpha', 0.4);
-    end
-    d = [a.t_err_ms; b.t_err_ms]; ba_lines(d);
-    xlabel('Manual CDC'); ylabel('T-end error (ms)');
-    title('b  T-end (beat-level)', 'FontWeight', 'bold');
-    set(gca, 'FontSize', 10, 'Box', 'on'); ann(d, []);
-
-    % c: CDC beat-level
-    subplot(2,2,3); hold on;
-    cm = [a.cdc_man; b.cdc_man]; ca = [a.cdc_aut; b.cdc_aut];
-    if length(cm) == length(ca) && ~isempty(cm)
-        mx = (cm+ca)/2; df = ca-cm;
-        n1c = length(a.cdc_man);
-        if n1c > 0
-            scatter(mx(1:n1c), df(1:n1c), ms, c1, 'filled', 'MarkerFaceAlpha', 0.4, 'DisplayName', 'LUDB');
-        end
-        if length(b.cdc_man) > 0
-            scatter(mx(n1c+1:end), df(n1c+1:end), ms, c2, 'filled', 'MarkerFaceAlpha', 0.4, 'DisplayName', 'QTDB');
-        end
-        ba_lines(df);
-        r_val = corr(cm, ca);
-    else
-        df = []; r_val = NaN;
-    end
-    xlabel('Mean CDC'); ylabel('\DeltaCDC');
-    title('c  CDC (beat-level)', 'FontWeight', 'bold');
-    legend('Location', 'southeast', 'FontSize', 8);
-    set(gca, 'FontSize', 10, 'Box', 'on'); ann(df, r_val);
-
-    % d: CDC subject-level
-    subplot(2,2,4); hold on;
-    sm = [a.subj_cdc_manual; b.subj_cdc_manual];
-    sa = [a.subj_cdc_auto;   b.subj_cdc_auto];
-    if length(sm) == length(sa) && ~isempty(sm)
-        mx2 = (sm+sa)/2; df2 = sa-sm;
-        n1s = length(a.subj_cdc_manual);
-        if n1s > 0
-            scatter(mx2(1:n1s), df2(1:n1s), 25, c1, 'filled', 'MarkerFaceAlpha', 0.6, 'DisplayName', 'LUDB');
-        end
-        if length(b.subj_cdc_manual) > 0
-            scatter(mx2(n1s+1:end), df2(n1s+1:end), 25, c2, 'filled', 'MarkerFaceAlpha', 0.6, 'DisplayName', 'QTDB');
-        end
-        ba_lines(df2);
-        r_val2 = corr(sm, sa);
-    else
-        df2 = []; r_val2 = NaN;
-    end
-    xlabel('Mean median CDC'); ylabel('\DeltaCDC');
-    title('d  CDC (subject-level median)', 'FontWeight', 'bold');
-    legend('Location', 'southeast', 'FontSize', 8);
-    set(gca, 'FontSize', 10, 'Box', 'on'); ann(df2, r_val2);
-end
-
-%% ========================================================================
 %  PRINT FUNCTIONS
 %  ========================================================================
 function print_res(r)
@@ -645,27 +572,4 @@ function r = qtdb_records()
          'sel38','sel39','sel40','sel41','sel42','sel43','sel44','sel45', ...
          'sel46','sel47','sel48','sel49','sel50','sel51','sel52','sel17152', ...
          'sel14046','sel14157','sel14172','sel15814'};
-end
-
-function ba_lines(d)
-    if isempty(d), return; end
-    yline(mean(d), 'k-', 'LineWidth', 1.2);
-    yline(mean(d)+1.96*std(d), 'k--', 'LineWidth', 0.8);
-    yline(mean(d)-1.96*std(d), 'k--', 'LineWidth', 0.8);
-    yline(0, 'Color', [0.6 0.6 0.6], 'LineStyle', ':');
-end
-
-function ann(d, r_val)
-    if isempty(d), return; end
-    b = mean(d); m = mean(abs(d));
-    if abs(b) < 1
-        text(0.03, 0.95, sprintf('Bias: %+.4f', b), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-        text(0.03, 0.87, sprintf('MAE: %.4f', m), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-    else
-        text(0.03, 0.95, sprintf('Bias: %+.1f ms', b), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-        text(0.03, 0.87, sprintf('MAE: %.1f ms', m), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-    end
-    if ~isempty(r_val) && ~isnan(r_val)
-        text(0.03, 0.79, sprintf('r = %.3f', r_val), 'Units', 'normalized', 'FontSize', 9, 'VerticalAlignment', 'top');
-    end
 end
