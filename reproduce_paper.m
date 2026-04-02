@@ -1,8 +1,7 @@
 % REPRODUCE_PAPER - One-command reproduction of all analyses, figures, and tables
 %
 % Reproduces every result in:
-%   Froese, T. (2026). The healthy heart converges on a thermodynamic
-%   optimum (1/e) that predicts survival. Nature Aging.
+%   Froese, T. et al. (in prep.). Nature Aging.
 %
 % Prerequisites:
 %   1. Run setup.m once to add all project paths.
