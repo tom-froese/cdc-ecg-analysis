@@ -18,7 +18,15 @@ Full reproducibility package for the *Nature Aging* Brief Communication (in prep
    cd cdc-ecg-analysis
    ```
 
-2. Download the preprocessed data archive from [Zenodo](https://doi.org/10.5281/zenodo.19246123) and unzip it into `data/preprocessed/`.
+2. Download the following files from [Zenodo](https://doi.org/10.5281/zenodo.19246123) and place them in `data/preprocessed/`:
+
+   - `ptbxl_beats.csv` (28 MB)
+   - `fantasia_beats.csv` (31 MB)
+   - `autonomic_aging_beats.csv` (168 MB)
+   - `code15_beats.csv` (201 MB)
+   - `code15_exams.csv` (36 MB)
+
+   The three small CSVs (`ludb_beats.csv`, `qtdb_beats.csv`, `ptb_beats.csv`) are already included in the repository.
 
 3. Open MATLAB and run:
 
@@ -58,23 +66,24 @@ cdc-ecg-analysis/
 ## Required software
 
 - **MATLAB R2024a** or newer
-- **Statistics and Machine Learning Toolbox** (for `fitlm`, `fitglme`)
-
-No third-party ECG processing libraries are required.
-
+- **Statistics and Machine Learning Toolbox** (for `fitlm`, `fitglme`, `ksdensity`)
+- **Signal Processing Toolbox** (required only for the preprocessing/export scripts in `code/preprocessing/`; not needed if reproducing from the preprocessed Zenodo CSVs)
+  
 ---
 
 ## Pipeline validation
 
 The automatic R-peak and T-end detectors are validated against expert manual annotations in the LUDB and QTDB databases. To reproduce this validation:
 
-1. Download [LUDB](https://doi.org/10.13026/eegm-h675) and [QTDB](https://doi.org/10.13026/C2HS3T) from PhysioNet into `data/raw/`.
+1. Download [LUDB](https://doi.org/10.13026/eegm-h675) and [QTDB](https://doi.org/10.13026/C2HS3T) from PhysioNet into `data/raw/lobachevsky-university-electrocardiography-database-1.0.1/` and `data/raw/qt-database-1.0.0/`, respectively. See `config.m` for the expected directory names for all databases.
 2. Run:
 
    ```matlab
    analyze_gold_standard_validation();
    plot_SI_Fig3();
    ```
+
+The `export_*.m` scripts in `code/preprocessing/` can regenerate all Zenodo CSVs from raw PhysioNet data. Note that `export_ptb.m` requires the supplementary annotation file (`12938_2006_174_MOESM1_ESM.doc`) to be placed in the PTB database root folder; see the script header for details.
 
 ---
 
