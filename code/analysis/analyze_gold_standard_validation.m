@@ -523,22 +523,21 @@ end
 %  ========================================================================
 function save_results_csv(a, b, p, paths)
     f = fopen(fullfile(paths.results, 'validation_results.csv'), 'w');
-    fprintf(f, 'level,database,metric,n,mae,bias,loa_lo,loa_hi,corr,sensitivity\n');
+    fprintf(f, 'level,database,metric,n,mae,median_ae,bias,loa_lo,loa_hi,corr,sensitivity\n');
     wr_beat(f, a); wr_beat(f, b); wr_beat(f, p);
     wr_subj(f, 'LUDB', a); wr_subj(f, 'QTDB', b); wr_subj(f, 'Pooled', p);
     fclose(f);
 end
 
 function wr_beat(f, r)
-    fprintf(f, 'beat,%s,R-peak,%d,%.2f,%.2f,%.2f,%.2f,,%.1f\n', r.database, r.r_n, r.r_mae, r.r_bias, r.r_loa_lo, r.r_loa_hi, r.r_sensitivity);
-    fprintf(f, 'beat,%s,T-end,%d,%.2f,%.2f,%.2f,%.2f,,\n', r.database, r.t_n, r.t_mae, r.t_bias, r.t_loa_lo, r.t_loa_hi);
-    fprintf(f, 'beat,%s,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', r.database, r.cdc_n, r.cdc_mae, r.cdc_bias, r.cdc_loa_lo, r.cdc_loa_hi, r.cdc_corr);
+    fprintf(f, 'beat,%s,R-peak,%d,%.2f,,%.2f,%.2f,%.2f,,%.1f\n', r.database, r.r_n, r.r_mae, r.r_bias, r.r_loa_lo, r.r_loa_hi, r.r_sensitivity);
+    fprintf(f, 'beat,%s,T-end,%d,%.2f,,%.2f,%.2f,%.2f,,\n', r.database, r.t_n, r.t_mae, r.t_bias, r.t_loa_lo, r.t_loa_hi);
+    fprintf(f, 'beat,%s,CDC,%d,%.5f,,%.5f,%.5f,%.5f,%.4f,\n', r.database, r.cdc_n, r.cdc_mae, r.cdc_bias, r.cdc_loa_lo, r.cdc_loa_hi, r.cdc_corr);
 end
 
 function wr_subj(f, lab, r)
-    fprintf(f, 'subject,%s,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.4f,\n', lab, r.subj_n, r.subj_mae, r.subj_bias, r.subj_loa_lo, r.subj_loa_hi, r.subj_corr);
+    fprintf(f, 'subject,%s,CDC,%d,%.5f,%.5f,%.5f,%.5f,%.5f,%.4f,\n', lab, r.subj_n, r.subj_mae, r.subj_median_ae, r.subj_bias, r.subj_loa_lo, r.subj_loa_hi, r.subj_corr);
 end
-
 
 %% ========================================================================
 %  HELPERS
