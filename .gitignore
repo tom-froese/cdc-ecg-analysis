@@ -15,6 +15,7 @@ data/preprocessed/ptbxl_beats.csv
 data/preprocessed/fantasia_beats.csv
 data/preprocessed/autonomic_aging_beats.csv
 data/preprocessed/code15_beats.csv
+data/preprocessed/code15_exams.csv
 
 # Results - generated outputs (reproducible from code)
 results/figures/
