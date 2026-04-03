@@ -3,8 +3,8 @@ function plot_SI_Fig1()
 %   identifies hidden mortality risk beyond standard ECG screening
 %
 %   a) The 1/e ratio predicts the healthy resting heart rate.
-%      Healthy controls from 3 databases (N = 1,165): the empirical
-%      CDC-HR regression intersects CDC = 1/e at 66.2 bpm [65.8, 66.7],
+%      Healthy controls from 4 databases (N = 1,177): the empirical
+%      CDC-HR regression intersects CDC = 1/e at 66 bpm [65.8, 66.7],
 %      within the textbook optimal resting HR range.
 %
 %   b) CDC deviation predicts mortality in clinically normal patients.
@@ -107,7 +107,7 @@ function plot_SI_Fig1()
     xlabel('Heart Rate (bpm)', 'FontSize', 13, 'FontWeight', 'bold');
     ylabel('Cardiac Duty Cycle (RT/RR)', 'FontSize', 13, 'FontWeight', 'bold');
     title({'{\bfa}  1/e predicts the healthy resting heart rate', ...
-           sprintf('Healthy controls from 3 databases (N = %s)', ...
+           sprintf('Healthy controls from 4 databases (N = %s)', ...
                    format_comma(height(healthy)))}, ...
         'FontSize', 12, 'FontWeight', 'normal');
     xlim([hr_lo hr_hi]); ylim([0.26 0.48]);

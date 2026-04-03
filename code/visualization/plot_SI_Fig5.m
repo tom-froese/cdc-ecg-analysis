@@ -95,15 +95,17 @@ function plot_SI_Fig5()
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend(ph, {sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ...
+    leg1 = legend(ph, {sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ...
            fant.n_all, mode_fant_d)}, ...
-           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
+    set(leg1, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
 
     xlim(x_limits); grid on;
+    xlabel('');  
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    text(0.03, 0.88, 'Database R-peaks, tangent T-end', ...
+    text(0.03, 0.88, {'Database R-peaks,', 'tangent T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
          'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
     text(-0.12, 1.06, ['\bf' panel_letters{1}], 'Units', 'normalized', ...
@@ -138,15 +140,17 @@ function plot_SI_Fig5()
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     pa = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend(pa, {sprintf('Healthy controls (n=%s, \\Delta=%+.3f)', ...
+    leg2 = legend(pa, {sprintf('Healthy controls (n=%s, \\Delta=%+.3f)', ...
            format_comma(aa.n_all), mode_aa_d)}, ...
-           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
+    set(leg2, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
 
     xlim(x_limits); grid on;
+    xlabel('');  
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    text(0.03, 0.88, 'Fully automatic (Pan-Tompkins + tangent)', ...
+    text(0.03, 0.88, {'Fully automatic', '(Pan-Tompkins + tangent)'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
          'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
     text(-0.12, 1.06, ['\bf' panel_letters{2}], 'Units', 'normalized', ...
@@ -189,7 +193,7 @@ function plot_SI_Fig5()
          'Color', col_path * 0.7, 'LineWidth', 1.0);
 
     ylabel('Density', 'FontSize', lab_fs);
-    title('PTB: manual T-end, algorithmic R-peak', ...
+    title('PTB: ages 17–87', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
@@ -206,15 +210,17 @@ function plot_SI_Fig5()
     leg_items(2) = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg_strs{2} = sprintf('Pathological (n=%d, \\Delta=%+.3f)', ...
                            ptb.n_path, mode_path_d);
-    legend(leg_items, leg_strs, 'Location', 'northeast', ...
-           'FontSize', leg_fs, 'Box', 'off');
+    leg3 = legend(leg_items, leg_strs, 'Location', 'northeast', ...
+           'FontSize', leg_fs, 'Box', 'on');
+    set(leg3, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
 
     xlim(x_limits); grid on;
+    xlabel('');  
     set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
     add_p_annotation(ptb.p_value, ax_fs);
-    text(0.03, 0.88, 'Manual T-end (5 referees), Pan-Tompkins R-peak', ...
+    text(0.03, 0.88, {'Manual T-end (5 referees),', 'Pan-Tompkins R-peak'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
          'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
     text(-0.12, 1.06, ['\bf' panel_letters{3}], 'Units', 'normalized', ...
@@ -252,33 +258,30 @@ function plot_SI_Fig5()
     plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
          'Color', col_path * 0.7, 'LineWidth', 1.0);
 
+    % X-axis label strictly on this bottom panel
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
            'FontSize', lab_fs);
     ylabel('Density', 'FontSize', lab_fs);
-    title('PTB-XL: ECGDeli automatic annotation', ...
+    title('PTB-XL: ages 2–90', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
     ph = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend([ph, pp], { ...
+    leg4 = legend([ph, pp], { ...
         sprintf('Clinically normal (n=%s, \\Delta=%+.3f)', ...
                 format_comma(ptbxl.n_cn), mode_cn_d), ...
         sprintf('Pathological (n=%s, \\Delta=%+.3f)', ...
                 format_comma(ptbxl.n_path), mode_path_d)}, ...
-        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
+    set(leg4, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
 
     xlim(x_limits); grid on;
     set(ax4, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
     add_p_annotation(ptbxl.p_value, ax_fs);
-
-    % Total N annotation
-    n_total = ptbxl.n_cn + ptbxl.n_path;
-    text(0.03, 0.78, sprintf('N = %s patients', format_comma(n_total)), ...
-         'Units', 'normalized', 'FontSize', ax_fs, 'Color', [0.3 0.3 0.3]);
-    text(0.03, 0.88, 'ECGDeli (R-peak + T-end)', ...
+    text(0.03, 0.88, {'ECGDeli automatic', '(R-peak + T-end)'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
          'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
     text(-0.12, 1.06, ['\bf' panel_letters{4}], 'Units', 'normalized', ...
@@ -296,10 +299,12 @@ function plot_SI_Fig5()
     width = 0.80;
     bottom_start = 0.06;
 
+    % We explicitly array the axes in order (a, b, c, d) 
+    % to guarantee 'ax1' gets the top slot and 'ax4' gets the bottom slot.
+    all_axes = [ax1, ax2, ax3, ax4];
+    
     for k = 1:4
-        ax = findobj(fig, 'Type', 'axes');
-        % Axes are stored in reverse order
-        set(ax(k), 'Position', [left, bottom_start + (4-k)*(panel_h + gap), width, panel_h]);
+        set(all_axes(k), 'Position', [left, bottom_start + (4-k)*(panel_h + gap), width, panel_h]);
     end
 
     set(fig, 'PaperUnits', 'centimeters');
@@ -333,11 +338,9 @@ function plot_SI_Fig5()
             format_comma(ptbxl.n_cn), format_comma(ptbxl.n_path), ptbxl.p_value);
 end
 
-
 %% ========================================================================
 %  LOCAL FUNCTIONS
 %  ========================================================================
-
 function add_p_annotation(p_val, fs)
     if isnan(p_val), return; end
     if p_val < 0.001
@@ -360,3 +363,4 @@ function s = format_comma(n)
         end
     end
 end
+

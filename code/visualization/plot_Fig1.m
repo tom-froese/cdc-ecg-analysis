@@ -5,24 +5,14 @@ function plot_Fig1()
 %   Panel a: ΔCDC from the theoretical optimum (1/e) across the adult
 %     lifespan, by clinical group. Individual subjects shown as
 %     semi-transparent dots; linear regression with 95% CI shading
-%     per group. The near-zero slope in healthy controls vs the
-%     positive slopes in clinical groups is the core finding.
+%     per group. 
 %
 %   Panel b: Thermodynamic diastole duration (ms) across the adult
 %     lifespan, by clinical group. Derived from subject-level median
 %     CDC and HR as: diastole = RR × (1 − CDC), where RR = 60000/HR.
 %
-% Linear regression was chosen over LOESS because the healthy control
-% group (N = 1,165) is drawn from databases with coarse or bimodal age
-% distributions (Fantasia: bimodal at ~26/~74 yr; Autonomic Aging:
-% age-range midpoints), causing LOESS to overfit to cluster structure.
-% OLS regression with 95% CI bands is robust to uneven age density and
-% transparently communicates uncertainty (wider bands for smaller N).
-%
-% Data source: hierarchical_results.mat (via analyze_hierarchical_model.m)
-%
 % Nature Aging formatting: double-column (183 mm), bold lowercase
-%   panel labels outside axes, 7-pt tick labels, no sgtitle.
+%   panel labels outside axes.
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit
 
@@ -37,14 +27,14 @@ function plot_Fig1()
              'all_data', 'group_modes', 'group_mode_cis', 'inv_e');
     D = S.all_data;
 
-    % Bootstrap mode results (order: HC, CN, Path — matches analyze_hierarchical_model)
+    % Bootstrap mode results (order: HC, CN, Path)
     group_modes    = S.group_modes;
     group_mode_cis = S.group_mode_cis;
 
     % Derived quantities
-    D.delta_CDC = D.CDC - inv_e;              % deviation from optimum
-    D.RR_ms     = 60000 ./ D.HR;              % RR interval (ms)
-    D.Dias_ms   = D.RR_ms .* (1 - D.CDC);    % thermodynamic diastole (ms)
+    D.delta_CDC = D.CDC - inv_e;              
+    D.RR_ms     = 60000 ./ D.HR;              
+    D.Dias_ms   = D.RR_ms .* (1 - D.CDC);    
 
     % Group masks
     is_hc   = D.Group == 'HealthyControl';
@@ -59,23 +49,19 @@ function plot_Fig1()
     fprintf('  Healthy Control:   N = %s\n', format_comma(n_hc));
     fprintf('  Clinically Normal: N = %s\n', format_comma(n_cn));
     fprintf('  Pathological:      N = %s\n', format_comma(n_path));
-    fprintf('  Total:             N = %s\n', format_comma(height(D)));
 
     %% ================================================================
-    %  COLOUR SCHEME (consistent across all main figures)
+    %  COLOUR SCHEME & LABELS
     %  ================================================================
 
-    col_hc   = [0.20 0.55 0.85];   % Blue  — verified healthy volunteers
-    col_cn   = [0.25 0.70 0.35];   % Green — clinically normal ECG
-    col_path = [0.85 0.25 0.20];   % Red   — pathological
+    col_hc   = [0.20 0.55 0.85];   % Blue
+    col_cn   = [0.25 0.70 0.35];   % Green
+    col_path = [0.85 0.25 0.20];   % Red 
 
     colors = [col_hc; col_cn; col_path];
     masks  = {is_hc, is_cn, is_path};
     ns     = [n_hc, n_cn, n_path];
 
-    % Legend labels for panel (a): n, mode, 95% CI, 1/e containment
-    % The thermodynamic prediction concerns the most probable state (mode),
-    % not the mean. Labels report the bootstrap mode with CI.
     group_names = {'Healthy Control', 'Clinically Normal', 'Pathological'};
     labels_a = cell(3, 1);
     for g = 1:3
@@ -88,38 +74,41 @@ function plot_Fig1()
         else
             ci_note = '';
         end
-        labels_a{g} = sprintf('%s (\\itn\\rm = %s; mode %.3f [%.3f, %.3f]%s)', ...
+        % Splitting into two lines with \n to prevent horizontal stretching
+        labels_a{g} = sprintf('%s (\\itn\\rm = %s)\nmode: %.3f [%.3f, %.3f]%s', ...
             group_names{g}, format_comma(ns(g)), m, lo, hi, ci_note);
     end
 
-    % Legend labels for panel (b): n only (diastole panel)
     labels_b = { ...
         sprintf('Healthy Control (\\itn\\rm = %s)', format_comma(n_hc)), ...
         sprintf('Clinically Normal (\\itn\\rm = %s)', format_comma(n_cn)), ...
         sprintf('Pathological (\\itn\\rm = %s)', format_comma(n_path))};
 
     %% ================================================================
-    %  FIGURE SETUP
+    %  FIGURE SETUP (SCALED FOR LEGIBILITY)
     %  ================================================================
-    %  Nature Aging double-column width: 183 mm.
-    %  Two panels, slightly taller for clean bottom-legend space.
-
-    fig_w_cm = 18.3;
-    fig_h_cm = 9.0;   % ← increased for breathing room below panel (a)
+    
+    % Draw the figure at 2x scale. When scaled to 50% in print, 
+    % fonts will naturally hit the required Nature standard sizes.
+    fig_scale = 2; 
+    
+    fig_w_cm = 18.3 * fig_scale;
+    fig_h_cm = 9.0 * fig_scale; 
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
-        'Position', [2 5 fig_w_cm fig_h_cm]);
+        'Position', [2 2 fig_w_cm fig_h_cm]);
 
-    % Font sizes (increased for better readability)
-    ax_fs    = 8;    % tick labels
-    lab_fs   = 9;    % axis labels
-    panel_fs = 11;   % panel labels (a, b)
-
-    % Scatter aesthetics
+    % Scaled font and line parameters
+    ax_fs    = 8 * fig_scale;    % tick labels 
+    lab_fs   = 9 * fig_scale;    % axis labels 
+    panel_fs = 11 * fig_scale;   % panel labels 
+    leg_fs   = 8 * fig_scale;    % legend labels
+    
     alpha_dot = 0.08;
-    dot_size  = 3;
+    dot_size  = 4 * fig_scale;
+    line_w    = 1.5 * fig_scale;
+    ax_line_w = 0.5 * fig_scale;
 
-    % Shared axis limits
     age_lim = [15 95];
     xfit = linspace(age_lim(1), age_lim(2), 300)';
 
@@ -130,24 +119,18 @@ function plot_Fig1()
     ax1 = subplot(1, 2, 1);
     hold on; box on;
 
-    % Individual scatter — back-to-front so HC visible on top
     scatter(D.Age(is_path), D.delta_CDC(is_path), dot_size, ...
-        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
-        'HandleVisibility', 'off');
+        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, 'HandleVisibility', 'off');
     scatter(D.Age(is_cn), D.delta_CDC(is_cn), dot_size, ...
-        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
-        'HandleVisibility', 'off');
+        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, 'HandleVisibility', 'off');
     scatter(D.Age(is_hc), D.delta_CDC(is_hc), dot_size, ...
-        col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, ...
-        'HandleVisibility', 'off');
+        col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, 'HandleVisibility', 'off');
 
-    % Reference line at ΔCDC = 0 (CDC = 1/e)
-    yline(0, 'k--', 'LineWidth', 1.0, 'HandleVisibility', 'off');
-    text(age_lim(2) - 1, -0.008, 'Optimal (1/\ite\rm)', ...
+    yline(0, 'k--', 'LineWidth', line_w * 0.7, 'HandleVisibility', 'off');
+    text(ax1, age_lim(2) - 1, -0.008, 'Optimal (1/\ite\rm)', ...
         'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
         'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
 
-    % Linear regression with 95% CI per group
     h_lines = gobjects(3, 1);
     for g = 1:3
         mask = masks{g};
@@ -155,28 +138,26 @@ function plot_Fig1()
         [yfit, ci] = predict(mdl, xfit, 'Alpha', 0.05);
 
         fill([xfit; flipud(xfit)], [ci(:,1); flipud(ci(:,2))], ...
-            colors(g,:), 'FaceAlpha', 0.12, 'EdgeColor', 'none', ...
-            'HandleVisibility', 'off');
+            colors(g,:), 'FaceAlpha', 0.12, 'EdgeColor', 'none', 'HandleVisibility', 'off');
 
-        h_lines(g) = plot(xfit, yfit, '-', 'Color', colors(g,:) * 0.8, ...
-            'LineWidth', 2.0);
+        h_lines(g) = plot(xfit, yfit, '-', 'Color', colors(g,:) * 0.8, 'LineWidth', line_w);
     end
 
     xlim(age_lim);
     ylim([-0.08 0.12]);
     xlabel('Age (years)', 'FontSize', lab_fs);
     ylabel('\DeltaCDC from 1/\ite', 'FontSize', lab_fs);
-    set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02]);
+    set(ax1, 'FontSize', ax_fs, 'LineWidth', ax_line_w, ...
+        'TickDir', 'out', 'TickLength', [0.015 0.015]);
 
-    % Legend moved to bottom of panel (a) – does not occlude lines
-    leg1 = legend(h_lines, labels_a, 'Location', 'southwest', ...
-        'FontSize', ax_fs - 1, 'Box', 'on');
-    set(leg1, 'Color', 'w', 'EdgeColor', 'k', 'FontSize', ax_fs - 1);
-
-    text(-0.14, 1.08, '\bfa', 'Units', 'normalized', ...
+    % Panel label A 
+    text(ax1, -0.12, 1.04, '\bfa', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', ...
-        'VerticalAlignment', 'top');
+        'Clipping', 'off', 'VerticalAlignment', 'bottom');
+
+    % Legend placed in the bottom right corner
+    leg1 = legend(ax1, h_lines, labels_a, 'Location', 'southeast', 'Box', 'on');
+    set(leg1, 'FontSize', leg_fs, 'Color', 'w');
 
     hold off;
 
@@ -187,18 +168,13 @@ function plot_Fig1()
     ax2 = subplot(1, 2, 2);
     hold on; box on;
 
-    % Individual scatter
     scatter(D.Age(is_path), D.Dias_ms(is_path), dot_size, ...
-        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
-        'HandleVisibility', 'off');
+        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, 'HandleVisibility', 'off');
     scatter(D.Age(is_cn), D.Dias_ms(is_cn), dot_size, ...
-        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
-        'HandleVisibility', 'off');
+        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, 'HandleVisibility', 'off');
     scatter(D.Age(is_hc), D.Dias_ms(is_hc), dot_size, ...
-        col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, ...
-        'HandleVisibility', 'off');
+        col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, 'HandleVisibility', 'off');
 
-    % Linear regression with 95% CI per group
     h_lines2 = gobjects(3, 1);
     for g = 1:3
         mask = masks{g};
@@ -206,42 +182,38 @@ function plot_Fig1()
         [yfit, ci] = predict(mdl, xfit, 'Alpha', 0.05);
 
         fill([xfit; flipud(xfit)], [ci(:,1); flipud(ci(:,2))], ...
-            colors(g,:), 'FaceAlpha', 0.12, 'EdgeColor', 'none', ...
-            'HandleVisibility', 'off');
+            colors(g,:), 'FaceAlpha', 0.12, 'EdgeColor', 'none', 'HandleVisibility', 'off');
 
-        h_lines2(g) = plot(xfit, yfit, '-', 'Color', colors(g,:) * 0.8, ...
-            'LineWidth', 2.0);
-
-        beta = mdl.Coefficients.Estimate(2);
-        p_val = mdl.Coefficients.pValue(2);
-        fprintf('  Panel b — %s: slope = %+.2f ms/yr, p = %.2e\n', ...
-            labels_b{g}, beta, p_val);
+        h_lines2(g) = plot(xfit, yfit, '-', 'Color', colors(g,:) * 0.8, 'LineWidth', line_w);
     end
 
     xlim(age_lim);
     xlabel('Age (years)', 'FontSize', lab_fs);
     ylabel('Thermodynamic diastole (ms)', 'FontSize', lab_fs);
-    set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02]);
+    set(ax2, 'FontSize', ax_fs, 'LineWidth', ax_line_w, ...
+        'TickDir', 'out', 'TickLength', [0.015 0.015]);
 
-    leg2 = legend(h_lines2, labels_b, ...
-        'Location', 'northeast', 'FontSize', ax_fs - 0.5, 'Box', 'off');
-    leg2.ItemTokenSize = [12 8];
+    leg2 = legend(ax2, h_lines2, labels_b, 'Location', 'northeast', ...
+        'FontSize', leg_fs, 'Box', 'off');
+    leg2.ItemTokenSize = [15 15];
 
-    % Panel label
-    text(-0.14, 1.08, '\bfb', 'Units', 'normalized', ...
+    % Panel label B 
+    text(ax2, -0.12, 1.04, '\bfb', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', ...
-        'VerticalAlignment', 'top');
+        'Clipping', 'off', 'VerticalAlignment', 'bottom');
 
     hold off;
 
     %% ================================================================
-    %  LAYOUT AND SAVE
+    %  EXPLICIT LAYOUT AND SAVE
     %  ================================================================
 
-    % Adjusted positions: more vertical space below panel (a) for legend
-    set(ax1, 'Position', [0.085 0.165 0.395 0.715]);
-    set(ax2, 'Position', [0.56  0.165 0.395 0.715]);
+    % Hardcode bounds [left bottom width height] to guarantee no overlap
+    ax1_pos = [0.10, 0.15, 0.38, 0.75];
+    ax2_pos = [0.58, 0.15, 0.38, 0.75];
+
+    set(ax1, 'Position', ax1_pos);
+    set(ax2, 'Position', ax2_pos);
 
     out_pdf = fullfile(paths.figures, 'Fig1_cdc_aging.pdf');
     out_png = fullfile(paths.figures, 'Fig1_cdc_aging.png');
@@ -250,67 +222,27 @@ function plot_Fig1()
     save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
 
     fprintf('\nFigure 1 saved.\n');
-
-    %% ================================================================
-    %  SUMMARY STATISTICS (for legend / Methods)
-    %  ================================================================
-
-    fprintf('\n--- Summary for figure legend ---\n');
-    fprintf('Total subjects: N = %s\n', format_comma(height(D)));
-    fprintf('  HC:   N = %5s, age %d-%d yr\n', format_comma(n_hc), ...
-        round(min(D.Age(is_hc))), round(max(D.Age(is_hc))));
-    fprintf('  CN:   N = %5s, age %d-%d yr\n', format_comma(n_cn), ...
-        round(min(D.Age(is_cn))), round(max(D.Age(is_cn))));
-    fprintf('  Path: N = %5s, age %d-%d yr\n', format_comma(n_path), ...
-        round(min(D.Age(is_path))), round(max(D.Age(is_path))));
-
-    fprintf('\nDiastole summary (ms):\n');
-    for g = 1:3
-        m = masks{g};
-        fprintf('  %-20s  %.0f +/- %.0f ms\n', ...
-            group_names{g}, ...
-            mean(D.Dias_ms(m)), std(D.Dias_ms(m)));
-    end
 end
-
 
 %% ========================================================================
 %  HELPERS
 %  ========================================================================
 
 function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
-% SAVE_LARGE_FIGURE - Save figure with many graphic objects without crashing
-%
-% For figures with large scatter plots (>10k points), MATLAB's painters
-% renderer and savefig serialize every point as a vector element, consuming
-% gigabytes of memory and often hanging the process.
-%
-% Strategy:
-%   PNG: exportgraphics (raster, always safe)
-%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
-%        avoids the painters memory explosion while producing a PDF file
-%        that embeds at 300 dpi — sufficient for main figures)
-%   FIG: skipped for large figures (the .fig format stores all graphic
-%        objects and can itself become multi-GB)
-
     set(fig, 'PaperUnits', 'centimeters');
     set(fig, 'PaperSize', [w_cm h_cm]);
     set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
 
-    % PNG — raster, always safe
+    % PNG — raster
     exportgraphics(fig, out_png, 'Resolution', 300);
     fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
 
-    % PDF — raster-in-PDF (avoids painters memory explosion)
+    % PDF — raster-in-PDF to prevent memory crash with 20k scatter points
     exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
     fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
 
-    % FIG — skip for large figures
     fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
-
-    close(fig);
 end
-
 
 function s = format_comma(n)
     s = num2str(n);

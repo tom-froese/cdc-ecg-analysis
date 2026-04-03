@@ -8,25 +8,15 @@ function plot_SI_Fig8()
 %   c: Thermodynamic diastole (ms) vs Age — Female, all groups
 %   d: Thermodynamic diastole (ms) vs Age — Male, all groups
 %
-% Design rationale:
-%   The panels mirror the structure of Figure 1 (which shows ΔCDC and
-%   diastole vs Age pooled across sexes), split into female and male
-%   subpanels to demonstrate that the 1/e convergence pattern — and the
-%   diastolic compensation mechanism — hold in both sexes. Within each
-%   panel, all three clinical groups are overlaid, preserving the
-%   group-comparison structure of Fig. 1. This layout makes it visually
-%   immediate that the aging trajectories are consistent across sexes,
-%   which is the key claim for the reviewer.
-%
-% Colour scheme matches Figure 1 (plot_Fig1.m):
+% Colour scheme matches Figure 1:
 %   Blue    [0.20 0.55 0.85]  = Healthy Control
 %   Green   [0.25 0.70 0.35]  = Clinically Normal
 %   Red     [0.85 0.25 0.20]  = Pathological
 %
-% Data source: sex_stratified_results.mat (via analyze_sex_stratified.m)
+% Uses manual axes positioning and data-coordinate annotations to
+% avoid exportgraphics displacement bugs.
 %
-% Nature Aging formatting: double-column width (183 mm), bold lowercase
-%   panel labels outside axes, 7-pt tick labels.
+% Data source: sex_stratified_results.mat (via analyze_sex_stratified.m)
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit
 
@@ -46,41 +36,53 @@ function plot_SI_Fig8()
     sex_labels   = S.sex_labels;
     ols_dcdc     = S.ols_dcdc;
     ols_dias     = S.ols_dias;
-    interaction  = S.interaction;
     desc         = S.desc;
 
     %% ================================================================
     %  COLOUR SCHEME (matches Figure 1)
     %  ================================================================
 
-    col_hc   = [0.20 0.55 0.85];   % Blue  — Healthy Control
-    col_cn   = [0.25 0.70 0.35];   % Green — Clinically Normal
-    col_path = [0.85 0.25 0.20];   % Red   — Pathological
+    col_hc   = [0.20 0.55 0.85];
+    col_cn   = [0.25 0.70 0.35];
+    col_path = [0.85 0.25 0.20];
     colors = [col_hc; col_cn; col_path];
 
     %% ================================================================
-    %  FIGURE SETUP — Nature Aging formatting
+    %  FIGURE SETUP
     %  ================================================================
 
-    fig_w_cm = 18.3;   % double-column width
-    fig_h_cm = 16.0;
+    fig_w_cm = 18.3;
+    fig_h_cm = 18.0;
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2 1 fig_w_cm fig_h_cm]);
 
-    ax_fs    = 7;    % tick labels
-    lab_fs   = 8;    % axis labels
-    title_fs = 8;    % panel titles
-    panel_fs = 10;   % panel letters
-    leg_fs   = 6;    % legend
+    % Font sizes — enlarged for readability
+    ax_fs    = 9;
+    lab_fs   = 10;
+    title_fs = 11;
+    panel_fs = 13;
+    leg_fs   = 7.5;
+    slope_fs = 7.5;
 
     % Scatter aesthetics
     dot_size  = 2;
     alpha_dot = 0.06;
+    line_w    = 2.0;
 
     % Shared axis limits
     age_lim   = [15 95];
     dcdc_lim  = [-0.08 0.12];
+
+    % Manual panel positions: [left, bottom, width, height]
+    pw = 0.38;
+    ph = 0.35;
+    positions = {
+        [0.10, 0.58, pw, ph],   % a: top-left (Female ΔCDC)
+        [0.57, 0.58, pw, ph],   % b: top-right (Male ΔCDC)
+        [0.10, 0.08, pw, ph],   % c: bottom-left (Female diastole)
+        [0.57, 0.08, pw, ph],   % d: bottom-right (Male diastole)
+    };
 
     panel_labels = {'a', 'b', 'c', 'd'};
     ax = gobjects(4, 1);
@@ -90,12 +92,12 @@ function plot_SI_Fig8()
     %  ================================================================
 
     for si = 1:2
-        ax(si) = subplot(2, 2, si);
+        ax(si) = axes('Position', positions{si});
         hold on; box on;
 
         sex_mask = (D.Sex == sexes{si});
 
-        % Reference line at ΔCDC = 0 (optimal)
+        % Reference line at ΔCDC = 0
         yline(0, 'k--', 'LineWidth', 1.0, 'HandleVisibility', 'off');
 
         % Scatter and OLS per group (back-to-front: Path, CN, HC)
@@ -105,35 +107,21 @@ function plot_SI_Fig8()
         for gi = [3, 2, 1]
             mask = sex_mask & (D.Group == groups{gi});
 
-            % Scatter
             alpha_g = alpha_dot;
-            if gi == 1, alpha_g = alpha_dot * 2.5; end  % HC more visible
+            if gi == 1, alpha_g = alpha_dot * 2.5; end
             scatter(D.Age(mask), D.delta_CDC(mask), dot_size, ...
                 colors(gi, :), 'filled', 'MarkerFaceAlpha', alpha_g, ...
                 'HandleVisibility', 'off');
 
-            % OLS trend + CI
-            slope = ols_dcdc(gi, si).slope;
-            intercept = ols_dcdc(gi, si).intercept;
-            yfit = intercept + slope * xfit;
-
-            % Refit for CI band (need the model object)
             mdl = fitlm(D.Age(mask), D.delta_CDC(mask));
-            [~, ci] = predict(mdl, xfit, 'Alpha', 0.05);
+            [yfit, ci] = predict(mdl, xfit, 'Alpha', 0.05);
 
             fill([xfit; flipud(xfit)], [ci(:,1); flipud(ci(:,2))], ...
                 colors(gi, :), 'FaceAlpha', 0.10, 'EdgeColor', 'none', ...
                 'HandleVisibility', 'off');
 
             h_lines(gi) = plot(xfit, yfit, '-', ...
-                'Color', colors(gi, :), 'LineWidth', 1.8);
-        end
-
-        % Optimal label
-        if si == 1
-            text(age_lim(2) - 1, 0.004, 'Optimal (1/\ite\rm)', ...
-                'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+                'Color', colors(gi, :), 'LineWidth', line_w);
         end
 
         xlim(age_lim);
@@ -152,12 +140,17 @@ function plot_SI_Fig8()
                 leg_strs{gi} = sprintf('%s (n=%s)', ...
                     group_labels{gi}, format_comma(desc(gi, si).n));
             end
-            leg = legend(h_lines, leg_strs, ...
-                'Location', 'northwest', 'FontSize', leg_fs, 'Box', 'off');
-            leg.ItemTokenSize = [12 8];
+            leg1 = legend(h_lines, leg_strs, ...
+                'Location', 'southwest', 'FontSize', leg_fs, 'Box', 'on');
+            set(leg1, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
+            leg1.ItemTokenSize = [12 8];
         end
 
-        % Slope annotations (top-right, compact)
+        % Slope annotations (data coordinates, bottom-right)
+        axes(ax(si));
+        xl = xlim; yl = ylim;
+        x_ann = xl(2) - 0.03 * diff(xl);
+
         for gi = 1:3
             slope = ols_dcdc(gi, si).slope;
             p_val = ols_dcdc(gi, si).p_slope;
@@ -168,17 +161,26 @@ function plot_SI_Fig8()
                 p_str = sprintf('%.3f', p_val);
             end
 
-            y_pos = 0.97 - (gi - 1) * 0.09;
-            text(0.97, y_pos, ...
+            y_ann = yl(1) + (0.18 - (gi-1)*0.06) * diff(yl);
+            text(x_ann, y_ann, ...
                 sprintf('%+.5f/yr (\\itp\\rm=%s)', slope, p_str), ...
-                'Units', 'normalized', 'FontSize', ax_fs - 0.5, ...
+                'FontSize', slope_fs, ...
                 'Color', colors(gi, :) * 0.7, ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+                'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
         end
 
-        % Panel label
-        text(-0.14, 1.08, ['\bf' panel_labels{si}], 'Units', 'normalized', ...
-            'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
+        % Optimal label (panel a only)
+        if si == 1
+            text(xl(2) - 0.02*diff(xl), 0.004, 'Optimal (1/\ite\rm)', ...
+                'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
+                'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+        end
+
+        % Panel label (data coordinates)
+        text(xl(1) - 0.14*diff(xl), yl(2) + 0.04*diff(yl), ...
+            ['\bf' panel_labels{si}], ...
+            'FontSize', panel_fs, 'FontWeight', 'bold', ...
+            'VerticalAlignment', 'bottom');
 
         hold off;
     end
@@ -188,7 +190,7 @@ function plot_SI_Fig8()
     %  ================================================================
 
     for si = 1:2
-        ax(si + 2) = subplot(2, 2, si + 2);
+        ax(si+2) = axes('Position', positions{si+2});
         hold on; box on;
 
         sex_mask = (D.Sex == sexes{si});
@@ -213,7 +215,7 @@ function plot_SI_Fig8()
                 'HandleVisibility', 'off');
 
             h_lines2(gi) = plot(xfit, yfit, '-', ...
-                'Color', colors(gi, :), 'LineWidth', 1.8);
+                'Color', colors(gi, :), 'LineWidth', line_w);
         end
 
         xlim(age_lim);
@@ -221,7 +223,7 @@ function plot_SI_Fig8()
         ylabel('Thermodynamic diastole (ms)', 'FontSize', lab_fs);
         title(sex_labels{si}, 'FontSize', title_fs, 'FontWeight', 'bold');
 
-        set(ax(si + 2), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
+        set(ax(si+2), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
             'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
         % Legend (panel c only)
@@ -232,11 +234,16 @@ function plot_SI_Fig8()
                     group_labels{gi}, format_comma(desc(gi, si).n));
             end
             leg2 = legend(h_lines2, leg_strs2, ...
-                'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+                'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
+            set(leg2, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
             leg2.ItemTokenSize = [12 8];
         end
 
-        % Slope annotations
+        % Slope annotations (data coordinates, bottom-left)
+        axes(ax(si+2));
+        xl = xlim; yl = ylim;
+        x_ann = xl(1) + 0.03 * diff(xl);
+
         for gi = 1:3
             slope = ols_dias(gi, si).slope;
             p_val = ols_dias(gi, si).p_slope;
@@ -247,40 +254,46 @@ function plot_SI_Fig8()
                 p_str = sprintf('%.3f', p_val);
             end
 
-            y_pos = 0.97 - (gi - 1) * 0.09;
-            text(0.97, y_pos, ...
+            y_ann = yl(1) + (0.18 - (gi-1)*0.06) * diff(yl);
+            text(x_ann, y_ann, ...
                 sprintf('%+.2f ms/yr (\\itp\\rm=%s)', slope, p_str), ...
-                'Units', 'normalized', 'FontSize', ax_fs - 0.5, ...
+                'FontSize', slope_fs, ...
                 'Color', colors(gi, :) * 0.7, ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+                'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
         end
 
-        % Panel label
-        text(-0.14, 1.08, ['\bf' panel_labels{si + 2}], 'Units', 'normalized', ...
-            'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
+        % Panel label (data coordinates)
+        text(xl(1) - 0.14*diff(xl), yl(2) + 0.04*diff(yl), ...
+            ['\bf' panel_labels{si+2}], ...
+            'FontSize', panel_fs, 'FontWeight', 'bold', ...
+            'VerticalAlignment', 'bottom');
 
         hold off;
     end
 
     %% ================================================================
-    %  LAYOUT AND SAVE
+    %  SAVE
     %  ================================================================
-
-    set(ax(1), 'Position', [0.08  0.58  0.40  0.36]);
-    set(ax(2), 'Position', [0.56  0.58  0.40  0.36]);
-    set(ax(3), 'Position', [0.08  0.08  0.40  0.36]);
-    set(ax(4), 'Position', [0.56  0.08  0.40  0.36]);
 
     out_pdf = fullfile(paths.figures, 'SI_Fig8_sex_stratified.pdf');
     out_png = fullfile(paths.figures, 'SI_Fig8_sex_stratified.png');
     out_fig = fullfile(paths.figures, 'SI_Fig8_sex_stratified.fig');
 
-    save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
+    set(fig, 'PaperUnits', 'centimeters');
+    set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
+    set(fig, 'PaperPosition', [0 0 fig_w_cm fig_h_cm]);
 
+    exportgraphics(fig, out_png, 'Resolution', 300);
+    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+
+    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
+    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+
+    fprintf('  Skipped: %s (too many graphic objects)\n', out_fig);
     fprintf('\nSupplementary Figure 8 saved.\n');
 
     %% ================================================================
-    %  CONSOLE SUMMARY (for SI figure legend)
+    %  CONSOLE SUMMARY
     %  ================================================================
 
     fprintf('\n--- Summary for SI Fig 8 legend ---\n');
@@ -318,7 +331,7 @@ function plot_SI_Fig8()
     fprintf('\nSex x Age interaction (within group):\n');
     for gi = 1:3
         fprintf('  %-22s  beta=%+.6f, p=%.2e\n', ...
-            interaction(gi).group, interaction(gi).beta, interaction(gi).p);
+            S.interaction(gi).group, S.interaction(gi).beta, S.interaction(gi).p);
     end
 
     fprintf('\nCohen''s d (M-F):\n');
@@ -333,41 +346,7 @@ end
 %  LOCAL FUNCTIONS
 %  ========================================================================
 
-function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
-% SAVE_LARGE_FIGURE - Save figure without crashing on large scatter data
-%
-% For figures with many graphic objects, MATLAB's painters renderer and
-% savefig serialize every element, consuming gigabytes of memory.
-%
-% Strategy:
-%   PNG: exportgraphics (raster, always safe)
-%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
-%        avoids the painters memory explosion while producing a PDF that
-%        embeds at 300 dpi)
-%   FIG: skipped (the .fig format stores all graphic objects and can
-%        itself become multi-GB)
-
-    set(fig, 'PaperUnits', 'centimeters');
-    set(fig, 'PaperSize', [w_cm h_cm]);
-    set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
-
-    % PNG — raster, always safe
-    exportgraphics(fig, out_png, 'Resolution', 300);
-    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
-
-    % PDF — raster-in-PDF (avoids painters memory explosion)
-    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
-    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
-
-    % FIG — skip for large figures
-    fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
-
-    close(fig);
-end
-
-
 function s = format_comma(n)
-% FORMAT_COMMA - Format integer with thousands separators
     s = num2str(n);
     if n >= 1000
         idx = length(s) - 2;

@@ -55,11 +55,11 @@ function plot_SI_Fig3()
                  'Color', 'w', 'Visible', 'on');
 
     % Font sizes for final print dimensions (Nature minimum: 5 pt)
-    ax_fs  = 7;    % axis tick labels
-    lab_fs = 8;    % axis labels
-    ttl_fs = 9;    % panel titles
-    ann_fs = 7;    % annotation text (bias, MAE, r)
-    leg_fs = 6;    % legend
+    ax_fs  = 9;    % axis tick labels
+    lab_fs = 12;    % axis labels
+    ttl_fs = 12;   % panel titles
+    ann_fs = 10;    % annotation text (bias, MAE, r)
+    leg_fs = 10;    % legend
 
     % Colours: LUDB blue, QTDB orange (consistent with SI Fig 4)
     c_ludb = [0.20 0.47 0.76];
@@ -83,11 +83,12 @@ function plot_SI_Fig3()
     end
     d_r = [a.r_err_ms; b.r_err_ms];
     draw_ba_lines(d_r);
+    legend('LUDB', 'QTDB', 'Location', 'southwest', 'FontSize', leg_fs, 'Box', 'off');
     ylabel('R-peak error (ms)', 'FontSize', lab_fs);
     xlabel('Beat index', 'FontSize', lab_fs);
     title('a  R-peak (beat-level)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
     set(gca, 'FontSize', ax_fs, 'Box', 'on');
-    annotate_panel(d_r, [], ann_fs);
+    annotate_panel(ax1, d_r, [], ann_fs, 0.05);
 
     %% ================================================================
     %  PANEL b: T-end timing error vs manual CDC
@@ -108,7 +109,7 @@ function plot_SI_Fig3()
     ylabel('T-end error (ms)', 'FontSize', lab_fs);
     title('b  T-end (beat-level)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
     set(gca, 'FontSize', ax_fs, 'Box', 'on');
-    annotate_panel(d_t, [], ann_fs);
+    annotate_panel(ax2, d_t, [], ann_fs, 0.05);
 
     %% ================================================================
     %  PANEL c: CDC Bland-Altman (beat-level)
@@ -137,9 +138,9 @@ function plot_SI_Fig3()
     xlabel('Mean CDC', 'FontSize', lab_fs);
     ylabel('\DeltaCDC', 'FontSize', lab_fs);
     title('c  CDC (beat-level)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
-    legend('Location', 'southeast', 'FontSize', leg_fs);
+    legend('Location', 'southwest', 'FontSize', leg_fs, 'Box', 'off');
     set(gca, 'FontSize', ax_fs, 'Box', 'on');
-    annotate_panel(df, r_val, ann_fs);
+    annotate_panel(ax3, df, r_val, ann_fs, 0.025);
 
     %% ================================================================
     %  PANEL d: CDC Bland-Altman (subject-level median)
@@ -168,9 +169,8 @@ function plot_SI_Fig3()
     xlabel('Mean median CDC', 'FontSize', lab_fs);
     ylabel('\DeltaCDC', 'FontSize', lab_fs);
     title('d  CDC (subject-level median)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
-    legend('Location', 'southeast', 'FontSize', leg_fs);
     set(gca, 'FontSize', ax_fs, 'Box', 'on');
-    annotate_panel(df2, r_val2, ann_fs);
+    annotate_panel(ax4, df2, r_val2, ann_fs, 0.01);
 
     %% ================================================================
     %  EXPORT
@@ -195,34 +195,35 @@ end
 function draw_ba_lines(d)
 % DRAW_BA_LINES - Mean bias line + 95% limits of agreement
     if isempty(d), return; end
-    yline(mean(d), 'k-', 'LineWidth', 1.2);
-    yline(mean(d) + 1.96*std(d), 'k--', 'LineWidth', 0.8);
-    yline(mean(d) - 1.96*std(d), 'k--', 'LineWidth', 0.8);
-    yline(0, 'Color', [0.6 0.6 0.6], 'LineStyle', ':');
+    yline(mean(d), 'k-', 'LineWidth', 1.2, 'HandleVisibility', 'off');
+    yline(mean(d) + 1.96*std(d), 'k--', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+    yline(mean(d) - 1.96*std(d), 'k--', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+    yline(0, 'Color', [0.6 0.6 0.6], 'LineStyle', ':', 'HandleVisibility', 'off');
 end
 
-
-function annotate_panel(d, r_val, fs)
+function annotate_panel(ax, d, r_val, fs, y_frac)
 % ANNOTATE_PANEL - In-plot text: bias, MAE, and correlation
+%   y_frac: fraction of y-range from top (0.05 = 5% from top)
     if isempty(d), return; end
+    if nargin < 5, y_frac = 0.05; end
+    axes(ax);
+    xl = xlim; yl = ylim;
+    x0 = xl(1) + 0.03 * diff(xl);
+    y_top = yl(2) - y_frac * diff(yl);
+    dy = 0.10 * diff(yl);
+    
     b = mean(d); m = mean(abs(d));
     if abs(b) < 1
-        text(0.03, 0.95, sprintf('Bias: %+.4f', b), ...
-            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
-        text(0.03, 0.85, sprintf('MAE: %.4f', m), ...
-            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(x0, y_top,      sprintf('Bias: %+.4f', b), 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(x0, y_top - dy,  sprintf('MAE: %.4f', m),   'FontSize', fs, 'VerticalAlignment', 'top');
     else
-        text(0.03, 0.95, sprintf('Bias: %+.1f ms', b), ...
-            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
-        text(0.03, 0.85, sprintf('MAE: %.1f ms', m), ...
-            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(x0, y_top,      sprintf('Bias: %+.1f ms', b), 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(x0, y_top - dy,  sprintf('MAE: %.1f ms', m),   'FontSize', fs, 'VerticalAlignment', 'top');
     end
     if ~isempty(r_val) && ~isnan(r_val)
-        text(0.03, 0.75, sprintf('r = %.3f', r_val), ...
-            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(x0, y_top - 2*dy, sprintf('r = %.3f', r_val), 'FontSize', fs, 'VerticalAlignment', 'top');
     end
 end
-
 
 function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
 % SAVE_LARGE_FIGURE - Save figure with many graphic objects without crashing
@@ -249,5 +250,4 @@ function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
     fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
     % FIG — skip for large figures
     fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
-    close(fig);
 end
