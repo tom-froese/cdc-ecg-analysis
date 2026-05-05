@@ -8,7 +8,7 @@ function plot_Fig1()
 %     per group. The near-zero slope in healthy controls vs the
 %     positive slopes in clinical groups is the core finding.
 %
-%   Panel b: Thermodynamic diastole duration (ms) across the adult
+%   Panel b: Diastolic duration (ms) across the adult
 %     lifespan, by clinical group. Derived from subject-level median
 %     CDC and HR as: diastole = RR × (1 − CDC), where RR = 60000/HR.
 %
@@ -44,7 +44,7 @@ function plot_Fig1()
     % Derived quantities
     D.delta_CDC = D.CDC - inv_e;              % deviation from optimum
     D.RR_ms     = 60000 ./ D.HR;              % RR interval (ms)
-    D.Dias_ms   = D.RR_ms .* (1 - D.CDC);    % thermodynamic diastole (ms)
+    D.Dias_ms   = D.RR_ms .* (1 - D.CDC);    % diastolic duration (ms)
 
     % Group masks
     is_hc   = D.Group == 'HealthyControl';
@@ -183,7 +183,7 @@ function plot_Fig1()
     hold off;
 
     %% ================================================================
-    %  PANEL (b): Thermodynamic diastole (ms) vs Age
+    %  PANEL (b): Diastolic duration (ms) vs Age
     %  ================================================================
 
     ax2 = subplot(1, 2, 2);
@@ -222,7 +222,7 @@ function plot_Fig1()
 
     xlim(age_lim);
     xlabel('Age (years)', 'FontSize', lab_fs);
-    ylabel('Thermodynamic diastole (ms)', 'FontSize', lab_fs);
+    ylabel('Diastolic duration (ms)', 'FontSize', lab_fs);
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 

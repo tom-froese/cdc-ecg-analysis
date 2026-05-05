@@ -5,8 +5,8 @@ function plot_SI_Fig1()
 % Four-panel figure:
 %   a: ΔCDC vs Age — Female, all three clinical groups
 %   b: ΔCDC vs Age — Male, all three clinical groups
-%   c: Thermodynamic diastole (ms) vs Age — Female, all groups
-%   d: Thermodynamic diastole (ms) vs Age — Male, all groups
+%   c: Diastolic duration (ms) vs Age — Female, all groups
+%   d: Diastolic duration (ms) vs Age — Male, all groups
 %
 % Design rationale:
 %   The panels mirror the structure of Figure 1 (which shows ΔCDC and
@@ -218,7 +218,7 @@ function plot_SI_Fig1()
 
         xlim(age_lim);
         xlabel('Age (years)', 'FontSize', lab_fs);
-        ylabel('Thermodynamic diastole (ms)', 'FontSize', lab_fs);
+        ylabel('Diastolic duration (ms)', 'FontSize', lab_fs);
         title(sex_labels{si}, 'FontSize', title_fs, 'FontWeight', 'bold');
 
         set(ax(si + 2), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
