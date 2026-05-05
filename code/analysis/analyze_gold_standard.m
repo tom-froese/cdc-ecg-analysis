@@ -4,20 +4,24 @@ function results = analyze_gold_standard()
 % This analysis uses ONLY datasets where both R-peaks and T-wave endpoints
 % were placed by expert cardiologists (annotation_method = 'manual'):
 %
-%   1. LUDB  - Healthy controls vs Pathological (n ~ 200)
-%   2. QTDB  - Clinically normal vs Pathological vs Sudden death (n ~ 100)
+%   1. LUDB  - Healthy controls vs Patients (pathological ECG) (n ~ 200)
+%   2. QTDB  - Patients (non-pathological ECG) vs Patients (pathological ECG)
+%             vs Sudden death (n ~ 100)
 %
 % LUDB "Healthy" are genuine healthy volunteers (Kalyakulina et al. 2020,
 % IEEE Access: "healthy volunteers and patients of the Nizhny Novgorod
 % City Hospital No 5").
 %
 % QTDB three-group classification:
-%   Clinically normal - MIT-BIH Normal Sinus Rhythm records (group='healthy')
-%                       Hospital referrals to the Beth Israel Arrhythmia
-%                       Laboratory with no significant arrhythmias — NOT
-%                       healthy volunteers, hence "Clinically Normal"
-%   Pathological      - MIT-BIH Arrhythmia, SVA, ST Change, European ST-T,
-%                       Long-Term records (group='pathological')
+%   Patients (non-pathological ECG)
+%       - MIT-BIH Normal Sinus Rhythm records (group='healthy').
+%         Hospital referrals to the Beth Israel Arrhythmia Laboratory
+%         with no significant arrhythmias — NOT healthy volunteers
+%         (internal categorical: 'ClinicallyNormal'; abbreviation: CN).
+%   Patients (pathological ECG)
+%       - MIT-BIH Arrhythmia, SVA, ST Change, European ST-T, Long-Term
+%         records (group='pathological'; internal: 'Pathological';
+%         abbreviation: Path).
 %   Sudden death      - BIH Sudden Death records (group='sudden_death')
 %
 % Purpose: Establish the core CDC pattern using gold-standard fiducial
@@ -56,7 +60,7 @@ function results = analyze_gold_standard()
     assert(all(strcmp(get_col_as_char(qtdb_beats, 'annotation_method'), 'manual')), ...
            'QTDB contains non-manual annotations');
 
-    %% Analysis 1: LUDB - Healthy controls vs Pathological
+    %% Analysis 1: LUDB - Healthy controls vs Patients (pathological ECG)
     fprintf('================================================================\n');
     fprintf('LUDB: HEALTHY CONTROLS vs PATHOLOGICAL\n');
     fprintf('================================================================\n');
@@ -64,7 +68,7 @@ function results = analyze_gold_standard()
     ludb_results = analyze_healthy_vs_pathological(ludb_beats, 'LUDB', ...
                    'Healthy controls', n_bootstrap, inv_e);
 
-    %% Analysis 2: QTDB - Clinically normal vs Pathological vs Sudden death
+    %% Analysis 2: QTDB - Patients (non-pathological ECG) vs Patients (pathological ECG) vs Sudden death
     fprintf('\n================================================================\n');
     fprintf('QTDB: CLINICALLY NORMAL vs PATHOLOGICAL vs SUDDEN DEATH\n');
     fprintf('================================================================\n');
@@ -76,30 +80,30 @@ function results = analyze_gold_standard()
     fprintf('GOLD-STANDARD SUMMARY\n');
     fprintf('================================================================\n\n');
 
-    fprintf('                              Mode      95%% CI          n      %% > 1/e\n');
-    fprintf('------------------------------------------------------------------------\n');
-    fprintf('LUDB Healthy controls         %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('                                      Mode      95%% CI          n      %% > 1/e\n');
+    fprintf('--------------------------------------------------------------------------------\n');
+    fprintf('LUDB Healthy controls                 %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             ludb_results.mode_healthy, ludb_results.ci_healthy(1), ...
             ludb_results.ci_healthy(2), ludb_results.n_healthy, ...
             ludb_results.pct_healthy_above);
-    fprintf('LUDB Pathological             %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('LUDB Patients (pathological ECG)      %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             ludb_results.mode_patient, ludb_results.ci_patient(1), ...
             ludb_results.ci_patient(2), ludb_results.n_patient, ...
             ludb_results.pct_patient_above);
-    fprintf('------------------------------------------------------------------------\n');
-    fprintf('QTDB Clinically normal        %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('--------------------------------------------------------------------------------\n');
+    fprintf('QTDB Patients (non-pathological ECG)  %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             qtdb_results.mode_normal, qtdb_results.ci_normal(1), ...
             qtdb_results.ci_normal(2), qtdb_results.n_normal, ...
             qtdb_results.pct_normal_above);
-    fprintf('QTDB Pathological             %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('QTDB Patients (pathological ECG)      %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             qtdb_results.mode_pathological, qtdb_results.ci_pathological(1), ...
             qtdb_results.ci_pathological(2), qtdb_results.n_pathological, ...
             qtdb_results.pct_pathological_above);
-    fprintf('QTDB Sudden death             %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('QTDB Sudden death                     %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             qtdb_results.mode_fatal, qtdb_results.ci_fatal(1), ...
             qtdb_results.ci_fatal(2), qtdb_results.n_fatal, ...
             qtdb_results.pct_fatal_above);
-    fprintf('------------------------------------------------------------------------\n');
+    fprintf('--------------------------------------------------------------------------------\n');
     fprintf('Reference: 1/e = %.4f\n\n', inv_e);
 
     fprintf('Statistical comparisons:\n');
@@ -167,7 +171,7 @@ function results = analyze_healthy_vs_pathological(beats, dataset_name, healthy_
     n_patient = length(patient_ratios);
 
     fprintf('  %s: n = %d\n', healthy_label, n_healthy);
-    fprintf('  Pathological: n = %d\n', n_patient);
+    fprintf('  Patients (pathological ECG): n = %d\n', n_patient);
 
     %% Statistics
     [mode_healthy, ci_healthy] = bootstrap_mode(healthy_ratios, n_bootstrap);
@@ -181,7 +185,7 @@ function results = analyze_healthy_vs_pathological(beats, dataset_name, healthy_
     [mode_patient, ci_patient] = bootstrap_mode(patient_ratios, n_bootstrap);
     pct_patient_above = 100 * sum(patient_ratios > inv_e) / n_patient;
 
-    fprintf('\n  PATHOLOGICAL:\n');
+    fprintf('\n  PATIENTS (PATHOLOGICAL ECG):\n');
     fprintf('    Mode: %.4f [%.4f, %.4f]\n', mode_patient, ci_patient(1), ci_patient(2));
     fprintf('    Mean: %.4f, Median: %.4f\n', mean(patient_ratios), median(patient_ratios));
     fprintf('    1/e in CI: %s\n', yesno(inv_e >= ci_patient(1) && inv_e <= ci_patient(2)));
@@ -212,11 +216,16 @@ end
 %  QTDB THREE-GROUP ANALYSIS
 %  ========================================================================
 function results = analyze_qtdb_three_groups(beats, n_bootstrap, inv_e)
-% Three-group split:
-%   'healthy'       → Clinically normal (MIT-BIH Normal Sinus Rhythm, n~10)
-%                     Hospital referrals with no arrhythmias, NOT healthy volunteers
-%   'pathological'  → Pathological (Arrhythmia, SVA, ST Change, European ST-T, Long-Term)
-%   'sudden_death'  → Sudden death (BIH Sudden Death)
+% Three-group split (internal categorical → display label):
+%   'healthy'       → 'ClinicallyNormal' (CN), displayed as
+%                     "Patients (non-pathological ECG)" — MIT-BIH Normal
+%                     Sinus Rhythm (n~10), hospital referrals with no
+%                     arrhythmias, NOT healthy volunteers.
+%   'pathological'  → 'Pathological' (Path), displayed as
+%                     "Patients (pathological ECG)" — Arrhythmia, SVA,
+%                     ST Change, European ST-T, Long-Term records.
+%   'sudden_death'  → 'SuddenDeath', displayed as "Sudden death" —
+%                     BIH Sudden Death records.
 
     fprintf('Processing QTDB (three-group split)...\n');
 
@@ -263,11 +272,11 @@ function results = analyze_qtdb_three_groups(beats, n_bootstrap, inv_e)
     n_pathological = length(patho_ratios);
     n_fatal = length(fatal_ratios);
 
-    fprintf('  Clinically normal: n = %d (MIT-BIH Normal Sinus Rhythm)\n', n_normal);
-    fprintf('  Pathological:      n = %d (Arrhythmia, SVA, ST, European, Long-Term)\n', n_pathological);
-    fprintf('  Sudden death:      n = %d (BIH Sudden Death)\n', n_fatal);
+    fprintf('  Patients (non-pathological ECG): n = %d (MIT-BIH Normal Sinus Rhythm)\n', n_normal);
+    fprintf('  Patients (pathological ECG):     n = %d (Arrhythmia, SVA, ST, European, Long-Term)\n', n_pathological);
+    fprintf('  Sudden death:                    n = %d (BIH Sudden Death)\n', n_fatal);
 
-    %% Statistics — Clinically normal
+    %% Statistics — Patients (non-pathological ECG)
     if n_normal >= 3
         [mode_normal, ci_normal] = bootstrap_mode(normal_ratios, n_bootstrap);
     else
@@ -275,16 +284,16 @@ function results = analyze_qtdb_three_groups(beats, n_bootstrap, inv_e)
     end
     pct_normal_above = 100 * sum(normal_ratios > inv_e) / n_normal;
 
-    fprintf('\n  CLINICALLY NORMAL:\n');
+    fprintf('\n  PATIENTS (NON-PATHOLOGICAL ECG):\n');
     fprintf('    Mode: %.4f [%.4f, %.4f]\n', mode_normal, ci_normal(1), ci_normal(2));
     fprintf('    Mean: %.4f, Median: %.4f\n', mean(normal_ratios), median(normal_ratios));
     fprintf('    %% > 1/e: %.1f%%\n', pct_normal_above);
 
-    %% Statistics — Pathological
+    %% Statistics — Patients (pathological ECG)
     [mode_pathological, ci_pathological] = bootstrap_mode(patho_ratios, n_bootstrap);
     pct_pathological_above = 100 * sum(patho_ratios > inv_e) / n_pathological;
 
-    fprintf('\n  PATHOLOGICAL:\n');
+    fprintf('\n  PATIENTS (PATHOLOGICAL ECG):\n');
     fprintf('    Mode: %.4f [%.4f, %.4f]\n', mode_pathological, ci_pathological(1), ci_pathological(2));
     fprintf('    Mean: %.4f, Median: %.4f\n', mean(patho_ratios), median(patho_ratios));
     fprintf('    %% > 1/e: %.1f%%\n', pct_pathological_above);
@@ -301,15 +310,15 @@ function results = analyze_qtdb_three_groups(beats, n_bootstrap, inv_e)
     %% Pairwise comparisons
     if n_normal >= 3 && n_pathological >= 3
         p_normal_vs_patho = ranksum(normal_ratios, patho_ratios);
-        fprintf('\n  Clinically normal vs Pathological: p = %.2e%s\n', ...
+        fprintf('\n  Patients (non-pathological ECG) vs Patients (pathological ECG): p = %.2e%s\n', ...
                 p_normal_vs_patho, stars(p_normal_vs_patho));
     else
         p_normal_vs_patho = NaN;
-        fprintf('\n  Clinically normal vs Pathological: insufficient n\n');
+        fprintf('\n  Patients (non-pathological ECG) vs Patients (pathological ECG): insufficient n\n');
     end
 
     p_patho_vs_fatal = ranksum(patho_ratios, fatal_ratios);
-    fprintf('  Pathological vs Sudden death:      p = %.2e%s\n', ...
+    fprintf('  Patients (pathological ECG) vs Sudden death:                    p = %.2e%s\n', ...
             p_patho_vs_fatal, stars(p_patho_vs_fatal));
 
     %% Kruskal-Wallis (overall three-group test)

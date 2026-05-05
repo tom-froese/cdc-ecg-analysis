@@ -73,8 +73,8 @@ function results = analyze_code15()
     n_path = sum(all_data.Group == 'Pathological');
 
     fprintf('Valid subjects: %d\n', height(all_data));
-    fprintf('  ClinicallyNormal: %d\n', n_cn);
-    fprintf('  Pathological:     %d\n', n_path);
+    fprintf('  Patients (non-pathological ECG): %d\n', n_cn);
+    fprintf('  Patients (pathological ECG):     %d\n', n_path);
     fprintf('  Age range: %.0f-%.0f (Mean: %.1f +/- %.1f)\n', ...
         min(all_data.Age), max(all_data.Age), mean(all_data.Age), std(all_data.Age));
 
@@ -111,39 +111,41 @@ function results = analyze_code15()
     fprintf('================================================================\n\n');
 
     idx = strcmp(coeffs.Properties.RowNames, '(Intercept)');
-    fprintf('Intercept (ClinicallyNormal, Female, mean age): %.4f (SE=%.4f, p=%.2e)\n\n', ...
+    fprintf('Intercept (Patients (non-pathological ECG), Female, mean age): %.4f (SE=%.4f, p=%.2e)\n\n', ...
         coeffs.Estimate(idx), coeffs.SE(idx), coeffs.pValue(idx));
 
     idx = strcmp(coeffs.Properties.RowNames, 'Group_Pathological');
-    fprintf('Pathological vs ClinicallyNormal: beta=%.4f, SE=%.4f, p=%.2e\n\n', ...
+    fprintf('Patients (pathological ECG) vs Patients (non-pathological ECG): beta=%.4f, SE=%.4f, p=%.2e\n\n', ...
         coeffs.Estimate(idx), coeffs.SE(idx), coeffs.pValue(idx));
 
     idx_age = strcmp(coeffs.Properties.RowNames, 'Age_c');
-    fprintf('Age slope (ClinicallyNormal): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
+    fprintf('Age slope (Patients (non-pathological ECG)): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
         coeffs.Estimate(idx_age), coeffs.SE(idx_age), coeffs.pValue(idx_age));
 
     idx_age_p = strcmp(coeffs.Properties.RowNames, 'Age_c:Group_Pathological');
     if any(idx_age_p)
-        fprintf('Additional slope (Pathological): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
+        fprintf('Additional slope (Patients (pathological ECG)): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
             coeffs.Estimate(idx_age_p), coeffs.SE(idx_age_p), coeffs.pValue(idx_age_p));
     end
 
     %% Marginal means
+    group_ids    = {'ClinicallyNormal', 'Pathological'};
+    group_labels = {'Patients (non-pathological ECG)', 'Patients (pathological ECG)'};
     fprintf('\nObserved means:\n');
-    for g = {'ClinicallyNormal', 'Pathological'}
-        mask = all_data.Group == g{1};
-        fprintf('  %-20s  %.4f +/- %.4f  (N=%d)\n', ...
-            g{1}, mean(all_data.CDC(mask)), std(all_data.CDC(mask)), sum(mask));
+    for gi = 1:numel(group_ids)
+        mask = all_data.Group == group_ids{gi};
+        fprintf('  %-32s  %.4f +/- %.4f  (N=%d)\n', ...
+            group_labels{gi}, mean(all_data.CDC(mask)), std(all_data.CDC(mask)), sum(mask));
     end
-    fprintf('  1/e reference:       %.4f\n', inv_e);
+    fprintf('  1/e reference:                    %.4f\n', inv_e);
 
     %% One-sample t-tests against 1/e
     fprintf('\nOne-sample t-tests vs 1/e:\n');
-    for g = {'ClinicallyNormal', 'Pathological'}
-        mask = all_data.Group == g{1};
+    for gi = 1:numel(group_ids)
+        mask = all_data.Group == group_ids{gi};
         cdc_vals = all_data.CDC(mask);
         [~, p, ~, tstats] = ttest(cdc_vals, inv_e);
-        fprintf('  %-20s  t(%d)=%.3f, p=%.2e\n', g{1}, tstats.df, tstats.tstat, p);
+        fprintf('  %-32s  t(%d)=%.3f, p=%.2e\n', group_labels{gi}, tstats.df, tstats.tstat, p);
     end
 
     %% Save

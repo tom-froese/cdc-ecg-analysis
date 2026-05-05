@@ -5,10 +5,14 @@ function results = analyze_hierarchical_model()
 %
 %   CDC ~ Age_c * Group * Sex + (1|Dataset)
 %
-% where Group has three levels:
-%   HealthyControl    - Verified healthy volunteers (LUDB, PTB, Fantasia, Autonomic Aging)
-%   ClinicallyNormal  - Hospital patients with normal ECG findings (PTB-XL)
-%   Pathological      - Hospital patients with cardiac pathology
+% where Group has three levels (internal categorical → display label):
+%   HealthyControl    → "Healthy Control" (HC)
+%                       Verified healthy volunteers (LUDB, PTB,
+%                       Fantasia, Autonomic Aging).
+%   ClinicallyNormal  → "Patients (non-pathological ECG)" (CN)
+%                       Hospital patients with normal ECG findings (PTB-XL).
+%   Pathological      → "Patients (pathological ECG)" (Path)
+%                       Hospital patients with cardiac pathology.
 %
 % Dataset is a random intercept absorbing annotation-method variance and
 % other between-database differences.
@@ -80,9 +84,9 @@ function results = analyze_hierarchical_model()
     all_data.Age_c = all_data.Age - mean(all_data.Age);
 
     fprintf('\nTotal subjects: %d\n', height(all_data));
-    fprintf('   HealthyControl:   %d\n', sum(all_data.Group == 'HealthyControl'));
-    fprintf('   ClinicallyNormal: %d\n', sum(all_data.Group == 'ClinicallyNormal'));
-    fprintf('   Pathological:     %d\n\n', sum(all_data.Group == 'Pathological'));
+    fprintf('   Healthy Control:                 %d\n', sum(all_data.Group == 'HealthyControl'));
+    fprintf('   Patients (non-pathological ECG): %d\n', sum(all_data.Group == 'ClinicallyNormal'));
+    fprintf('   Patients (pathological ECG):     %d\n\n', sum(all_data.Group == 'Pathological'));
 
     % Per-dataset breakdown
     fprintf('Per-dataset breakdown:\n');
@@ -126,16 +130,16 @@ function results = analyze_hierarchical_model()
     fprintf('KEY RESULTS\n');
     fprintf('================================================================\n\n');
 
-    fprintf('Intercept (HealthyControl, Female, mean age): %.4f (SE=%.4f, p=%.2e)\n\n', ...
+    fprintf('Intercept (Healthy Control, Female, mean age): %.4f (SE=%.4f, p=%.2e)\n\n', ...
         stats.Estimate(idx_intercept), stats.SE(idx_intercept), stats.pValue(idx_intercept));
 
-    fprintf('Group effects (relative to HealthyControl):\n');
-    fprintf('  ClinicallyNormal: beta=%.4f, SE=%.4f, p=%.2e\n', ...
+    fprintf('Group effects (relative to Healthy Control):\n');
+    fprintf('  Patients (non-pathological ECG): beta=%.4f, SE=%.4f, p=%.2e\n', ...
         stats.Estimate(idx_cn), stats.SE(idx_cn), stats.pValue(idx_cn));
-    fprintf('  Pathological:     beta=%.4f, SE=%.4f, p=%.2e\n\n', ...
+    fprintf('  Patients (pathological ECG):     beta=%.4f, SE=%.4f, p=%.2e\n\n', ...
         stats.Estimate(idx_path), stats.SE(idx_path), stats.pValue(idx_path));
 
-    fprintf('Age slope (HealthyControl): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
+    fprintf('Age slope (Healthy Control): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
         stats.Estimate(idx_age), stats.SE(idx_age), stats.pValue(idx_age));
     fprintf('Sex (Male vs Female):       %.4f   (SE=%.4f, p=%.2e)\n\n', ...
         stats.Estimate(idx_sex), stats.SE(idx_sex), stats.pValue(idx_sex));

@@ -222,8 +222,8 @@ function results = analyze_cdc_vs_hr()
     Group_str(~is_cn) = "Pathological";
 
     fprintf('  %d unique subjects\n', length(subject_ids));
-    fprintf('    ClinicallyNormal: %d\n', sum(is_cn));
-    fprintf('    Pathological:     %d\n', sum(~is_cn));
+    fprintf('    Patients (non-pathological ECG): %d\n', sum(is_cn));
+    fprintf('    Patients (pathological ECG):     %d\n', sum(~is_cn));
 
     beat_data = table(Record_id, subject_ids, Age, CDC, HR, Sex_str, Group_str, ...
         'VariableNames', {'record_id', 'unique_subject_id', 'Age', 'CDC', ...

@@ -52,7 +52,7 @@ function results = analyze_sex_stratified()
     %  ================================================================
 
     groups       = {'HealthyControl', 'ClinicallyNormal', 'Pathological'};
-    group_labels = {'Healthy Control', 'Clinically Normal', 'Pathological'};
+    group_labels = {'Healthy Control', 'Patients (non-pathological ECG)', 'Patients (pathological ECG)'};
     sexes        = {'F', 'M'};
     sex_labels   = {'Female', 'Male'};
 

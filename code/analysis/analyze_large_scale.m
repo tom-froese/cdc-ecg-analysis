@@ -10,10 +10,12 @@ function results = analyze_large_scale()
 %   4. PTB-XL          - CN vs Path: ECGDeli validated algorithm
 %
 % Group classification follows the hierarchical model (analyze_hierarchical_model.m):
-%   Healthy Control   (HC)  = Fantasia, Autonomic Aging, PTB 'healthy'
-%                             (all verified volunteers per source documentation)
-%   Clinically Normal (CN)  = PTB-XL 'healthy' (hospital patients, normal ECG)
-%   Pathological      (Path) = PTB, PTB-XL 'pathological'
+%   Healthy Control                    (HC)   = Fantasia, Autonomic Aging,
+%                                               PTB 'healthy' (all verified
+%                                               volunteers per source docs).
+%   Patients (non-pathological ECG)    (CN)   = PTB-XL 'healthy' (hospital
+%                                               patients with normal ECG).
+%   Patients (pathological ECG)        (Path) = PTB, PTB-XL 'pathological'.
 %
 % Purpose: Confirm the gold-standard findings at scale. These datasets
 % provide statistical power that the small manually annotated databases
@@ -92,17 +94,17 @@ function results = analyze_large_scale()
 
     aa_results = analyze_healthy_cohort(aa_beats, 'Autonomic Aging', n_bootstrap, inv_e, aa_excluded);
 
-    %% Analysis 3: PTB - Healthy Control vs Pathological
+    %% Analysis 3: PTB - Healthy Control vs Patients (pathological ECG)
     fprintf('\n================================================================\n');
-    fprintf('PTB: HEALTHY CONTROL vs PATHOLOGICAL\n');
+    fprintf('PTB: HEALTHY CONTROL vs PATIENTS (PATHOLOGICAL ECG)\n');
     fprintf('(Manual T-end, algorithmic R-peak)\n');
     fprintf('================================================================\n');
 
     ptb_results = analyze_hc_vs_pathological(ptb_beats, 'PTB', n_bootstrap, inv_e, ptb_excluded);
 
-    %% Analysis 4: PTB-XL - Clinically normal vs Pathological
+    %% Analysis 4: PTB-XL - Patients (non-pathological ECG) vs Patients (pathological ECG)
     fprintf('\n================================================================\n');
-    fprintf('PTB-XL: CLINICALLY NORMAL vs PATHOLOGICAL\n');
+    fprintf('PTB-XL: PATIENTS (NON-PATHOLOGICAL ECG) vs PATIENTS (PATHOLOGICAL ECG)\n');
     fprintf('(ECGDeli automatic annotation, N ~ 18,000 patients)\n');
     fprintf('================================================================\n');
 
@@ -113,36 +115,36 @@ function results = analyze_large_scale()
     fprintf('LARGE-SCALE SUMMARY\n');
     fprintf('================================================================\n\n');
 
-    fprintf('                              Mode      95%% CI          n      %% > 1/e\n');
-    fprintf('------------------------------------------------------------------------\n');
-    fprintf('Fantasia HC                   %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('                                              Mode      95%% CI          n      %% > 1/e\n');
+    fprintf('----------------------------------------------------------------------------------------\n');
+    fprintf('Fantasia HC                                   %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             fantasia_results.mode_all, fantasia_results.ci_all(1), ...
             fantasia_results.ci_all(2), fantasia_results.n_all, ...
             fantasia_results.pct_above);
-    fprintf('Autonomic Aging HC            %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
+    fprintf('Autonomic Aging HC                            %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
             aa_results.mode_all, aa_results.ci_all(1), ...
             aa_results.ci_all(2), aa_results.n_all, aa_results.pct_above);
-    fprintf('------------------------------------------------------------------------\n');
+    fprintf('----------------------------------------------------------------------------------------\n');
     if ~isnan(ptb_results.mode_hc)
-        fprintf('PTB Healthy control           %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+        fprintf('PTB Healthy control                           %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
                 ptb_results.mode_hc, ptb_results.ci_hc(1), ...
                 ptb_results.ci_hc(2), ptb_results.n_hc, ...
                 ptb_results.pct_hc_above);
     end
-    fprintf('PTB Pathological              %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
+    fprintf('PTB Patients (pathological ECG)               %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
             ptb_results.mode_path, ptb_results.ci_path(1), ...
             ptb_results.ci_path(2), ptb_results.n_path, ...
             ptb_results.pct_path_above);
-    fprintf('------------------------------------------------------------------------\n');
-    fprintf('PTB-XL Clinically normal      %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
+    fprintf('----------------------------------------------------------------------------------------\n');
+    fprintf('PTB-XL Patients (non-pathological ECG)        %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
             ptbxl_results.mode_cn, ptbxl_results.ci_cn(1), ...
             ptbxl_results.ci_cn(2), ptbxl_results.n_cn, ...
             ptbxl_results.pct_cn_above);
-    fprintf('PTB-XL Pathological           %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
+    fprintf('PTB-XL Patients (pathological ECG)            %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
             ptbxl_results.mode_path, ptbxl_results.ci_path(1), ...
             ptbxl_results.ci_path(2), ptbxl_results.n_path, ...
             ptbxl_results.pct_path_above);
-    fprintf('------------------------------------------------------------------------\n');
+    fprintf('----------------------------------------------------------------------------------------\n');
     fprintf('Reference: 1/e = %.4f\n', inv_e);
     fprintf('================================================================\n');
 
@@ -215,10 +217,12 @@ function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_
 end
 
 function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
-% ANALYZE_CN_VS_PATHOLOGICAL - Two-group analysis: Clinically Normal vs Pathological
+% ANALYZE_CN_VS_PATHOLOGICAL - Two-group analysis: CN vs Path
+%   ("Patients (non-pathological ECG)" vs "Patients (pathological ECG)").
 %
-% Used for PTB-XL. The 'healthy' group label denotes hospital patients
-% with normal ECG findings — Clinically Normal, not Healthy Control.
+% Used for PTB-XL. The 'healthy' source-data label denotes hospital
+% patients with normal ECG findings — the CN cohort, not Healthy
+% Control (which is reserved for verified volunteers).
 
     fprintf('Processing %s...\n', dataset_name);
 
@@ -260,8 +264,8 @@ function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, 
     n_cn   = length(cn_ratios);
     n_path = length(path_ratios);
 
-    fprintf('  Clinically normal: n = %d\n', n_cn);
-    fprintf('  Pathological:      n = %d\n', n_path);
+    fprintf('  Patients (non-pathological ECG): n = %d\n', n_cn);
+    fprintf('  Patients (pathological ECG):     n = %d\n', n_path);
 
     if n_cn >= 3
         [mode_cn, ci_cn] = bootstrap_mode(cn_ratios, n_bootstrap);
@@ -300,10 +304,12 @@ function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, 
 end
 
 function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
-% ANALYZE_HC_VS_PATHOLOGICAL - Two-group analysis: Healthy Control vs Pathological
+% ANALYZE_HC_VS_PATHOLOGICAL - Two-group analysis: HC vs Path
+%   ("Healthy Control" vs "Patients (pathological ECG)").
 %
-% Used for PTB. The 'healthy' group label denotes verified healthy
-% volunteers — Healthy Control — per the PhysioNet source documentation.
+% Used for PTB. The 'healthy' source-data label denotes verified
+% healthy volunteers — Healthy Control — per the PhysioNet source
+% documentation.
 
     fprintf('Processing %s...\n', dataset_name);
 
@@ -345,8 +351,8 @@ function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, 
     n_hc   = length(hc_ratios);
     n_path = length(path_ratios);
 
-    fprintf('  Healthy control: n = %d\n', n_hc);
-    fprintf('  Pathological:    n = %d\n', n_path);
+    fprintf('  Healthy control:             n = %d\n', n_hc);
+    fprintf('  Patients (pathological ECG): n = %d\n', n_path);
 
     if n_hc >= 3
         [mode_hc, ci_hc] = bootstrap_mode(hc_ratios, n_bootstrap);
