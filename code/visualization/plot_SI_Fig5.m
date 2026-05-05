@@ -1,366 +1,253 @@
 function plot_SI_Fig5()
-% PLOT_SI_FIG5 - Supplementary Figure 5: CDC distributions in large-scale
-%   databases with algorithmic or hybrid annotation
+% PLOT_SI_FIG5 - Supplementary Figure 5: Bland-Altman agreement between
+%   automatic and manual annotation pipelines
 %
 % Four-panel figure:
-%   a: Fantasia        — Healthy Controls (n=40, verified volunteers)
-%   b: Autonomic Aging — Healthy Controls (n~1,100, verified volunteers)
-%   c: PTB             — Healthy Control vs Pathological (manual T-end)
-%   d: PTB-XL          — Clinically Normal vs Pathological (ECGDeli)
+%   a  R-peak timing error (ms) by beat index
+%   b  T-end timing error (ms) vs manual CDC
+%   c  CDC agreement (beat-level Bland-Altman)
+%   d  CDC agreement (subject-level median Bland-Altman)
 %
-% X-axis: ΔCDC from theoretical optimum (1/e ≈ 0.3679).
-% Subject-level median CDC (computed in analyze_large_scale.m with
-% uniform quality filters applied).
+% Data source: validation_results.mat (via analyze_gold_standard_validation.m)
 %
-% Colour palette matches main figures (plot_Fig1.m):
-%   Blue    [0.20 0.55 0.85]  = Healthy Control (verified volunteers)
-%   Green   [0.25 0.70 0.35]  = Clinically Normal (hospital patients, normal ECG)
-%   Red     [0.85 0.25 0.20]  = Pathological
+% Nature Aging formatting: double-column (183 mm), bold lowercase
+%   panel labels outside axes, 7-pt tick labels, no sgtitle.
 %
-% Group classification follows the hierarchical model:
-%   Fantasia, Autonomic Aging, PTB 'healthy' → HC (Blue)
-%   PTB-XL 'healthy'                         → CN (Green)
-%   PTB, PTB-XL other                        → Pathological (Red)
+% Figure export uses print() with -painters renderer and savefig(),
+% which are stable across MATLAB versions and avoid the rendering-engine
+% crashes that exportgraphics can trigger with large scatter plots.
 %
-% Data source: large_scale_results.mat (via analyze_large_scale.m)
-%
-% Tom Froese, OIST Embodied Cognitive Science Unit
+% Tom Froese, OIST Embodied Cognitive Science Unit, March 2026
 
     paths = config();
-    inv_e = 1 / exp(1);
 
     %% ================================================================
-    %  LOAD PRECOMPUTED RESULTS
+    %  LOAD DATA
     %  ================================================================
-    S = load(fullfile(paths.results, 'large_scale_results.mat'), 'results');
-    results = S.results;
 
-    %% ================================================================
-    %  COLOUR PALETTE (matches main figures)
-    %  ================================================================
-    col_hc   = [0.20 0.55 0.85];   % blue  — healthy controls
-    col_cn   = [0.25 0.70 0.35];   % green — clinically normal
-    col_path = [0.85 0.25 0.20];   % red   — pathological
-
-    %% ================================================================
-    %  FIGURE SETUP — Nature Aging formatting
-    %  ================================================================
-    %  120 mm width, four-panel stacked layout.
-
-    fig_w_cm = 12.0;
-    fig_h_cm = 22.0;
-
-    fig = figure('Color', 'w', 'Units', 'centimeters', ...
-        'Position', [2 1 fig_w_cm fig_h_cm]);
-
-    % Font sizes (Nature minimum: 5 pt)
-    ax_fs    = 7;    % tick labels
-    lab_fs   = 8;    % axis labels
-    title_fs = 8;    % panel titles
-    panel_fs = 10;   % panel letters
-    leg_fs   = 6;    % legend
-
-    % Histogram and KDE parameters
-    edges = (0.20:0.01:0.65) - inv_e;   % ΔCDC bin edges
-    x_limits = [0.20 - inv_e, 0.65 - inv_e];
-    kde_pts = 500;
-
-    % Panel labels
-    panel_letters = {'a', 'b', 'c', 'd'};
-
-    %% ================================================================
-    %  PANEL (a): Fantasia — Healthy Controls
-    %  ================================================================
-    ax1 = subplot(4, 1, 1);
-    hold on; box on;
-
-    fant = results.fantasia;
-    d_fant = fant.all_ratios - inv_e;
-    mode_fant_d = fant.mode_all - inv_e;
-
-    histogram(d_fant, edges, 'FaceColor', col_hc, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    [f, x] = ksdensity(d_fant, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
-
-    yl = ylim;
-    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-    if ~isnan(mode_fant_d)
-        plot(mode_fant_d * [1 1], [0 yl(2)], '--', ...
-             'Color', col_hc * 0.7, 'LineWidth', 1.0);
+    mat_file = fullfile(paths.results, 'validation_results.mat');
+    if ~exist(mat_file, 'file')
+        error(['validation_results.mat not found.\n' ...
+               'Run analyze_gold_standard_validation() first.']);
     end
 
-    ylabel('Density', 'FontSize', lab_fs);
-    title('Fantasia: healthy volunteers (ages 21–85)', ...
-          'FontSize', title_fs, 'FontWeight', 'bold');
+    S = load(mat_file, 'results');
+    a = S.results.ludb;
+    b = S.results.qtdb;
 
-    ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg1 = legend(ph, {sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ...
-           fant.n_all, mode_fant_d)}, ...
-           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
-    set(leg1, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
-
-    xlim(x_limits); grid on;
-    xlabel('');  
-    set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
-
-    text(0.03, 0.88, {'Database R-peaks,', 'tangent T-end'}, ...
-         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
-    text(-0.12, 1.06, ['\bf' panel_letters{1}], 'Units', 'normalized', ...
-        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    hold off;
+    fprintf('\nSupplementary Figure 5 — data loaded:\n');
+    fprintf('  LUDB: %d matched R-peaks, %d matched T-ends, %d subjects\n', ...
+        a.n_matched_r, a.n_matched_t, a.subj_n);
+    fprintf('  QTDB: %d matched R-peaks, %d matched T-ends, %d subjects\n', ...
+        b.n_matched_r, b.n_matched_t, b.subj_n);
 
     %% ================================================================
-    %  PANEL (b): Autonomic Aging — Healthy Controls
+    %  FIGURE SETUP
     %  ================================================================
-    ax2 = subplot(4, 1, 2);
-    hold on; box on;
 
-    aa = results.autonomic_aging;
-    d_aa = aa.all_ratios - inv_e;
-    mode_aa_d = aa.mode_all - inv_e;
+    % Nature double-column: 183 mm wide.  Aspect ~ 16:9 for 4 panels.
+    fig_w_mm = 183;
+    fig_h_mm = 110;
+    fig_w_in = fig_w_mm / 25.4;
+    fig_h_in = fig_h_mm / 25.4;
 
-    histogram(d_aa, edges, 'FaceColor', col_hc, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    [f, x] = ksdensity(d_aa, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
+    fig = figure('Units', 'inches', 'Position', [1 1 fig_w_in fig_h_in], ...
+                 'Color', 'w', 'Visible', 'on');
 
-    yl = ylim;
-    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-    if ~isnan(mode_aa_d)
-        plot(mode_aa_d * [1 1], [0 yl(2)], '--', ...
-             'Color', col_hc * 0.7, 'LineWidth', 1.0);
-    end
+    % Font sizes for final print dimensions (Nature minimum: 5 pt)
+    ax_fs  = 7;    % axis tick labels
+    lab_fs = 8;    % axis labels
+    ttl_fs = 9;    % panel titles
+    ann_fs = 7;    % annotation text (bias, MAE, r)
+    leg_fs = 6;    % legend
 
-    ylabel('Density', 'FontSize', lab_fs);
-    title('Autonomic Aging: healthy volunteers (ages 18–92)', ...
-          'FontSize', title_fs, 'FontWeight', 'bold');
-
-    pa = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg2 = legend(pa, {sprintf('Healthy controls (n=%s, \\Delta=%+.3f)', ...
-           format_comma(aa.n_all), mode_aa_d)}, ...
-           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
-    set(leg2, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
-
-    xlim(x_limits); grid on;
-    xlabel('');  
-    set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
-
-    text(0.03, 0.88, {'Fully automatic', '(Pan-Tompkins + tangent)'}, ...
-         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
-    text(-0.12, 1.06, ['\bf' panel_letters{2}], 'Units', 'normalized', ...
-        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    hold off;
+    % Colours: LUDB blue, QTDB orange (consistent with SI Fig 4)
+    c_ludb = [0.20 0.47 0.76];
+    c_qtdb = [0.85 0.40 0.25];
+    ms = 4;   % marker size (points)
 
     %% ================================================================
-    %  PANEL (c): PTB — Healthy Control vs Pathological
+    %  PANEL a: R-peak timing error
     %  ================================================================
-    ax3 = subplot(4, 1, 3);
-    hold on; box on;
 
-    ptb = results.ptb;
-
-    if ptb.n_hc >= 3
-        d_hc = ptb.hc_ratios - inv_e;
-        mode_hc_d = ptb.mode_hc - inv_e;
-        histogram(d_hc, edges, 'FaceColor', col_hc, ...
-                  'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-        [f, x] = ksdensity(d_hc, 'NumPoints', kde_pts);
-        plot(x, f, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
+    ax1 = subplot(2,2,1); hold on;
+    n1 = length(a.r_err_ms);
+    n2 = length(b.r_err_ms);
+    if n1 > 0
+        scatter((1:n1)', a.r_err_ms, ms, c_ludb, 'filled', ...
+            'MarkerFaceAlpha', 0.4, 'DisplayName', 'LUDB');
     end
-
-    d_path = ptb.path_ratios - inv_e;
-    mode_path_d = ptb.mode_path - inv_e;
-    histogram(d_path, edges, 'FaceColor', col_path, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
-    [f, x] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_path * 0.7, 'LineWidth', 1.8);
-
-    yl = ylim;
-    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-
-    if ptb.n_hc >= 3 && ~isnan(mode_hc_d)
-        plot(mode_hc_d * [1 1], [0 yl(2)], '--', ...
-             'Color', col_hc * 0.7, 'LineWidth', 1.0);
+    if n2 > 0
+        scatter(n1+(1:n2)', b.r_err_ms, ms, c_qtdb, 'filled', ...
+            'MarkerFaceAlpha', 0.4, 'DisplayName', 'QTDB');
     end
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
+    d_r = [a.r_err_ms; b.r_err_ms];
+    draw_ba_lines(d_r);
+    ylabel('R-peak error (ms)', 'FontSize', lab_fs);
+    xlabel('Beat index', 'FontSize', lab_fs);
+    title('a  R-peak (beat-level)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
+    set(gca, 'FontSize', ax_fs, 'Box', 'on');
+    annotate_panel(d_r, [], ann_fs);
 
-    ylabel('Density', 'FontSize', lab_fs);
-    title('PTB: ages 17–87', ...
-          'FontSize', title_fs, 'FontWeight', 'bold');
+    %% ================================================================
+    %  PANEL b: T-end timing error vs manual CDC
+    %  ================================================================
 
-    % Legend
-    leg_items = gobjects(2, 1);
-    leg_strs = cell(2, 1);
-    if ptb.n_hc >= 3 && ~isnan(ptb.mode_hc)
-        leg_items(1) = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Healthy control (n=%d, \\Delta=%+.3f)', ...
-                              ptb.n_hc, mode_hc_d);
+    ax2 = subplot(2,2,2); hold on;
+    if ~isempty(a.t_err_ms) && length(a.cdc_man) == length(a.t_err_ms)
+        scatter(a.cdc_man, a.t_err_ms, ms, c_ludb, 'filled', ...
+            'MarkerFaceAlpha', 0.4, 'DisplayName', 'LUDB');
+    end
+    if ~isempty(b.t_err_ms) && length(b.cdc_man) == length(b.t_err_ms)
+        scatter(b.cdc_man, b.t_err_ms, ms, c_qtdb, 'filled', ...
+            'MarkerFaceAlpha', 0.4, 'DisplayName', 'QTDB');
+    end
+    d_t = [a.t_err_ms; b.t_err_ms];
+    draw_ba_lines(d_t);
+    xlabel('Manual CDC', 'FontSize', lab_fs);
+    ylabel('T-end error (ms)', 'FontSize', lab_fs);
+    title('b  T-end (beat-level)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
+    set(gca, 'FontSize', ax_fs, 'Box', 'on');
+    annotate_panel(d_t, [], ann_fs);
+
+    %% ================================================================
+    %  PANEL c: CDC Bland-Altman (beat-level)
+    %  ================================================================
+
+    ax3 = subplot(2,2,3); hold on;
+    cm = [a.cdc_man; b.cdc_man];
+    ca = [a.cdc_aut; b.cdc_aut];
+    if length(cm) == length(ca) && ~isempty(cm)
+        mx = (cm + ca) / 2;
+        df = ca - cm;
+        n1c = length(a.cdc_man);
+        if n1c > 0
+            scatter(mx(1:n1c), df(1:n1c), ms, c_ludb, 'filled', ...
+                'MarkerFaceAlpha', 0.4, 'DisplayName', 'LUDB');
+        end
+        if ~isempty(b.cdc_man)
+            scatter(mx(n1c+1:end), df(n1c+1:end), ms, c_qtdb, 'filled', ...
+                'MarkerFaceAlpha', 0.4, 'DisplayName', 'QTDB');
+        end
+        draw_ba_lines(df);
+        r_val = corr(cm, ca);
     else
-        leg_items(1) = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Healthy control (n=%d)', ptb.n_hc);
+        df = []; r_val = NaN;
     end
-    leg_items(2) = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg_strs{2} = sprintf('Pathological (n=%d, \\Delta=%+.3f)', ...
-                           ptb.n_path, mode_path_d);
-    leg3 = legend(leg_items, leg_strs, 'Location', 'northeast', ...
-           'FontSize', leg_fs, 'Box', 'on');
-    set(leg3, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
-
-    xlim(x_limits); grid on;
-    xlabel('');  
-    set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
-
-    add_p_annotation(ptb.p_value, ax_fs);
-    text(0.03, 0.88, {'Manual T-end (5 referees),', 'Pan-Tompkins R-peak'}, ...
-         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
-    text(-0.12, 1.06, ['\bf' panel_letters{3}], 'Units', 'normalized', ...
-        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    hold off;
+    xlabel('Mean CDC', 'FontSize', lab_fs);
+    ylabel('\DeltaCDC', 'FontSize', lab_fs);
+    title('c  CDC (beat-level)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
+    legend('Location', 'southeast', 'FontSize', leg_fs);
+    set(gca, 'FontSize', ax_fs, 'Box', 'on');
+    annotate_panel(df, r_val, ann_fs);
 
     %% ================================================================
-    %  PANEL (d): PTB-XL — Clinically Normal vs Pathological
+    %  PANEL d: CDC Bland-Altman (subject-level median)
     %  ================================================================
-    ax4 = subplot(4, 1, 4);
-    hold on; box on;
 
-    ptbxl = results.ptbxl;
-
-    d_cn = ptbxl.cn_ratios - inv_e;
-    mode_cn_d = ptbxl.mode_cn - inv_e;
-    d_path = ptbxl.path_ratios - inv_e;
-    mode_path_d = ptbxl.mode_path - inv_e;
-
-    histogram(d_cn, edges, 'FaceColor', col_cn, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    histogram(d_path, edges, 'FaceColor', col_path, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
-
-    [f, x] = ksdensity(d_cn, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
-    [f, x] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_path * 0.7, 'LineWidth', 1.8);
-
-    yl = ylim;
-    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-    plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_cn * 0.7, 'LineWidth', 1.0);
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
-
-    % X-axis label strictly on this bottom panel
-    xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
-           'FontSize', lab_fs);
-    ylabel('Density', 'FontSize', lab_fs);
-    title('PTB-XL: ages 2–90', ...
-          'FontSize', title_fs, 'FontWeight', 'bold');
-
-    % Legend
-    ph = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg4 = legend([ph, pp], { ...
-        sprintf('Clinically normal (n=%s, \\Delta=%+.3f)', ...
-                format_comma(ptbxl.n_cn), mode_cn_d), ...
-        sprintf('Pathological (n=%s, \\Delta=%+.3f)', ...
-                format_comma(ptbxl.n_path), mode_path_d)}, ...
-        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
-    set(leg4, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
-
-    xlim(x_limits); grid on;
-    set(ax4, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02]);
-
-    add_p_annotation(ptbxl.p_value, ax_fs);
-    text(0.03, 0.88, {'ECGDeli automatic', '(R-peak + T-end)'}, ...
-         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
-    text(-0.12, 1.06, ['\bf' panel_letters{4}], 'Units', 'normalized', ...
-        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    hold off;
-
-    %% ================================================================
-    %  LAYOUT AND SAVE
-    %  ================================================================
-    % Four evenly spaced panels
-    panel_h = 0.19;
-    gap = 0.045;
-    left = 0.14;
-    width = 0.80;
-    bottom_start = 0.06;
-
-    % We explicitly array the axes in order (a, b, c, d) 
-    % to guarantee 'ax1' gets the top slot and 'ax4' gets the bottom slot.
-    all_axes = [ax1, ax2, ax3, ax4];
-    
-    for k = 1:4
-        set(all_axes(k), 'Position', [left, bottom_start + (4-k)*(panel_h + gap), width, panel_h]);
+    ax4 = subplot(2,2,4); hold on;
+    sm = [a.subj_cdc_manual; b.subj_cdc_manual];
+    sa = [a.subj_cdc_auto;   b.subj_cdc_auto];
+    if length(sm) == length(sa) && ~isempty(sm)
+        mx2 = (sm + sa) / 2;
+        df2 = sa - sm;
+        n1s = length(a.subj_cdc_manual);
+        if n1s > 0
+            scatter(mx2(1:n1s), df2(1:n1s), 20, c_ludb, 'filled', ...
+                'MarkerFaceAlpha', 0.6, 'DisplayName', 'LUDB');
+        end
+        if ~isempty(b.subj_cdc_manual)
+            scatter(mx2(n1s+1:end), df2(n1s+1:end), 20, c_qtdb, 'filled', ...
+                'MarkerFaceAlpha', 0.6, 'DisplayName', 'QTDB');
+        end
+        draw_ba_lines(df2);
+        r_val2 = corr(sm, sa);
+    else
+        df2 = []; r_val2 = NaN;
     end
-
-    set(fig, 'PaperUnits', 'centimeters');
-    set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
-    set(fig, 'PaperPosition', [0 0 fig_w_cm fig_h_cm]);
-
-    out_pdf = fullfile(paths.figures, 'SI_Fig5_large_scale.pdf');
-    out_png = fullfile(paths.figures, 'SI_Fig5_large_scale.png');
-    out_fig = fullfile(paths.figures, 'SI_Fig5_large_scale.fig');
-
-    print(fig, out_pdf, '-dpdf', '-painters');
-    print(fig, out_png, '-dpng', '-r300');
-    savefig(fig, out_fig);
-
-    fprintf('\nSupplementary Figure 5 saved:\n');
-    fprintf('  %s  (vector)\n', out_pdf);
-    fprintf('  %s  (raster, 300 dpi)\n', out_png);
-    fprintf('  %s  (editable)\n', out_fig);
+    xlabel('Mean median CDC', 'FontSize', lab_fs);
+    ylabel('\DeltaCDC', 'FontSize', lab_fs);
+    title('d  CDC (subject-level median)', 'FontWeight', 'bold', 'FontSize', ttl_fs);
+    legend('Location', 'southeast', 'FontSize', leg_fs);
+    set(gca, 'FontSize', ax_fs, 'Box', 'on');
+    annotate_panel(df2, r_val2, ann_fs);
 
     %% ================================================================
-    %  CONSOLE SUMMARY (for SI figure legend)
+    %  EXPORT
     %  ================================================================
-    fprintf('\n--- Summary for SI Fig 5 legend ---\n');
-    fprintf('Fantasia:        HC n=%d (mode=%.3f, dCDC=%+.4f)\n', ...
-            fant.n_all, fant.mode_all, fant.mode_all - inv_e);
-    fprintf('Autonomic Aging: HC n=%s (mode=%.3f, dCDC=%+.4f)\n', ...
-            format_comma(aa.n_all), aa.mode_all, aa.mode_all - inv_e);
-    fprintf('PTB:             HC n=%d, Path n=%d, p=%.2e\n', ...
-            ptb.n_hc, ptb.n_path, ptb.p_value);
-    fprintf('PTB-XL:          CN n=%s, Path n=%s, p=%.2e\n', ...
-            format_comma(ptbxl.n_cn), format_comma(ptbxl.n_path), ptbxl.p_value);
+
+    out_pdf = fullfile(paths.figures, 'SI_Fig5_validation.pdf');
+    out_png = fullfile(paths.figures, 'SI_Fig5_validation.png');
+    out_fig = fullfile(paths.figures, 'SI_Fig5_validation.fig');
+
+    fig_w_cm = fig_w_mm / 10;
+    fig_h_cm = fig_h_mm / 10;
+    save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
+
+    fprintf('\nSupplementary Figure 5 saved.\n');
 end
+
 
 %% ========================================================================
-%  LOCAL FUNCTIONS
+%  LOCAL HELPERS
 %  ========================================================================
-function add_p_annotation(p_val, fs)
-    if isnan(p_val), return; end
-    if p_val < 0.001
-        p_str = 'p < 0.001';
+
+function draw_ba_lines(d)
+% DRAW_BA_LINES - Mean bias line + 95% limits of agreement
+    if isempty(d), return; end
+    yline(mean(d), 'k-', 'LineWidth', 1.2);
+    yline(mean(d) + 1.96*std(d), 'k--', 'LineWidth', 0.8);
+    yline(mean(d) - 1.96*std(d), 'k--', 'LineWidth', 0.8);
+    yline(0, 'Color', [0.6 0.6 0.6], 'LineStyle', ':');
+end
+
+
+function annotate_panel(d, r_val, fs)
+% ANNOTATE_PANEL - In-plot text: bias, MAE, and correlation
+    if isempty(d), return; end
+    b = mean(d); m = mean(abs(d));
+    if abs(b) < 1
+        text(0.03, 0.95, sprintf('Bias: %+.4f', b), ...
+            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(0.03, 0.85, sprintf('MAE: %.4f', m), ...
+            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
     else
-        p_str = sprintf('p = %.3f', p_val);
+        text(0.03, 0.95, sprintf('Bias: %+.1f ms', b), ...
+            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
+        text(0.03, 0.85, sprintf('MAE: %.1f ms', m), ...
+            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
     end
-    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
-         'FontSize', fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-end
-
-function s = format_comma(n)
-    s = num2str(n);
-    if n >= 1000
-        idx = length(s) - 2;
-        while idx > 1
-            s = [s(1:idx-1) ',' s(idx:end)];
-            idx = idx - 3;
-        end
+    if ~isempty(r_val) && ~isnan(r_val)
+        text(0.03, 0.75, sprintf('r = %.3f', r_val), ...
+            'Units', 'normalized', 'FontSize', fs, 'VerticalAlignment', 'top');
     end
 end
 
+
+function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
+% SAVE_LARGE_FIGURE - Save figure with many graphic objects without crashing
+%
+% For figures with large scatter plots (>10k points), MATLAB's painters
+% renderer and savefig serialize every point as a vector element, consuming
+% gigabytes of memory and often hanging the process.
+%
+% Strategy:
+%   PNG: exportgraphics (raster, always safe)
+%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
+%        avoids the painters memory explosion while producing a PDF file
+%        that embeds at 300 dpi — sufficient for main figures)
+%   FIG: skipped for large figures (the .fig format stores all graphic
+%        objects and can itself become multi-GB)
+    set(fig, 'PaperUnits', 'centimeters');
+    set(fig, 'PaperSize', [w_cm h_cm]);
+    set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
+    % PNG — raster, always safe
+    exportgraphics(fig, out_png, 'Resolution', 300);
+    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+    % PDF — raster-in-PDF (avoids painters memory explosion)
+    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
+    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+    % FIG — skip for large figures
+    fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
+    close(fig);
+end

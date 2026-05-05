@@ -1,22 +1,17 @@
 function plot_SI_Fig8()
-% PLOT_SI_FIG8 - Supplementary Figure 8: Sex-stratified CDC aging
-%   trajectories confirm 1/e convergence in both sexes
+% PLOT_SI_FIG8 - Supplementary Figure 8: CODE-15% CDC distributions and
+%   age trajectories
 %
-% Four-panel figure:
-%   a: ΔCDC vs Age — Female, all three clinical groups
-%   b: ΔCDC vs Age — Male, all three clinical groups
-%   c: Thermodynamic diastole (ms) vs Age — Female, all groups
-%   d: Thermodynamic diastole (ms) vs Age — Male, all groups
+% Three-panel figure:
+%   a: ΔCDC distribution — Patients (non-pathological ECG) vs Patients (pathological ECG)
+%   b: ΔCDC vs Age by clinical group (scatter + OLS trend)
+%   c: RR interval vs Age by clinical group (scatter + OLS trend)
 %
-% Colour scheme matches Figure 1:
-%   Blue    [0.20 0.55 0.85]  = Healthy Control
-%   Green   [0.25 0.70 0.35]  = Clinically Normal
-%   Red     [0.85 0.25 0.20]  = Pathological
+% Colour palette matches main figures (plot_Fig1.m):
+%   Green   [0.25 0.70 0.35]  = Patients (non-pathological ECG)
+%   Red     [0.85 0.25 0.20]  = Patients (pathological ECG)
 %
-% Uses manual axes positioning and data-coordinate annotations to
-% avoid exportgraphics displacement bugs.
-%
-% Data source: sex_stratified_results.mat (via analyze_sex_stratified.m)
+% Data source: code15_results.mat (via analyze_code15.m)
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit
 
@@ -26,318 +21,260 @@ function plot_SI_Fig8()
     %% ================================================================
     %  LOAD PRECOMPUTED RESULTS
     %  ================================================================
-
-    S = load(fullfile(paths.results, 'sex_stratified_results.mat'));
-
-    D            = S.all_data;
-    groups       = S.groups;
-    group_labels = S.group_labels;
-    sexes        = S.sexes;
-    sex_labels   = S.sex_labels;
-    ols_dcdc     = S.ols_dcdc;
-    ols_dias     = S.ols_dias;
-    desc         = S.desc;
+    S = load(fullfile(paths.results, 'code15_results.mat'), ...
+             'all_data', 'mode_cn', 'mode_path', 'p_ranksum', ...
+             'n_cn', 'n_path', 'inv_e');
+    all_data = S.all_data;
+    all_data.dCDC = all_data.CDC - inv_e;
+    all_data.RR   = 60 ./ all_data.HR;   % bpm → seconds
 
     %% ================================================================
-    %  COLOUR SCHEME (matches Figure 1)
+    %  COLOUR PALETTE (matches main figures)
     %  ================================================================
+    col_cn   = [0.25 0.70 0.35];   % green — clinically normal
+    col_path = [0.85 0.25 0.20];   % red   — pathological
 
-    col_hc   = [0.20 0.55 0.85];
-    col_cn   = [0.25 0.70 0.35];
-    col_path = [0.85 0.25 0.20];
-    colors = [col_hc; col_cn; col_path];
+    %% Group masks
+    is_cn   = all_data.Group == 'ClinicallyNormal';
+    is_path = all_data.Group == 'Pathological';
+
+    n_cn   = S.n_cn;
+    n_path = S.n_path;
+    n_total = n_cn + n_path;
+
+    mode_cn_d   = S.mode_cn - inv_e;
+    mode_path_d = S.mode_path - inv_e;
 
     %% ================================================================
-    %  FIGURE SETUP
+    %  FIGURE SETUP — Nature Aging formatting
     %  ================================================================
-
-    fig_w_cm = 18.3;
-    fig_h_cm = 18.0;
+    fig_w_cm = 18.3;   % double-column width
+    fig_h_cm = 16.0;
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
-        'Position', [2 1 fig_w_cm fig_h_cm]);
+        'Position', [2 2 fig_w_cm fig_h_cm]);
 
-    % Font sizes — enlarged for readability
-    ax_fs    = 9;
-    lab_fs   = 10;
-    title_fs = 11;
-    panel_fs = 13;
-    leg_fs   = 7.5;
-    slope_fs = 7.5;
+    % Font sizes (Nature minimum: 5 pt)
+    ax_fs    = 7;    % tick labels
+    lab_fs   = 8;    % axis labels
+    title_fs = 8;    % panel titles
+    panel_fs = 10;   % panel letters
+    leg_fs   = 6;    % legend
 
     % Scatter aesthetics
     dot_size  = 2;
-    alpha_dot = 0.06;
-    line_w    = 2.0;
+    alpha_dot = 0.04;
 
-    % Shared axis limits
-    age_lim   = [15 95];
-    dcdc_lim  = [-0.08 0.12];
-
-    % Manual panel positions: [left, bottom, width, height]
-    pw = 0.38;
-    ph = 0.35;
-    positions = {
-        [0.10, 0.58, pw, ph],   % a: top-left (Female ΔCDC)
-        [0.57, 0.58, pw, ph],   % b: top-right (Male ΔCDC)
-        [0.10, 0.08, pw, ph],   % c: bottom-left (Female diastole)
-        [0.57, 0.08, pw, ph],   % d: bottom-right (Male diastole)
-    };
-
-    panel_labels = {'a', 'b', 'c', 'd'};
-    ax = gobjects(4, 1);
+    % Shared age limits
+    age_lim = [15 97];
 
     %% ================================================================
-    %  PANELS (a,b): ΔCDC vs Age — Female, then Male
+    %  PANEL (a): ΔCDC distribution
     %  ================================================================
+    ax1 = subplot(2, 2, [1 2]);
+    hold on; box on;
 
-    for si = 1:2
-        ax(si) = axes('Position', positions{si});
-        hold on; box on;
+    edges = (0.20:0.01:0.65) - inv_e;
+    x_limits = [0.20 - inv_e, 0.65 - inv_e];
+    kde_pts = 500;
 
-        sex_mask = (D.Sex == sexes{si});
+    % Histograms
+    histogram(all_data.dCDC(is_cn), edges, 'FaceColor', col_cn, ...
+              'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
+    histogram(all_data.dCDC(is_path), edges, 'FaceColor', col_path, ...
+              'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
 
-        % Reference line at ΔCDC = 0
-        yline(0, 'k--', 'LineWidth', 1.0, 'HandleVisibility', 'off');
+    % KDE overlays
+    [f_cn, x_cn] = ksdensity(all_data.dCDC(is_cn), 'NumPoints', kde_pts);
+    plot(x_cn, f_cn, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
+    [f_path, x_path] = ksdensity(all_data.dCDC(is_path), 'NumPoints', kde_pts);
+    plot(x_path, f_path, 'Color', col_path * 0.7, 'LineWidth', 1.8);
 
-        % Scatter and OLS per group (back-to-front: Path, CN, HC)
-        h_lines = gobjects(3, 1);
-        xfit = linspace(age_lim(1), age_lim(2), 300)';
+    % 1/e reference line
+    yl = ylim;
+    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
 
-        for gi = [3, 2, 1]
-            mask = sex_mask & (D.Group == groups{gi});
+    % Mode dashed lines
+    plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_cn * 0.7, 'LineWidth', 1.0);
+    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_path * 0.7, 'LineWidth', 1.0);
 
-            alpha_g = alpha_dot;
-            if gi == 1, alpha_g = alpha_dot * 2.5; end
-            scatter(D.Age(mask), D.delta_CDC(mask), dot_size, ...
-                colors(gi, :), 'filled', 'MarkerFaceAlpha', alpha_g, ...
-                'HandleVisibility', 'off');
+    xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', 'FontSize', lab_fs);
+    ylabel('Density', 'FontSize', lab_fs);
+    title('CODE-15%: Patients (non-pathological ECG) vs Patients (pathological ECG)', ...
+          'FontSize', title_fs, 'FontWeight', 'bold');
 
-            mdl = fitlm(D.Age(mask), D.delta_CDC(mask));
-            [yfit, ci] = predict(mdl, xfit, 'Alpha', 0.05);
+    % Legend
+    ph = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    legend([ph, pp], { ...
+        sprintf('Patients (non-pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_cn), mode_cn_d), ...
+        sprintf('Patients (pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_path), mode_path_d)}, ...
+        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
 
-            fill([xfit; flipud(xfit)], [ci(:,1); flipud(ci(:,2))], ...
-                colors(gi, :), 'FaceAlpha', 0.10, 'EdgeColor', 'none', ...
-                'HandleVisibility', 'off');
+    xlim(x_limits); grid on;
+    set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
+        'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-            h_lines(gi) = plot(xfit, yfit, '-', ...
-                'Color', colors(gi, :), 'LineWidth', line_w);
-        end
+    % p-value
+    add_p_annotation(S.p_ranksum, ax_fs);
 
-        xlim(age_lim);
-        ylim(dcdc_lim);
-        xlabel('Age (years)', 'FontSize', lab_fs);
-        ylabel('\DeltaCDC from 1/\ite', 'FontSize', lab_fs);
-        title(sex_labels{si}, 'FontSize', title_fs, 'FontWeight', 'bold');
+    % N and method annotations
+    text(0.03, 0.88, sprintf('N = %s patients', format_comma(n_total)), ...
+         'Units', 'normalized', 'FontSize', ax_fs, 'Color', [0.3 0.3 0.3]);
+    text(0.03, 0.78, 'Fully automatic (Pan-Tompkins + tangent)', ...
+         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
 
-        set(ax(si), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-            'TickDir', 'out', 'TickLength', [0.02 0.02]);
+    text(-0.08, 1.06, '\bfa', 'Units', 'normalized', ...
+        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
-        % Legend (panel a only)
-        if si == 1
-            leg_strs = cell(3, 1);
-            for gi = 1:3
-                leg_strs{gi} = sprintf('%s (n=%s)', ...
-                    group_labels{gi}, format_comma(desc(gi, si).n));
-            end
-            leg1 = legend(h_lines, leg_strs, ...
-                'Location', 'southwest', 'FontSize', leg_fs, 'Box', 'on');
-            set(leg1, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
-            leg1.ItemTokenSize = [12 8];
-        end
+    hold off;
 
-        % Slope annotations (data coordinates, bottom-right)
-        axes(ax(si));
-        xl = xlim; yl = ylim;
-        x_ann = xl(2) - 0.03 * diff(xl);
+    %% ================================================================
+    %  PANEL (b): ΔCDC vs Age
+    %  ================================================================
+    ax2 = subplot(2, 2, 3);
+    hold on; box on;
 
-        for gi = 1:3
-            slope = ols_dcdc(gi, si).slope;
-            p_val = ols_dcdc(gi, si).p_slope;
+    groups = {'ClinicallyNormal', 'Pathological'};
+    colors = [col_cn; col_path];
+    masks  = {is_cn, is_path};
 
-            if p_val < 0.001
-                p_str = '<0.001';
-            else
-                p_str = sprintf('%.3f', p_val);
-            end
+    h_lines = gobjects(2, 1);
 
-            y_ann = yl(1) + (0.18 - (gi-1)*0.06) * diff(yl);
-            text(x_ann, y_ann, ...
-                sprintf('%+.5f/yr (\\itp\\rm=%s)', slope, p_str), ...
-                'FontSize', slope_fs, ...
-                'Color', colors(gi, :) * 0.7, ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
-        end
+    % Plot back to front: pathological first, then CN on top
+    for g = [2, 1]
+        idx = masks{g};
 
-        % Optimal label (panel a only)
-        if si == 1
-            text(xl(2) - 0.02*diff(xl), 0.004, 'Optimal (1/\ite\rm)', ...
-                'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-        end
+        % OLS trend line with CI
+        mdl = fitlm(all_data.Age(idx), all_data.dCDC(idx));
+        xfit = linspace(age_lim(1), age_lim(2), 300);
+        [yfit, ci] = predict(mdl, xfit', 'Alpha', 0.05);
 
-        % Panel label (data coordinates)
-        text(xl(1) - 0.14*diff(xl), yl(2) + 0.04*diff(yl), ...
-            ['\bf' panel_labels{si}], ...
-            'FontSize', panel_fs, 'FontWeight', 'bold', ...
-            'VerticalAlignment', 'bottom');
+        fill([xfit fliplr(xfit)], [ci(:,1)' fliplr(ci(:,2)')], colors(g,:), ...
+             'FaceAlpha', 0.10, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+        h_lines(g) = plot(xfit, yfit, 'Color', colors(g,:) * 0.75, 'LineWidth', 1.8);
 
-        hold off;
+        scatter(all_data.Age(idx), all_data.dCDC(idx), dot_size, colors(g,:), ...
+                'filled', 'MarkerFaceAlpha', alpha_dot, 'HandleVisibility', 'off');
     end
 
+    % Reference line
+    yline(0, 'k--', 'LineWidth', 1.0, 'HandleVisibility', 'off');
+    text(age_lim(2) - 1, 0.004, 'Optimal (1/\ite\rm)', ...
+        'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
+        'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+
+    xlabel('Age (years)', 'FontSize', lab_fs);
+    ylabel('\DeltaCDC from 1/\ite', 'FontSize', lab_fs);
+
+    legend(h_lines, { ...
+        sprintf('Patients (non-pathological ECG) (n=%s)', format_comma(n_cn)), ...
+        sprintf('Patients (pathological ECG) (n=%s)', format_comma(n_path))}, ...
+        'Location', 'northwest', 'FontSize', leg_fs, 'Box', 'off');
+
+    xlim(age_lim);
+    ylim([-0.15 0.28]);
+    set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
+        'TickDir', 'out', 'TickLength', [0.02 0.02]);
+
+    text(-0.16, 1.06, '\bfb', 'Units', 'normalized', ...
+        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
+
+    hold off;
+
     %% ================================================================
-    %  PANELS (c,d): DIASTOLE vs Age — Female, then Male
+    %  PANEL (c): RR interval vs Age
     %  ================================================================
+    ax3 = subplot(2, 2, 4);
+    hold on; box on;
 
-    for si = 1:2
-        ax(si+2) = axes('Position', positions{si+2});
-        hold on; box on;
+    h_lines2 = gobjects(2, 1);
 
-        sex_mask = (D.Sex == sexes{si});
+    for g = [2, 1]
+        idx = masks{g};
 
-        h_lines2 = gobjects(3, 1);
-        xfit = linspace(age_lim(1), age_lim(2), 300)';
+        mdl = fitlm(all_data.Age(idx), all_data.RR(idx));
+        xfit = linspace(age_lim(1), age_lim(2), 300);
+        [yfit, ci] = predict(mdl, xfit', 'Alpha', 0.05);
 
-        for gi = [3, 2, 1]
-            mask = sex_mask & (D.Group == groups{gi});
+        fill([xfit fliplr(xfit)], [ci(:,1)' fliplr(ci(:,2)')], colors(g,:), ...
+             'FaceAlpha', 0.10, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+        h_lines2(g) = plot(xfit, yfit, 'Color', colors(g,:) * 0.75, 'LineWidth', 1.8);
 
-            alpha_g = alpha_dot;
-            if gi == 1, alpha_g = alpha_dot * 2.5; end
-            scatter(D.Age(mask), D.Dias_ms(mask), dot_size, ...
-                colors(gi, :), 'filled', 'MarkerFaceAlpha', alpha_g, ...
-                'HandleVisibility', 'off');
-
-            mdl = fitlm(D.Age(mask), D.Dias_ms(mask));
-            [yfit, ci] = predict(mdl, xfit, 'Alpha', 0.05);
-
-            fill([xfit; flipud(xfit)], [ci(:,1); flipud(ci(:,2))], ...
-                colors(gi, :), 'FaceAlpha', 0.10, 'EdgeColor', 'none', ...
-                'HandleVisibility', 'off');
-
-            h_lines2(gi) = plot(xfit, yfit, '-', ...
-                'Color', colors(gi, :), 'LineWidth', line_w);
-        end
-
-        xlim(age_lim);
-        xlabel('Age (years)', 'FontSize', lab_fs);
-        ylabel('Thermodynamic diastole (ms)', 'FontSize', lab_fs);
-        title(sex_labels{si}, 'FontSize', title_fs, 'FontWeight', 'bold');
-
-        set(ax(si+2), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-            'TickDir', 'out', 'TickLength', [0.02 0.02]);
-
-        % Legend (panel c only)
-        if si == 1
-            leg_strs2 = cell(3, 1);
-            for gi = 1:3
-                leg_strs2{gi} = sprintf('%s (n=%s)', ...
-                    group_labels{gi}, format_comma(desc(gi, si).n));
-            end
-            leg2 = legend(h_lines2, leg_strs2, ...
-                'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'on');
-            set(leg2, 'Color', 'w', 'EdgeColor', [0.7 0.7 0.7]);
-            leg2.ItemTokenSize = [12 8];
-        end
-
-        % Slope annotations (data coordinates, bottom-left)
-        axes(ax(si+2));
-        xl = xlim; yl = ylim;
-        x_ann = xl(1) + 0.03 * diff(xl);
-
-        for gi = 1:3
-            slope = ols_dias(gi, si).slope;
-            p_val = ols_dias(gi, si).p_slope;
-
-            if p_val < 0.001
-                p_str = '<0.001';
-            else
-                p_str = sprintf('%.3f', p_val);
-            end
-
-            y_ann = yl(1) + (0.18 - (gi-1)*0.06) * diff(yl);
-            text(x_ann, y_ann, ...
-                sprintf('%+.2f ms/yr (\\itp\\rm=%s)', slope, p_str), ...
-                'FontSize', slope_fs, ...
-                'Color', colors(gi, :) * 0.7, ...
-                'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
-        end
-
-        % Panel label (data coordinates)
-        text(xl(1) - 0.14*diff(xl), yl(2) + 0.04*diff(yl), ...
-            ['\bf' panel_labels{si+2}], ...
-            'FontSize', panel_fs, 'FontWeight', 'bold', ...
-            'VerticalAlignment', 'bottom');
-
-        hold off;
+        scatter(all_data.Age(idx), all_data.RR(idx), dot_size, colors(g,:), ...
+                'filled', 'MarkerFaceAlpha', alpha_dot, 'HandleVisibility', 'off');
     end
 
-    %% ================================================================
-    %  SAVE
-    %  ================================================================
+    xlabel('Age (years)', 'FontSize', lab_fs);
+    ylabel('Median RR interval (s)', 'FontSize', lab_fs);
 
-    out_pdf = fullfile(paths.figures, 'SI_Fig8_sex_stratified.pdf');
-    out_png = fullfile(paths.figures, 'SI_Fig8_sex_stratified.png');
-    out_fig = fullfile(paths.figures, 'SI_Fig8_sex_stratified.fig');
+    legend(h_lines2, { ...
+        sprintf('Patients (non-pathological ECG) (n=%s)', format_comma(n_cn)), ...
+        sprintf('Patients (pathological ECG) (n=%s)', format_comma(n_path))}, ...
+        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+
+    xlim(age_lim);
+    set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
+        'TickDir', 'out', 'TickLength', [0.02 0.02]);
+
+    text(-0.16, 1.06, '\bfc', 'Units', 'normalized', ...
+        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
+
+    hold off;
+
+    %% ================================================================
+    %  LAYOUT AND SAVE
+    %  ================================================================
+    % Top panel spans full width; bottom two panels side by side
+    set(ax1, 'Position', [0.10  0.58  0.85  0.36]);
+    set(ax2, 'Position', [0.10  0.08  0.38  0.40]);
+    set(ax3, 'Position', [0.58  0.08  0.38  0.40]);
 
     set(fig, 'PaperUnits', 'centimeters');
     set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
     set(fig, 'PaperPosition', [0 0 fig_w_cm fig_h_cm]);
 
-    exportgraphics(fig, out_png, 'Resolution', 300);
-    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+    out_pdf = fullfile(paths.figures, 'SI_Fig8_code15.pdf');
+    out_png = fullfile(paths.figures, 'SI_Fig8_code15.png');
+    out_fig = fullfile(paths.figures, 'SI_Fig8_code15.fig');
 
-    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
-    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+    save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
 
-    fprintf('  Skipped: %s (too many graphic objects)\n', out_fig);
-    fprintf('\nSupplementary Figure 8 saved.\n');
+    fprintf('\nSupplementary Figure 8 saved:\n');
+    fprintf('  %s  (vector)\n', out_pdf);
+    fprintf('  %s  (raster, 300 dpi)\n', out_png);
+    fprintf('  %s  (editable)\n', out_fig);
 
     %% ================================================================
-    %  CONSOLE SUMMARY
+    %  CONSOLE SUMMARY (for SI figure legend)
     %  ================================================================
-
     fprintf('\n--- Summary for SI Fig 8 legend ---\n');
+    fprintf('N = %s patients (%s CN, %s Path)\n', ...
+            format_comma(n_total), format_comma(n_cn), format_comma(n_path));
+    fprintf('CN mode: %.3f (dCDC=%+.4f)\n', S.mode_cn, mode_cn_d);
+    fprintf('Path mode: %.3f (dCDC=%+.4f)\n', S.mode_path, mode_path_d);
+    fprintf('Wilcoxon p = %.2e\n', S.p_ranksum);
 
-    n_total = height(D);
-    n_f = sum(D.Sex == 'F');
-    n_m = sum(D.Sex == 'M');
-    fprintf('N = %s subjects (%s F, %s M)\n', ...
-        format_comma(n_total), format_comma(n_f), format_comma(n_m));
-
-    fprintf('\nGroup x Sex breakdown:\n');
-    for gi = 1:3
-        fprintf('  %s:  F=%s, M=%s\n', group_labels{gi}, ...
-            format_comma(desc(gi, 1).n), format_comma(desc(gi, 2).n));
+    % OLS slopes for legend
+    fprintf('\nOLS age slopes (for legend):\n');
+    for g = 1:2
+        idx = masks{g};
+        mdl = fitlm(all_data.Age(idx), all_data.dCDC(idx));
+        coeffs = mdl.Coefficients;
+        slope = coeffs.Estimate(2);
+        p_slope = coeffs.pValue(2);
+        fprintf('  %-20s  dCDC: %+.5f/yr (p=%.2e)\n', groups{g}, slope, p_slope);
     end
-
-    fprintf('\ndCDC slopes (per year):\n');
-    for gi = 1:3
-        for si = 1:2
-            fprintf('  %-22s %-8s  %+.6f/yr (p=%.2e)\n', ...
-                group_labels{gi}, sex_labels{si}, ...
-                ols_dcdc(gi, si).slope, ols_dcdc(gi, si).p_slope);
-        end
-    end
-
-    fprintf('\nDiastole slopes (ms per year):\n');
-    for gi = 1:3
-        for si = 1:2
-            fprintf('  %-22s %-8s  %+.4f ms/yr (p=%.2e)\n', ...
-                group_labels{gi}, sex_labels{si}, ...
-                ols_dias(gi, si).slope, ols_dias(gi, si).p_slope);
-        end
-    end
-
-    fprintf('\nSex x Age interaction (within group):\n');
-    for gi = 1:3
-        fprintf('  %-22s  beta=%+.6f, p=%.2e\n', ...
-            S.interaction(gi).group, S.interaction(gi).beta, S.interaction(gi).p);
-    end
-
-    fprintf('\nCohen''s d (M-F):\n');
-    for gi = 1:3
-        fprintf('  %-22s  CDC: d=%+.3f,  HR: d=%+.3f\n', ...
-            S.cohens_d(gi).group, S.cohens_d(gi).d_cdc, S.cohens_d(gi).d_hr);
+    for g = 1:2
+        idx = masks{g};
+        mdl = fitlm(all_data.Age(idx), all_data.RR(idx));
+        coeffs = mdl.Coefficients;
+        slope = coeffs.Estimate(2);
+        p_slope = coeffs.pValue(2);
+        fprintf('  %-20s  RR:   %+.5f s/yr (p=%.2e)\n', groups{g}, slope, p_slope);
     end
 end
 
@@ -345,6 +282,18 @@ end
 %% ========================================================================
 %  LOCAL FUNCTIONS
 %  ========================================================================
+
+function add_p_annotation(p_val, fs)
+    if isnan(p_val), return; end
+    if p_val < 0.001
+        p_str = 'p < 0.001';
+    else
+        p_str = sprintf('p = %.3f', p_val);
+    end
+    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
+         'FontSize', fs, 'FontWeight', 'bold', ...
+         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+end
 
 function s = format_comma(n)
     s = num2str(n);
@@ -355,4 +304,35 @@ function s = format_comma(n)
             idx = idx - 3;
         end
     end
+end
+
+function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
+% SAVE_LARGE_FIGURE - Save figure with many graphic objects without crashing
+%
+% For figures with large scatter plots (>10k points), MATLAB's painters
+% renderer and savefig serialize every point as a vector element, consuming
+% gigabytes of memory and often hanging the process.
+%
+% Strategy:
+%   PNG: exportgraphics (raster, always safe)
+%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
+%        avoids the painters memory explosion while producing a PDF file
+%        that embeds at 300 dpi — sufficient for SI figures)
+%   FIG: skipped for large figures (the .fig format stores all graphic
+%        objects and can itself become multi-GB)
+
+    set(fig, 'PaperUnits', 'centimeters');
+    set(fig, 'PaperSize', [w_cm h_cm]);
+    set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
+
+    % PNG — raster, always safe
+    exportgraphics(fig, out_png, 'Resolution', 300);
+    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+
+    % PDF — raster-in-PDF (avoids painters memory explosion)
+    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
+    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+
+    % FIG — skip for large figures
+    fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
 end

@@ -1,281 +1,243 @@
 function plot_SI_Fig4()
-% PLOT_SI_FIG4 - Supplementary Figure 4: CDC distributions in gold-standard
-%   databases with fully manual annotation
+% PLOT_SI_FIG4 - Supplementary Figure 4: Kaplan-Meier survival curves by
+%   CDC-deviation tertile, overall and sex-stratified
 %
-% Two-panel figure:
-%   a: LUDB — Healthy Controls vs Pathological (full manual annotation)
-%   b: QTDB — Clinically Normal vs Pathological vs Sudden Death (full manual)
+% Three-panel figure:
+%   a: Overall KM curves by CDC-deviation tertile (with 95% CI)
+%   b: Female KM curves by CDC-deviation tertile
+%   c: Male KM curves by CDC-deviation tertile
 %
-% X-axis: ΔCDC from theoretical optimum (1/e ≈ 0.3679).
-% Subject-level median CDC (computed in analyze_gold_standard.m).
+% Colour palette matches Figure 2 (plot_Fig2.m):
+%   Green  [0.30 0.65 0.40]  = Near 1/e  (T1, nearest third)
+%   Amber  [0.85 0.65 0.13]  = Moderate  (T2, middle third)
+%   Red    [0.80 0.30 0.25]  = Far from 1/e (T3, farthest third)
 %
-% Colour palette matches main figures (plot_Fig1.m):
-%   Blue    [0.20 0.55 0.85]  = Healthy Control (verified healthy volunteers)
-%   Green   [0.25 0.70 0.35]  = Clinically Normal (hospital patients, normal ECG)
-%   Red     [0.85 0.25 0.20]  = Pathological
-%   Crimson [0.55 0.00 0.15]  = Sudden Death (QTDB only)
+% Each panel includes a number-at-risk table below the axes, consistent
+% with standard survival analysis reporting (CONSORT guidelines).
 %
-% LUDB "Healthy" are genuine healthy volunteers (Kalyakulina et al. 2020,
-% IEEE Access: "healthy volunteers and patients of the Nizhny Novgorod
-% City Hospital No 5"). → Blue (Healthy Control).
+% Data source: survival_curve_results.mat (via analyze_survival_curves.m)
 %
-% QTDB "healthy" are MIT-BIH Normal Sinus Rhythm subjects: hospital
-% referrals to the Arrhythmia Laboratory at Beth Israel Hospital who
-% were found to have no significant arrhythmias. → Green (Clinically Normal).
-%
-% Data source: gold_standard_results.mat (via analyze_gold_standard.m)
+% Nature Aging formatting: double-column width (183 mm), bold lowercase
+%   panel labels outside axes, 7-pt tick labels, log-log 95% CI bands.
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit
 
     paths = config();
-    inv_e = 1 / exp(1);
 
     %% ================================================================
     %  LOAD PRECOMPUTED RESULTS
     %  ================================================================
-    S = load(fullfile(paths.results, 'gold_standard_results.mat'), 'results');
-    results = S.results;
+
+    S = load(fullfile(paths.results, 'survival_curve_results.mat'));
+
+    km_overall   = S.km_overall;
+    km_by_sex    = S.km_by_sex;
+    risk_times   = S.risk_times;
+    at_risk_all  = S.at_risk_overall;
+    at_risk_sex  = S.at_risk_sex;
+    tert_labels  = S.tert_labels;
+    sex_labels   = S.sex_labels;
+    tau          = S.rmst_tau;
 
     %% ================================================================
-    %  COLOUR PALETTE (matches main figures)
+    %  COLOUR SCHEME (matches Figure 2)
     %  ================================================================
-    col_hc   = [0.20 0.55 0.85];   % blue    — healthy controls (LUDB)
-    col_cn   = [0.25 0.70 0.35];   % green   — clinically normal (QTDB healthy)
-    col_path = [0.85 0.25 0.20];   % red     — pathological
-    col_sd   = [0.55 0.00 0.15];   % crimson — sudden death (QTDB only)
+
+    col_near = [0.30 0.65 0.40];   % Green  — nearest to 1/e
+    col_mod  = [0.85 0.65 0.13];   % Amber  — moderate deviation
+    col_far  = [0.80 0.30 0.25];   % Red    — farthest from 1/e
+    colors = [col_near; col_mod; col_far];
+
+    % Lighter shades for CI bands
+    ci_alpha = 0.12;
 
     %% ================================================================
     %  FIGURE SETUP — Nature Aging formatting
     %  ================================================================
-    %  120 mm width, stacked two-panel layout.
 
-    fig_w_cm = 12.0;
-    fig_h_cm = 14.0;
+    fig_w_cm = 18.3;   % double-column width
+    fig_h_cm = 20.0;   % tall to accommodate three panels + at-risk tables
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
-        'Position', [2 3 fig_w_cm fig_h_cm]);
+        'Position', [2 1 fig_w_cm fig_h_cm]);
 
     % Font sizes (Nature minimum: 5 pt)
     ax_fs    = 7;    % tick labels
     lab_fs   = 8;    % axis labels
     title_fs = 8;    % panel titles
-    panel_fs = 10;   % panel letters (a, b)
-    leg_fs   = 6.5;  % legend
-
-    % Histogram and KDE parameters
-    edges = (0.20:0.01:0.60) - inv_e;   % ΔCDC bin edges
-    x_limits = [0.20 - inv_e, 0.60 - inv_e];
-    kde_pts = 500;
+    panel_fs = 10;   % panel letters
+    leg_fs   = 6;    % legend
+    risk_fs  = 5.5;  % at-risk table
 
     %% ================================================================
-    %  PANEL (a): LUDB — Healthy Controls vs Pathological
+    %  PANEL (a): Overall KM curves
     %  ================================================================
-    ax1 = subplot(2, 1, 1);
+
+    ax1 = subplot(3, 1, 1);
     hold on; box on;
 
-    ludb = results.ludb;
+    h_lines = plot_km_panel(km_overall, colors, ci_alpha, 3);
 
-    d_hc   = ludb.healthy_ratios - inv_e;
-    d_path = ludb.patient_ratios - inv_e;
+    xlabel('Follow-up (years)', 'FontSize', lab_fs);
+    ylabel('Survival probability', 'FontSize', lab_fs);
+    title(sprintf('Overall (N = %s; %s deaths)', ...
+        format_comma(S.n_total), format_comma(S.n_deceased)), ...
+        'FontSize', title_fs, 'FontWeight', 'bold');
 
-    mode_hc_d   = ludb.mode_healthy - inv_e;
-    mode_path_d = ludb.mode_patient - inv_e;
-
-    % Histograms
-    histogram(d_hc, edges, 'FaceColor', col_hc, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    histogram(d_path, edges, 'FaceColor', col_path, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
-
-    % KDE overlays
-    [f_hc, x_hc] = ksdensity(d_hc, 'NumPoints', kde_pts);
-    plot(x_hc, f_hc, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
-    [f_path, x_path] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x_path, f_path, 'Color', col_path * 0.7, 'LineWidth', 1.8);
-
-    % 1/e reference line (ΔCDC = 0)
-    yl = ylim;
-    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-
-    % Mode dashed lines
-    plot(mode_hc_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_hc * 0.7, 'LineWidth', 1.0);
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
-
-    ylabel('Density', 'FontSize', lab_fs);
-    title('LUDB: full manual annotation', 'FontSize', title_fs, 'FontWeight', 'bold');
+    ylim([0.90 1.005]);
+    xlim([0 tau]);
+    set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
+        'TickDir', 'out', 'TickLength', [0.015 0.015], ...
+        'YTick', 0.90:0.02:1.00);
 
     % Legend
-    ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend([ph, pp], { ...
-        sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ludb.n_healthy, mode_hc_d), ...
-        sprintf('Pathological (n=%d, \\Delta=%+.3f)', ludb.n_patient, mode_path_d)}, ...
-        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+    leg_strs = cell(3, 1);
+    for ti = 1:3
+        leg_strs{ti} = sprintf('%s (n=%s)', ...
+            tert_labels{ti}, format_comma(km_overall(ti).n));
+    end
+    leg = legend(h_lines, leg_strs, ...
+        'Location', 'southwest', 'FontSize', leg_fs, 'Box', 'off');
+    leg.ItemTokenSize = [12 8];
 
-    xlim(x_limits); grid on;
-    set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
+    % Log-rank p-value
+    add_logrank_annotation(S.logrank_omnibus.p, ax_fs);
 
-    % p-value annotation
-    add_p_annotation(ludb.p_value, ax_fs);
+    % Panel label
+    text(-0.08, 1.06, '\bfa', 'Units', 'normalized', ...
+        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
-    % Annotation method note
-    text(0.03, 0.88, 'Manual R-peaks, manual T-end', ...
-         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
-
-    % Panel label (Nature: bold lowercase, outside axes)
-    text(-0.12, 1.06, '\bfa', 'Units', 'normalized', ...
-        'FontSize', panel_fs, 'FontWeight', 'bold', ...
-        'VerticalAlignment', 'top');
+    % Number-at-risk table
+    add_risk_table(ax1, risk_times, at_risk_all, tert_labels, ...
+                   colors, risk_fs, tau);
 
     hold off;
 
     %% ================================================================
-    %  PANEL (b): QTDB — Clinically Normal vs Pathological vs Sudden Death
+    %  PANEL (b): Female KM curves
     %  ================================================================
-    ax2 = subplot(2, 1, 2);
+
+    ax2 = subplot(3, 1, 2);
     hold on; box on;
 
-    qtdb = results.qtdb;
+    h_lines_f = plot_km_panel(km_by_sex(1).km, colors, ci_alpha, 3);
 
-    d_cn   = qtdb.normal_ratios - inv_e;
-    d_path = qtdb.pathological_ratios - inv_e;
-    d_sd   = qtdb.fatal_ratios - inv_e;
+    xlabel('Follow-up (years)', 'FontSize', lab_fs);
+    ylabel('Survival probability', 'FontSize', lab_fs);
+    title(sprintf('%s (n = %s; %d deaths)', ...
+        sex_labels{1}, format_comma(km_by_sex(1).n), km_by_sex(1).d), ...
+        'FontSize', title_fs, 'FontWeight', 'bold');
 
-    mode_cn_d   = qtdb.mode_normal - inv_e;
-    mode_path_d = qtdb.mode_pathological - inv_e;
-    mode_sd_d   = qtdb.mode_fatal - inv_e;
-
-    % Histograms — layered back to front (widest distribution first)
-    histogram(d_sd, edges, 'FaceColor', col_sd, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.40, 'Normalization', 'pdf');
-    histogram(d_path, edges, 'FaceColor', col_path, ...
-              'EdgeColor', 'none', 'FaceAlpha', 0.40, 'Normalization', 'pdf');
-    if length(d_cn) >= 3
-        histogram(d_cn, edges, 'FaceColor', col_cn, ...
-                  'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    end
-
-    % KDE overlays
-    if length(d_cn) >= 3
-        [f_cn, x_cn] = ksdensity(d_cn, 'NumPoints', kde_pts);
-        plot(x_cn, f_cn, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
-    end
-    [f_path, x_path] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x_path, f_path, 'Color', col_path * 0.7, 'LineWidth', 1.8);
-    [f_sd, x_sd] = ksdensity(d_sd, 'NumPoints', kde_pts);
-    plot(x_sd, f_sd, 'Color', col_sd * 0.8, 'LineWidth', 1.8);
-
-    % 1/e reference line
-    yl = ylim;
-    plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-
-    % Mode dashed lines
-    if length(d_cn) >= 3 && ~isnan(mode_cn_d)
-        plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
-             'Color', col_cn * 0.7, 'LineWidth', 1.0);
-    end
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
-    plot(mode_sd_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_sd * 0.8, 'LineWidth', 1.0);
-
-    xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
-           'FontSize', lab_fs);
-    ylabel('Density', 'FontSize', lab_fs);
-    title('QTDB: full manual annotation', 'FontSize', title_fs, 'FontWeight', 'bold');
-
-    % Legend — three groups
-    leg_items = gobjects(3, 1);
-    leg_strs  = cell(3, 1);
-
-    if length(d_cn) >= 3 && ~isnan(mode_cn_d)
-        leg_items(1) = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Clinically normal (n=%d, \\Delta=%+.3f)', ...
-                              qtdb.n_normal, mode_cn_d);
-    else
-        leg_items(1) = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Clinically normal (n=%d)', qtdb.n_normal);
-    end
-    leg_items(2) = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg_strs{2} = sprintf('Pathological (n=%d, \\Delta=%+.3f)', ...
-                           qtdb.n_pathological, mode_path_d);
-    leg_items(3) = patch(NaN, NaN, col_sd, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg_strs{3} = sprintf('Sudden death (n=%d, \\Delta=%+.3f)', ...
-                           qtdb.n_fatal, mode_sd_d);
-
-    legend(leg_items, leg_strs, 'Location', 'northeast', ...
-           'FontSize', leg_fs, 'Box', 'off');
-
-    xlim(x_limits); grid on;
+    ylim([0.90 1.005]);
+    xlim([0 tau]);
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
-        'TickDir', 'out', 'TickLength', [0.02 0.02]);
+        'TickDir', 'out', 'TickLength', [0.015 0.015], ...
+        'YTick', 0.90:0.02:1.00);
 
-    % Kruskal-Wallis p-value
-    if qtdb.p_kruskal < 0.001
-        p_str = 'Kruskal-Wallis p < 0.001';
-    else
-        p_str = sprintf('Kruskal-Wallis p = %.3f', qtdb.p_kruskal);
-    end
-    text(0.97, 0.5, p_str, 'Units', 'normalized', ...
-         'FontSize', ax_fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right');
-
-    % Annotation method note
-    text(0.03, 0.88, 'Manual R-peaks, manual T-end', ...
-         'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+    % Log-rank p-value
+    add_logrank_annotation(km_by_sex(1).logrank_p, ax_fs);
 
     % Panel label
-    text(-0.12, 1.06, '\bfb', 'Units', 'normalized', ...
-        'FontSize', panel_fs, 'FontWeight', 'bold', ...
-        'VerticalAlignment', 'top');
+    text(-0.08, 1.06, '\bfb', 'Units', 'normalized', ...
+        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
+
+    % Number-at-risk table
+    add_risk_table(ax2, risk_times, at_risk_sex{1}, tert_labels, ...
+                   colors, risk_fs, tau);
+
+    hold off;
+
+    %% ================================================================
+    %  PANEL (c): Male KM curves
+    %  ================================================================
+
+    ax3 = subplot(3, 1, 3);
+    hold on; box on;
+
+    h_lines_m = plot_km_panel(km_by_sex(2).km, colors, ci_alpha, 3);
+
+    xlabel('Follow-up (years)', 'FontSize', lab_fs);
+    ylabel('Survival probability', 'FontSize', lab_fs);
+    title(sprintf('%s (n = %s; %d deaths)', ...
+        sex_labels{2}, format_comma(km_by_sex(2).n), km_by_sex(2).d), ...
+        'FontSize', title_fs, 'FontWeight', 'bold');
+
+    ylim([0.90 1.005]);
+    xlim([0 tau]);
+    set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
+        'TickDir', 'out', 'TickLength', [0.015 0.015], ...
+        'YTick', 0.90:0.02:1.00);
+
+    % Log-rank p-value
+    add_logrank_annotation(km_by_sex(2).logrank_p, ax_fs);
+
+    % Panel label
+    text(-0.08, 1.06, '\bfc', 'Units', 'normalized', ...
+        'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
+
+    % Number-at-risk table
+    add_risk_table(ax3, risk_times, at_risk_sex{2}, tert_labels, ...
+                   colors, risk_fs, tau);
 
     hold off;
 
     %% ================================================================
     %  LAYOUT AND SAVE
     %  ================================================================
-    set(ax1, 'Position', [0.14  0.56  0.80  0.37]);
-    set(ax2, 'Position', [0.14  0.10  0.80  0.37]);
+    %  Three stacked panels with room below each for the at-risk table.
 
-    set(fig, 'PaperUnits', 'centimeters');
-    set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
-    set(fig, 'PaperPosition', [0 0 fig_w_cm fig_h_cm]);
+    % Panel positions: [left, bottom, width, height]
+    % Leave extra space at the bottom of each panel for the risk table
+    panel_w = 0.82;
+    panel_h = 0.22;
+    left    = 0.12;
+    gap     = 0.105;  % gap includes risk table space
 
-    out_pdf = fullfile(paths.figures, 'SI_Fig4_gold_standard.pdf');
-    out_png = fullfile(paths.figures, 'SI_Fig4_gold_standard.png');
-    out_fig = fullfile(paths.figures, 'SI_Fig4_gold_standard.fig');
+    set(ax1, 'Position', [left, 0.72, panel_w, panel_h]);
+    set(ax2, 'Position', [left, 0.39, panel_w, panel_h]);
+    set(ax3, 'Position', [left, 0.06, panel_w, panel_h]);
 
-    print(fig, out_pdf, '-dpdf', '-painters');
-    print(fig, out_png, '-dpng', '-r300');
-    savefig(fig, out_fig);
+    out_pdf = fullfile(paths.figures, 'SI_Fig4_survival_curves.pdf');
+    out_png = fullfile(paths.figures, 'SI_Fig4_survival_curves.png');
+    out_fig = fullfile(paths.figures, 'SI_Fig4_survival_curves.fig');
 
-    fprintf('\nSupplementary Figure 4 saved:\n');
-    fprintf('  %s  (vector)\n', out_pdf);
-    fprintf('  %s  (raster, 300 dpi)\n', out_png);
-    fprintf('  %s  (editable)\n', out_fig);
+    save_large_figure(fig, out_pdf, out_png, out_fig, fig_w_cm, fig_h_cm);
+
+    fprintf('\nSupplementary Figure 4 saved.\n');
 
     %% ================================================================
     %  CONSOLE SUMMARY (for SI figure legend)
     %  ================================================================
-    fprintf('\n--- Summary for SI Fig 4 legend ---\n');
-    fprintf('LUDB: Healthy controls n=%d (mode=%.3f, dCDC=%+.4f), ', ...
-            ludb.n_healthy, ludb.mode_healthy, ludb.mode_healthy - inv_e);
-    fprintf('Pathological n=%d (mode=%.3f, dCDC=%+.4f)\n', ...
-            ludb.n_patient, ludb.mode_patient, ludb.mode_patient - inv_e);
-    fprintf('  Wilcoxon rank-sum p = %.2e\n', ludb.p_value);
 
-    fprintf('QTDB: Clinically normal n=%d (mode=%.3f), ', ...
-            qtdb.n_normal, qtdb.mode_normal);
-    fprintf('Pathological n=%d (mode=%.3f), ', ...
-            qtdb.n_pathological, qtdb.mode_pathological);
-    fprintf('Sudden death n=%d (mode=%.3f)\n', ...
-            qtdb.n_fatal, qtdb.mode_fatal);
-    fprintf('  Kruskal-Wallis p = %.2e\n', qtdb.p_kruskal);
+    fprintf('\n--- Summary for SI Fig 4 legend ---\n');
+    fprintf('N = %s patients (%s deaths, %.1f%%)\n', ...
+        format_comma(S.n_total), format_comma(S.n_deceased), ...
+        100 * S.n_deceased / S.n_total);
+    fprintf('Median follow-up: %.2f years\n', S.median_followup);
+    fprintf('Tertile boundaries: |CDC - 1/e| = %.4f / %.4f\n', ...
+        S.tertile_bounds(1), S.tertile_bounds(2));
+
+    fprintf('\nOverall survival by tertile:\n');
+    for ti = 1:3
+        fprintf('  %-25s  N=%s, Deaths=%d (%.2f%%), RMST(%dyr)=%.3f\n', ...
+            tert_labels{ti}, format_comma(km_overall(ti).n), ...
+            km_overall(ti).d, 100 * km_overall(ti).d / km_overall(ti).n, ...
+            tau, km_overall(ti).rmst);
+    end
+    fprintf('RMST difference (T1-T3): %.3f years\n', S.rmst_diff_t1_t3);
+
+    fprintf('\nLog-rank tests:\n');
+    fprintf('  Omnibus: chi2=%.2f, p=%.2e\n', ...
+        S.logrank_omnibus.chi2, S.logrank_omnibus.p);
+    fprintf('  T1 vs T3: chi2=%.2f, p=%.2e\n', ...
+        S.logrank_t1_vs_t3.chi2, S.logrank_t1_vs_t3.p);
+
+    fprintf('\nSex-stratified log-rank (omnibus):\n');
+    for si = 1:2
+        fprintf('  %s: chi2=%.2f, p=%.2e (N=%s)\n', ...
+            sex_labels{si}, km_by_sex(si).logrank_chi2, ...
+            km_by_sex(si).logrank_p, format_comma(km_by_sex(si).n));
+    end
 end
 
 
@@ -283,15 +245,167 @@ end
 %  LOCAL FUNCTIONS
 %  ========================================================================
 
-function add_p_annotation(p_val, fs)
-% ADD_P_ANNOTATION - Place a formatted p-value in the lower right
-    if isnan(p_val), return; end
-    if p_val < 0.001
-        p_str = 'p < 0.001';
-    else
-        p_str = sprintf('p = %.3f', p_val);
+function h_lines = plot_km_panel(km_struct, colors, ci_alpha, n_groups)
+% PLOT_KM_PANEL - Plot KM step functions with CI bands for all groups
+%
+%   Renders in reverse order (T3 first) so that T1 (nearest) is on top.
+
+    h_lines = gobjects(n_groups, 1);
+
+    for ti = n_groups:-1:1
+        t = km_struct(ti).t;
+        s = km_struct(ti).s;
+        lo = km_struct(ti).lo;
+        hi = km_struct(ti).hi;
+        col = colors(ti, :);
+
+        % Step-function versions for CI bands
+        [t_step, lo_step] = stairs(t, lo);
+        [~, hi_step] = stairs(t, hi);
+
+        % CI band
+        fill([t_step; flipud(t_step)], [lo_step; flipud(hi_step)], ...
+            col, 'FaceAlpha', ci_alpha, 'EdgeColor', 'none', ...
+            'HandleVisibility', 'off');
+
+        % KM step function
+        h_lines(ti) = stairs(t, s, 'Color', col, 'LineWidth', 1.5);
     end
-    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
-         'FontSize', fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+end
+
+
+function add_logrank_annotation(p_val, fs)
+% ADD_LOGRANK_ANNOTATION - Place log-rank p-value in lower-left corner
+
+    if isnan(p_val), return; end
+
+    if p_val < 0.001
+        p_str = 'Log-rank \itp\rm < 0.001';
+    else
+        p_str = sprintf('Log-rank \\itp\\rm = %.3f', p_val);
+    end
+
+    text(0.97, 0.06, p_str, 'Units', 'normalized', ...
+        'FontSize', fs, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', ...
+        'BackgroundColor', [1 1 1 0.8], 'EdgeColor', [0.5 0.5 0.5]);
+end
+
+
+function add_risk_table(ax, risk_times, at_risk, tert_labels, colors, fs, tau)
+% ADD_RISK_TABLE - Number-at-risk table below KM axes
+%
+%   Displays only times within [0, tau] and thins labels for readability.
+
+    % Select time points to display (thin if > 8)
+    valid = risk_times <= tau;
+    disp_times = risk_times(valid);
+    disp_risk  = at_risk(:, valid);
+
+    if length(disp_times) > 8
+        step = ceil(length(disp_times) / 8);
+        idx = [1:step:length(disp_times), length(disp_times)];
+        idx = unique(idx);
+        disp_times = disp_times(idx);
+        disp_risk  = disp_risk(:, idx);
+    end
+
+    % Get axes position in normalised figure coordinates
+    ax_pos = get(ax, 'Position');  % [left, bottom, width, height]
+
+    n_groups = size(at_risk, 1);
+    row_h = 0.012;    % height of each row in normalised units
+    table_top = ax_pos(2) - 0.015;  % start just below axes
+
+    % Short labels for the risk table
+    short_labels = {'T1 (Near)', 'T2 (Mod.)', 'T3 (Far)'};
+    if n_groups > length(short_labels)
+        short_labels = tert_labels;
+    end
+
+    for ti = 1:n_groups
+        y_row = table_top - (ti - 1) * row_h;
+
+        % Row label
+        annotation('textbox', ...
+            [ax_pos(1) - 0.09, y_row - row_h/2, 0.08, row_h], ...
+            'String', short_labels{ti}, ...
+            'FontSize', fs, 'FontWeight', 'bold', ...
+            'Color', colors(ti, :) * 0.8, ...
+            'EdgeColor', 'none', ...
+            'HorizontalAlignment', 'right', ...
+            'VerticalAlignment', 'middle', ...
+            'FitBoxToText', 'off');
+
+        % Numbers
+        for ri = 1:length(disp_times)
+            x_frac = ax_pos(1) + ax_pos(3) * disp_times(ri) / tau;
+            annotation('textbox', ...
+                [x_frac - 0.02, y_row - row_h/2, 0.04, row_h], ...
+                'String', format_comma(disp_risk(ti, ri)), ...
+                'FontSize', fs, ...
+                'Color', [0.3 0.3 0.3], ...
+                'EdgeColor', 'none', ...
+                'HorizontalAlignment', 'center', ...
+                'VerticalAlignment', 'middle', ...
+                'FitBoxToText', 'off');
+        end
+    end
+
+    % "No. at risk" header
+    annotation('textbox', ...
+        [ax_pos(1) - 0.09, table_top + row_h * 0.3, 0.08, row_h], ...
+        'String', 'No. at risk', ...
+        'FontSize', fs, 'FontAngle', 'italic', ...
+        'Color', [0.4 0.4 0.4], ...
+        'EdgeColor', 'none', ...
+        'HorizontalAlignment', 'right', ...
+        'VerticalAlignment', 'middle', ...
+        'FitBoxToText', 'off');
+end
+
+
+function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
+% SAVE_LARGE_FIGURE - Save figure without crashing on large scatter data
+%
+% For figures with many graphic objects, MATLAB's painters renderer and
+% savefig serialize every element, consuming gigabytes of memory.
+%
+% Strategy:
+%   PNG: exportgraphics (raster, always safe)
+%   PDF: exportgraphics with ContentType 'image' (raster-in-PDF wrapper,
+%        avoids the painters memory explosion while producing a PDF that
+%        embeds at 300 dpi)
+%   FIG: skipped (the .fig format stores all graphic objects and can
+%        itself become multi-GB)
+
+    set(fig, 'PaperUnits', 'centimeters');
+    set(fig, 'PaperSize', [w_cm h_cm]);
+    set(fig, 'PaperPosition', [0 0 w_cm h_cm]);
+
+    % PNG — raster, always safe
+    exportgraphics(fig, out_png, 'Resolution', 300);
+    fprintf('  Saved: %s (raster, 300 dpi)\n', out_png);
+
+    % PDF — raster-in-PDF (avoids painters memory explosion)
+    exportgraphics(fig, out_pdf, 'ContentType', 'image', 'Resolution', 300);
+    fprintf('  Saved: %s (raster-in-PDF, 300 dpi)\n', out_pdf);
+
+    % FIG — skip for large figures
+    fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
+
+    close(fig);
+end
+
+
+function s = format_comma(n)
+% FORMAT_COMMA - Format integer with thousands separators
+    s = num2str(n);
+    if n >= 1000
+        idx = length(s) - 2;
+        while idx > 1
+            s = [s(1:idx-1) ',' s(idx:end)];
+            idx = idx - 3;
+        end
+    end
 end
