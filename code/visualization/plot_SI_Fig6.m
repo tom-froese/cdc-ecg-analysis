@@ -40,8 +40,8 @@ function plot_SI_Fig6()
     %  COLOUR PALETTE (matches main figures)
     %  ================================================================
     col_hc   = [0.20 0.55 0.85];   % blue    — healthy controls (LUDB)
-    col_cn   = [0.25 0.70 0.35];   % green   — clinically normal (QTDB healthy)
-    col_path = [0.85 0.25 0.20];   % red     — pathological
+    col_npe   = [0.25 0.70 0.35];   % green   — clinically normal (QTDB healthy)
+    col_pe = [0.85 0.25 0.20];   % red     — pathological
     col_sd   = [0.55 0.00 0.15];   % crimson — sudden death (QTDB only)
 
     %% ================================================================
@@ -76,22 +76,22 @@ function plot_SI_Fig6()
     ludb = results.ludb;
 
     d_hc   = ludb.healthy_ratios - inv_e;
-    d_path = ludb.patient_ratios - inv_e;
+    d_pe = ludb.pe_ratios - inv_e;
 
     mode_hc_d   = ludb.mode_healthy - inv_e;
-    mode_path_d = ludb.mode_patient - inv_e;
+    mode_pe_d = ludb.mode_pe - inv_e;
 
     % Histograms
     histogram(d_hc, edges, 'FaceColor', col_hc, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    histogram(d_path, edges, 'FaceColor', col_path, ...
+    histogram(d_pe, edges, 'FaceColor', col_pe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
 
     % KDE overlays
     [f_hc, x_hc] = ksdensity(d_hc, 'NumPoints', kde_pts);
     plot(x_hc, f_hc, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
-    [f_path, x_path] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x_path, f_path, 'Color', col_path * 0.7, 'LineWidth', 1.8);
+    [f_pe, x_pe] = ksdensity(d_pe, 'NumPoints', kde_pts);
+    plot(x_pe, f_pe, 'Color', col_pe * 0.7, 'LineWidth', 1.8);
 
     % 1/e reference line (ΔCDC = 0)
     yl = ylim;
@@ -100,18 +100,18 @@ function plot_SI_Fig6()
     % Mode dashed lines
     plot(mode_hc_d * [1 1], [0 yl(2)], '--', ...
          'Color', col_hc * 0.7, 'LineWidth', 1.0);
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
+    plot(mode_pe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     ylabel('Density', 'FontSize', lab_fs);
     title('LUDB: full manual annotation', 'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
     ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    pp = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     legend([ph, pp], { ...
         sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ludb.n_healthy, mode_hc_d), ...
-        sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ludb.n_patient, mode_path_d)}, ...
+        sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ludb.n_pe, mode_pe_d)}, ...
         'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
@@ -141,31 +141,31 @@ function plot_SI_Fig6()
 
     qtdb = results.qtdb;
 
-    d_cn   = qtdb.normal_ratios - inv_e;
-    d_path = qtdb.pathological_ratios - inv_e;
+    d_npe   = qtdb.npe_ratios - inv_e;
+    d_pe = qtdb.pe_ratios - inv_e;
     d_sd   = qtdb.fatal_ratios - inv_e;
 
-    mode_cn_d   = qtdb.mode_normal - inv_e;
-    mode_path_d = qtdb.mode_pathological - inv_e;
+    mode_npe_d   = qtdb.mode_npe - inv_e;
+    mode_pe_d = qtdb.mode_pe - inv_e;
     mode_sd_d   = qtdb.mode_fatal - inv_e;
 
     % Histograms — layered back to front (widest distribution first)
     histogram(d_sd, edges, 'FaceColor', col_sd, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.40, 'Normalization', 'pdf');
-    histogram(d_path, edges, 'FaceColor', col_path, ...
+    histogram(d_pe, edges, 'FaceColor', col_pe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.40, 'Normalization', 'pdf');
-    if length(d_cn) >= 3
-        histogram(d_cn, edges, 'FaceColor', col_cn, ...
+    if length(d_npe) >= 3
+        histogram(d_npe, edges, 'FaceColor', col_npe, ...
                   'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
     end
 
     % KDE overlays
-    if length(d_cn) >= 3
-        [f_cn, x_cn] = ksdensity(d_cn, 'NumPoints', kde_pts);
-        plot(x_cn, f_cn, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
+    if length(d_npe) >= 3
+        [f_npe, x_npe] = ksdensity(d_npe, 'NumPoints', kde_pts);
+        plot(x_npe, f_npe, 'Color', col_npe * 0.7, 'LineWidth', 1.8);
     end
-    [f_path, x_path] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x_path, f_path, 'Color', col_path * 0.7, 'LineWidth', 1.8);
+    [f_pe, x_pe] = ksdensity(d_pe, 'NumPoints', kde_pts);
+    plot(x_pe, f_pe, 'Color', col_pe * 0.7, 'LineWidth', 1.8);
     [f_sd, x_sd] = ksdensity(d_sd, 'NumPoints', kde_pts);
     plot(x_sd, f_sd, 'Color', col_sd * 0.8, 'LineWidth', 1.8);
 
@@ -174,12 +174,12 @@ function plot_SI_Fig6()
     plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
 
     % Mode dashed lines
-    if length(d_cn) >= 3 && ~isnan(mode_cn_d)
-        plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
-             'Color', col_cn * 0.7, 'LineWidth', 1.0);
+    if length(d_npe) >= 3 && ~isnan(mode_npe_d)
+        plot(mode_npe_d * [1 1], [0 yl(2)], '--', ...
+             'Color', col_npe * 0.7, 'LineWidth', 1.0);
     end
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
+    plot(mode_pe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_pe * 0.7, 'LineWidth', 1.0);
     plot(mode_sd_d * [1 1], [0 yl(2)], '--', ...
          'Color', col_sd * 0.8, 'LineWidth', 1.0);
 
@@ -192,17 +192,17 @@ function plot_SI_Fig6()
     leg_items = gobjects(3, 1);
     leg_strs  = cell(3, 1);
 
-    if length(d_cn) >= 3 && ~isnan(mode_cn_d)
-        leg_items(1) = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    if length(d_npe) >= 3 && ~isnan(mode_npe_d)
+        leg_items(1) = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
         leg_strs{1} = sprintf('Patients (non-pathological ECG) (n=%d, \\Delta=%+.3f)', ...
-                              qtdb.n_normal, mode_cn_d);
+                              qtdb.n_npe, mode_npe_d);
     else
-        leg_items(1) = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-        leg_strs{1} = sprintf('Patients (non-pathological ECG) (n=%d)', qtdb.n_normal);
+        leg_items(1) = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+        leg_strs{1} = sprintf('Patients (non-pathological ECG) (n=%d)', qtdb.n_npe);
     end
-    leg_items(2) = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    leg_items(2) = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg_strs{2} = sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ...
-                           qtdb.n_pathological, mode_path_d);
+                           qtdb.n_pe, mode_pe_d);
     leg_items(3) = patch(NaN, NaN, col_sd, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg_strs{3} = sprintf('Sudden death (n=%d, \\Delta=%+.3f)', ...
                            qtdb.n_fatal, mode_sd_d);
@@ -266,13 +266,13 @@ function plot_SI_Fig6()
     fprintf('LUDB: Healthy controls n=%d (mode=%.3f, dCDC=%+.4f), ', ...
             ludb.n_healthy, ludb.mode_healthy, ludb.mode_healthy - inv_e);
     fprintf('Patients (pathological ECG) n=%d (mode=%.3f, dCDC=%+.4f)\n', ...
-            ludb.n_patient, ludb.mode_patient, ludb.mode_patient - inv_e);
+            ludb.n_pe, ludb.mode_pe, ludb.mode_pe - inv_e);
     fprintf('  Wilcoxon rank-sum p = %.2e\n', ludb.p_value);
 
     fprintf('QTDB: Patients (non-pathological ECG) n=%d (mode=%.3f), ', ...
-            qtdb.n_normal, qtdb.mode_normal);
+            qtdb.n_npe, qtdb.mode_npe);
     fprintf('Patients (pathological ECG) n=%d (mode=%.3f), ', ...
-            qtdb.n_pathological, qtdb.mode_pathological);
+            qtdb.n_pe, qtdb.mode_pe);
     fprintf('Sudden death n=%d (mode=%.3f)\n', ...
             qtdb.n_fatal, qtdb.mode_fatal);
     fprintf('  Kruskal-Wallis p = %.2e\n', qtdb.p_kruskal);

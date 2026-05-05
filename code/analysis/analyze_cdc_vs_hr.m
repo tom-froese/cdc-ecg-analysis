@@ -7,7 +7,7 @@ function results = analyze_cdc_vs_hr()
 %     CDC = 1/e predicts the optimal resting HR from first principles.
 %     Bootstrap CI quantifies uncertainty.
 %
-%   PART 2 — HIDDEN RISK IN CLINICALLY NORMAL PATIENTS
+%   PART 2 — HIDDEN RISK IN PATIENTS (NON-PATHOLOGICAL ECG)
 %     CODE-15% patients with normal ECG only. Tests whether CDC
 %     deviation predicts mortality independently of HR, even among
 %     patients who passed standard clinical screening.
@@ -168,11 +168,11 @@ function results = analyze_cdc_vs_hr()
     end
 
     %% ================================================================
-    %  PART 2: HIDDEN RISK IN CLINICALLY NORMAL PATIENTS (CODE-15%)
+    %  PART 2: HIDDEN RISK IN PATIENTS (NON-PATHOLOGICAL ECG) (CODE-15%)
     %  ================================================================
 
     fprintf('\n\n================================================================\n');
-    fprintf('PART 2: HIDDEN RISK IN CLINICALLY NORMAL PATIENTS\n');
+    fprintf('PART 2: HIDDEN RISK IN PATIENTS (NON-PATHOLOGICAL ECG)\n');
     fprintf('================================================================\n\n');
 
     fprintf('Loading CODE-15%% beat-level data...\n');
@@ -211,19 +211,19 @@ function results = analyze_cdc_vs_hr()
     % Record ID (patient_id for mortality merge)
     Record_id = splitapply(@(x) x(1), string(beats.record_id), G);
 
-    % Group: ClinicallyNormal if ALL beats have source_subset == "normal"
+    % Group: NonPathECG if ALL beats have source_subset == "normal"
     is_normal_beat = (beats.source_subset == "normal");
     total_per   = splitapply(@numel, beats.record_id, G);
     normal_per  = splitapply(@sum, is_normal_beat, G);
-    is_cn = (total_per == normal_per);
+    is_npe = (total_per == normal_per);
 
     Group_str = strings(length(subject_ids), 1);
-    Group_str(is_cn)  = "ClinicallyNormal";
-    Group_str(~is_cn) = "Pathological";
+    Group_str(is_npe)  = "NonPathECG";
+    Group_str(~is_npe) = "PathECG";
 
     fprintf('  %d unique subjects\n', length(subject_ids));
-    fprintf('    Patients (non-pathological ECG): %d\n', sum(is_cn));
-    fprintf('    Patients (pathological ECG):     %d\n', sum(~is_cn));
+    fprintf('    Patients (non-pathological ECG): %d\n', sum(is_npe));
+    fprintf('    Patients (pathological ECG):     %d\n', sum(~is_npe));
 
     beat_data = table(Record_id, subject_ids, Age, CDC, HR, Sex_str, Group_str, ...
         'VariableNames', {'record_id', 'unique_subject_id', 'Age', 'CDC', ...
@@ -284,23 +284,23 @@ function results = analyze_cdc_vs_hr()
     fprintf('  Full cohort: N = %d  (Deceased: %d, %.2f%%)\n', ...
         height(data_all), sum(data_all.Deceased), 100*mean(data_all.Deceased));
 
-    % --- RESTRICT TO CLINICALLY NORMAL ---
-    data = data_all(data_all.Group == 'ClinicallyNormal', :);
+    % --- RESTRICT TO PATIENTS (NON-PATHOLOGICAL ECG) ---
+    data = data_all(data_all.Group == 'NonPathECG', :);
     data.Age_c   = data.Age - mean(data.Age);
     data.CDC_dev = abs(data.CDC - inv_e);
     data.is_male = double(data.Sex == 'Male' | data.Sex == 'M');
-    n_cn = height(data);
-    n_cn_dead = sum(data.Deceased);
+    n_npe = height(data);
+    n_npe_dead = sum(data.Deceased);
 
-    fprintf('\n  *** Restricting to ClinicallyNormal ***\n');
-    fprintf('  N = %d  (Deceased: %d, %.2f%%)\n', n_cn, n_cn_dead, 100*mean(data.Deceased));
+    fprintf('\n  *** Restricting to Patients (non-pathological ECG) ***\n');
+    fprintf('  N = %d  (Deceased: %d, %.2f%%)\n', n_npe, n_npe_dead, 100*mean(data.Deceased));
     fprintf('  HR range: %.1f - %.1f bpm (mean %.1f +/- %.1f)\n', ...
         min(data.HR), max(data.HR), mean(data.HR), std(data.HR));
     fprintf('  CDC range: %.4f - %.4f (mean %.4f +/- %.4f)\n', ...
         min(data.CDC), max(data.CDC), mean(data.CDC), std(data.CDC));
 
     % --- 2a. VIF and partial correlations ---
-    fprintf('\n--- 2a. VIF and partial correlations (ClinicallyNormal) ---\n');
+    fprintf('\n--- 2a. VIF and partial correlations (Patients (non-pathological ECG)) ---\n');
     [r_cn, p_cn] = corr(data.CDC, data.HR);
     fprintf('  CDC-HR correlation: r = %.4f, p = %.2e\n', r_cn, p_cn);
     r_cdc_hr_dev = corr(data.CDC_dev, data.HR);
@@ -316,7 +316,7 @@ function results = analyze_cdc_vs_hr()
     fprintf('  Partial r (HR-Mortality | CDC_dev, Age, Sex): %.4f\n', r_hr_mort_partial);
 
     % --- 2b. Within-HR-stratum mortality by CDC tertile ---
-    fprintf('\n--- 2b. Within-HR-stratum mortality (ClinicallyNormal) ---\n\n');
+    fprintf('\n--- 2b. Within-HR-stratum mortality (Patients (non-pathological ECG)) ---\n\n');
 
     hr_edges = [50 55 60 65 70 75 80 85 90 95 100];
     hr_labels = arrayfun(@(i) sprintf('%d-%d', hr_edges(i), hr_edges(i+1)), ...
@@ -386,7 +386,7 @@ function results = analyze_cdc_vs_hr()
     fprintf('    CMH chi2 = %.2f, df = 1, p = %.2e\n', cmh_chi2, cmh_p);
 
     % --- 2c. Nested Cox models ---
-    fprintf('\n--- 2c. Nested Cox models (ClinicallyNormal only) ---\n\n');
+    fprintf('\n--- 2c. Nested Cox models (Patients (non-pathological ECG) only) ---\n\n');
     has_fu = ismember('FollowUp_yrs', data.Properties.VariableNames);
     cox_results = struct();
 
@@ -449,24 +449,24 @@ function results = analyze_cdc_vs_hr()
     results.healthy.bin_stats = hc_bin_stats;
     results.healthy.data = healthy;
 
-    results.code15_cn.data = data;
-    results.code15_cn.n = n_cn;
-    results.code15_cn.n_deceased = n_cn_dead;
-    results.code15_cn.coupling.r_cdc_hr = r_cn;
-    results.code15_cn.coupling.r_cdc_hr_dev = r_cdc_hr_dev;
-    results.code15_cn.coupling.vif = vif;
-    results.code15_cn.coupling.r_cdc_mort_partial = r_cdc_mort_partial;
-    results.code15_cn.coupling.r_hr_mort_partial = r_hr_mort_partial;
-    if has_fu, results.code15_cn.cox = cox_results; end
-    results.code15_cn.hr_strata.hr_edges = hr_edges;
-    results.code15_cn.hr_strata.hr_labels = hr_labels;
-    results.code15_cn.hr_strata.cdc_tert_edges = cdc_tert_edges;
-    results.code15_cn.hr_strata.tert_labels = tert_labels;
-    results.code15_cn.hr_strata.mort_rate = mort_rate;
-    results.code15_cn.hr_strata.mort_n = mort_n;
-    results.code15_cn.hr_strata.mort_dead = mort_dead;
-    results.code15_cn.hr_strata.cmh_chi2 = cmh_chi2;
-    results.code15_cn.hr_strata.cmh_p = cmh_p;
+    results.code15_npe.data = data;
+    results.code15_npe.n = n_npe;
+    results.code15_npe.n_deceased = n_npe_dead;
+    results.code15_npe.coupling.r_cdc_hr = r_cn;
+    results.code15_npe.coupling.r_cdc_hr_dev = r_cdc_hr_dev;
+    results.code15_npe.coupling.vif = vif;
+    results.code15_npe.coupling.r_cdc_mort_partial = r_cdc_mort_partial;
+    results.code15_npe.coupling.r_hr_mort_partial = r_hr_mort_partial;
+    if has_fu, results.code15_npe.cox = cox_results; end
+    results.code15_npe.hr_strata.hr_edges = hr_edges;
+    results.code15_npe.hr_strata.hr_labels = hr_labels;
+    results.code15_npe.hr_strata.cdc_tert_edges = cdc_tert_edges;
+    results.code15_npe.hr_strata.tert_labels = tert_labels;
+    results.code15_npe.hr_strata.mort_rate = mort_rate;
+    results.code15_npe.hr_strata.mort_n = mort_n;
+    results.code15_npe.hr_strata.mort_dead = mort_dead;
+    results.code15_npe.hr_strata.cmh_chi2 = cmh_chi2;
+    results.code15_npe.hr_strata.cmh_p = cmh_p;
 
     mat_file = fullfile(paths.results, 'cdc_vs_hr_results.mat');
     save(mat_file, '-struct', 'results', '-v7.3');

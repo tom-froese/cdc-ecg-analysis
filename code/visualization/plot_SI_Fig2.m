@@ -122,13 +122,13 @@ function plot_SI_Fig2()
     ax2 = subplot(1, 2, 2);
     hold on; grid on; box on;
 
-    hr_labels   = S.code15_cn.hr_strata.hr_labels;
-    hr_edges    = S.code15_cn.hr_strata.hr_edges;
-    mort_rate   = S.code15_cn.hr_strata.mort_rate;
-    mort_n      = S.code15_cn.hr_strata.mort_n;
-    mort_dead   = S.code15_cn.hr_strata.mort_dead;
-    tert_labels = S.code15_cn.hr_strata.tert_labels;
-    n_cn        = S.code15_cn.n;
+    hr_labels   = S.code15_npe.hr_strata.hr_labels;
+    hr_edges    = S.code15_npe.hr_strata.hr_edges;
+    mort_rate   = S.code15_npe.hr_strata.mort_rate;
+    mort_n      = S.code15_npe.hr_strata.mort_n;
+    mort_dead   = S.code15_npe.hr_strata.mort_dead;
+    tert_labels = S.code15_npe.hr_strata.tert_labels;
+    n_npe        = S.code15_npe.n;
 
     MIN_DEATHS = 20;
     idx_r = find(all(mort_dead >= MIN_DEATHS, 2));
@@ -196,7 +196,7 @@ function plot_SI_Fig2()
     set(leg, 'Color', 'w', 'EdgeColor', 'k', 'FontSize', 10);   % <-- this fixes the error
 
     % === CMH annotation: middle-right with boxed background ===
-    cmh_p = S.code15_cn.hr_strata.cmh_p;
+    cmh_p = S.code15_npe.hr_strata.cmh_p;
     if cmh_p < 0.001, cmh_str = 'CMH p < 0.001';
     else, cmh_str = sprintf('CMH p = %.3f', cmh_p); end
     text(0.97, 0.55, cmh_str, 'Units', 'normalized', ...
@@ -218,7 +218,7 @@ function plot_SI_Fig2()
     xlabel('Heart Rate (bpm)', 'FontSize', 13, 'FontWeight', 'bold');
     ylabel('All-Cause Mortality (%)', 'FontSize', 13, 'FontWeight', 'bold');
     title({'{\bfb}  CDC deviation predicts mortality in clinically normal patients', ...
-           sprintf('CODE-15%% normal ECG subgroup (N = %s)', format_comma(n_cn))}, ...
+           sprintf('CODE-15%% normal ECG subgroup (N = %s)', format_comma(n_npe))}, ...
         'FontSize', 12, 'FontWeight', 'normal');
     hold off;
 

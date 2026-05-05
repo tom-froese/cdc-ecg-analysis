@@ -32,34 +32,34 @@ function plot_SI_Fig3()
 
     % Group masks
     is_hc   = D.Group == 'HealthyControl';
-    is_cn   = D.Group == 'ClinicallyNormal';
-    is_path = D.Group == 'Pathological';
+    is_npe   = D.Group == 'NonPathECG';
+    is_pe = D.Group == 'PathECG';
 
     n_hc   = sum(is_hc);
-    n_cn   = sum(is_cn);
-    n_path = sum(is_path);
+    n_npe   = sum(is_npe);
+    n_pe = sum(is_pe);
 
     fprintf('SI Figure 3 — data loaded:\n');
     fprintf('  Healthy Control:   N = %s\n', format_comma(n_hc));
-    fprintf('  Patients (non-pathological ECG): N = %s\n', format_comma(n_cn));
-    fprintf('  Patients (pathological ECG):      N = %s\n', format_comma(n_path));
+    fprintf('  Patients (non-pathological ECG): N = %s\n', format_comma(n_npe));
+    fprintf('  Patients (pathological ECG):      N = %s\n', format_comma(n_pe));
 
     %% ================================================================
     %  COLOUR SCHEME
     %  ================================================================
 
     col_hc   = [0.20 0.55 0.85];
-    col_cn   = [0.25 0.70 0.35];
-    col_path = [0.85 0.25 0.20];
+    col_npe   = [0.25 0.70 0.35];
+    col_pe = [0.85 0.25 0.20];
 
-    colors = [col_hc; col_cn; col_path];
-    masks  = {is_hc, is_cn, is_path};
-    ns     = [n_hc, n_cn, n_path];
+    colors = [col_hc; col_npe; col_pe];
+    masks  = {is_hc, is_npe, is_pe};
+    ns     = [n_hc, n_npe, n_pe];
 
     labels = { ...
         sprintf('Healthy Control (\\itn\\rm = %s)', format_comma(n_hc)), ...
-        sprintf('Patients (non-pathological ECG) (\\itn\\rm = %s)', format_comma(n_cn)), ...
-        sprintf('Patients (pathological ECG) (\\itn\\rm = %s)', format_comma(n_path))};
+        sprintf('Patients (non-pathological ECG) (\\itn\\rm = %s)', format_comma(n_npe)), ...
+        sprintf('Patients (pathological ECG) (\\itn\\rm = %s)', format_comma(n_pe))};
 
     %% ================================================================
     %  FIGURE SETUP
@@ -89,11 +89,11 @@ function plot_SI_Fig3()
     hold on; box on;
 
     % Scatter
-    scatter(D.Age(is_path), D.RT_ms(is_path), dot_size, ...
-        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_pe), D.RT_ms(is_pe), dot_size, ...
+        col_pe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
-    scatter(D.Age(is_cn), D.RT_ms(is_cn), dot_size, ...
-        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_npe), D.RT_ms(is_npe), dot_size, ...
+        col_npe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
     scatter(D.Age(is_hc), D.RT_ms(is_hc), dot_size, ...
         col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, ...
@@ -142,11 +142,11 @@ function plot_SI_Fig3()
     hold on; box on;
 
     % Scatter
-    scatter(D.Age(is_path), D.RR_ms(is_path), dot_size, ...
-        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_pe), D.RR_ms(is_pe), dot_size, ...
+        col_pe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
-    scatter(D.Age(is_cn), D.RR_ms(is_cn), dot_size, ...
-        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_npe), D.RR_ms(is_npe), dot_size, ...
+        col_npe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
     scatter(D.Age(is_hc), D.RR_ms(is_hc), dot_size, ...
         col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, ...

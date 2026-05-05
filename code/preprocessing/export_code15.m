@@ -142,12 +142,12 @@ function [n_beats_out, n_records_out] = export_code15(base_path, output_file)
     selected_meta.group(is_normal) = "healthy";
     selected_meta.source_subset(is_normal) = "normal";
 
-    n_normal = sum(is_normal);
-    n_pathological = sum(~is_normal);
+    n_npe = sum(is_normal);
+    n_pe = sum(~is_normal);
     fprintf('  Patients (non-pathological ECG, first exam): %d (%.1f%%)\n', ...
-            n_normal, 100 * n_normal / height(selected_meta));
+            n_npe, 100 * n_npe / height(selected_meta));
     fprintf('  Patients (pathological ECG, first exam):     %d (%.1f%%)\n', ...
-            n_pathological, 100 * n_pathological / height(selected_meta));
+            n_pe, 100 * n_pe / height(selected_meta));
 
     % Skip exams with missing critical demographics
     valid_demo = ~isnan(selected_meta.age) & ~ismissing(selected_meta.patient_id);

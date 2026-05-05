@@ -10,12 +10,13 @@ function results = analyze_large_scale()
 %   4. PTB-XL          - CN vs Path: ECGDeli validated algorithm
 %
 % Group classification follows the hierarchical model (analyze_hierarchical_model.m):
-%   Healthy Control                    (HC)   = Fantasia, Autonomic Aging,
-%                                               PTB 'healthy' (all verified
-%                                               volunteers per source docs).
-%   Patients (non-pathological ECG)    (CN)   = PTB-XL 'healthy' (hospital
-%                                               patients with normal ECG).
-%   Patients (pathological ECG)        (Path) = PTB, PTB-XL 'pathological'.
+%   Healthy Control                  → 'HealthyControl' = Fantasia, Autonomic
+%                                      Aging, PTB 'healthy' (all verified
+%                                      volunteers per source docs).
+%   Patients (non-pathological ECG)  → 'NonPathECG'     = PTB-XL 'healthy'
+%                                      (hospital patients with normal ECG).
+%   Patients (pathological ECG)      → 'PathECG'        = PTB, PTB-XL
+%                                      'pathological'.
 %
 % Purpose: Confirm the gold-standard findings at scale. These datasets
 % provide statistical power that the small manually annotated databases
@@ -100,7 +101,7 @@ function results = analyze_large_scale()
     fprintf('(Manual T-end, algorithmic R-peak)\n');
     fprintf('================================================================\n');
 
-    ptb_results = analyze_hc_vs_pathological(ptb_beats, 'PTB', n_bootstrap, inv_e, ptb_excluded);
+    ptb_results = analyze_hc_vs_pe(ptb_beats, 'PTB', n_bootstrap, inv_e, ptb_excluded);
 
     %% Analysis 4: PTB-XL - Patients (non-pathological ECG) vs Patients (pathological ECG)
     fprintf('\n================================================================\n');
@@ -108,7 +109,7 @@ function results = analyze_large_scale()
     fprintf('(ECGDeli automatic annotation, N ~ 18,000 patients)\n');
     fprintf('================================================================\n');
 
-    ptbxl_results = analyze_cn_vs_pathological(ptbxl_beats, 'PTB-XL', n_bootstrap, inv_e, ptbxl_excluded);
+    ptbxl_results = analyze_npe_vs_pe(ptbxl_beats, 'PTB-XL', n_bootstrap, inv_e, ptbxl_excluded);
 
     %% Integrated summary
     fprintf('\n================================================================\n');
@@ -132,18 +133,18 @@ function results = analyze_large_scale()
                 ptb_results.pct_hc_above);
     end
     fprintf('PTB Patients (pathological ECG)               %.4f    [%.3f, %.3f]    %3d    %.1f%%\n', ...
-            ptb_results.mode_path, ptb_results.ci_path(1), ...
-            ptb_results.ci_path(2), ptb_results.n_path, ...
-            ptb_results.pct_path_above);
+            ptb_results.mode_pe, ptb_results.ci_pe(1), ...
+            ptb_results.ci_pe(2), ptb_results.n_pe, ...
+            ptb_results.pct_pe_above);
     fprintf('----------------------------------------------------------------------------------------\n');
     fprintf('PTB-XL Patients (non-pathological ECG)        %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
-            ptbxl_results.mode_cn, ptbxl_results.ci_cn(1), ...
-            ptbxl_results.ci_cn(2), ptbxl_results.n_cn, ...
-            ptbxl_results.pct_cn_above);
+            ptbxl_results.mode_npe, ptbxl_results.ci_npe(1), ...
+            ptbxl_results.ci_npe(2), ptbxl_results.n_npe, ...
+            ptbxl_results.pct_npe_above);
     fprintf('PTB-XL Patients (pathological ECG)            %.4f    [%.3f, %.3f]  %5d    %.1f%%\n', ...
-            ptbxl_results.mode_path, ptbxl_results.ci_path(1), ...
-            ptbxl_results.ci_path(2), ptbxl_results.n_path, ...
-            ptbxl_results.pct_path_above);
+            ptbxl_results.mode_pe, ptbxl_results.ci_pe(1), ...
+            ptbxl_results.ci_pe(2), ptbxl_results.n_pe, ...
+            ptbxl_results.pct_pe_above);
     fprintf('----------------------------------------------------------------------------------------\n');
     fprintf('Reference: 1/e = %.4f\n', inv_e);
     fprintf('================================================================\n');
@@ -216,8 +217,8 @@ function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_
         'pct_above', pct_above, 'all_ratios', median_ratio);
 end
 
-function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
-% ANALYZE_CN_VS_PATHOLOGICAL - Two-group analysis: CN vs Path
+function results = analyze_npe_vs_pe(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
+% ANALYZE_NPE_VS_PE - Two-group analysis: CN vs Path
 %   ("Patients (non-pathological ECG)" vs "Patients (pathological ECG)").
 %
 % Used for PTB-XL. The 'healthy' source-data label denotes hospital
@@ -259,34 +260,34 @@ function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, 
     median_ratio = median_ratio(valid);
     group = group(valid);
 
-    cn_ratios   = median_ratio(strcmp(group, 'healthy'));
-    path_ratios = median_ratio(~strcmp(group, 'healthy'));
-    n_cn   = length(cn_ratios);
-    n_path = length(path_ratios);
+    npe_ratios   = median_ratio(strcmp(group, 'healthy'));
+    pe_ratios = median_ratio(~strcmp(group, 'healthy'));
+    n_npe   = length(npe_ratios);
+    n_pe = length(pe_ratios);
 
-    fprintf('  Patients (non-pathological ECG): n = %d\n', n_cn);
-    fprintf('  Patients (pathological ECG):     n = %d\n', n_path);
+    fprintf('  Patients (non-pathological ECG): n = %d\n', n_npe);
+    fprintf('  Patients (pathological ECG):     n = %d\n', n_pe);
 
-    if n_cn >= 3
-        [mode_cn, ci_cn] = bootstrap_mode(cn_ratios, n_bootstrap);
-        pct_cn_above = 100 * sum(cn_ratios > inv_e) / n_cn;
+    if n_npe >= 3
+        [mode_npe, ci_npe] = bootstrap_mode(npe_ratios, n_bootstrap);
+        pct_npe_above = 100 * sum(npe_ratios > inv_e) / n_npe;
     else
-        mode_cn = NaN; ci_cn = [NaN NaN]; pct_cn_above = NaN;
+        mode_npe = NaN; ci_npe = [NaN NaN]; pct_npe_above = NaN;
     end
 
-    [mode_path, ci_path] = bootstrap_mode(path_ratios, n_bootstrap);
-    pct_path_above = 100 * sum(path_ratios > inv_e) / n_path;
+    [mode_pe, ci_pe] = bootstrap_mode(pe_ratios, n_bootstrap);
+    pct_pe_above = 100 * sum(pe_ratios > inv_e) / n_pe;
 
-    fprintf('  CN mode:   %.4f [%.4f, %.4f]\n', mode_cn, ci_cn(1), ci_cn(2));
-    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_path, ci_path(1), ci_path(2));
+    fprintf('  CN mode:   %.4f [%.4f, %.4f]\n', mode_npe, ci_npe(1), ci_npe(2));
+    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_pe, ci_pe(1), ci_pe(2));
 
-    if n_cn >= 3 && n_path >= 3
-        [p_val, ~, stats] = ranksum(cn_ratios, path_ratios);
+    if n_npe >= 3 && n_pe >= 3
+        [p_val, ~, stats] = ranksum(npe_ratios, pe_ratios);
         fprintf('  Wilcoxon: p = %.2e%s\n', p_val, stars(p_val));
         % Rank-biserial effect size
         if isfield(stats, 'ranksum')
-            U = stats.ranksum - n_cn*(n_cn+1)/2;
-            effect_size = 1 - 2*U/(n_cn*n_path);
+            U = stats.ranksum - n_npe*(n_npe+1)/2;
+            effect_size = 1 - 2*U/(n_npe*n_pe);
         else
             effect_size = NaN;
         end
@@ -295,16 +296,16 @@ function results = analyze_cn_vs_pathological(beats, dataset_name, n_bootstrap, 
         p_val = NaN; effect_size = NaN;
     end
 
-    results = struct('n_cn', n_cn, 'n_path', n_path, ...
-        'mode_cn', mode_cn, 'ci_cn', ci_cn, ...
-        'mode_path', mode_path, 'ci_path', ci_path, ...
-        'pct_cn_above', pct_cn_above, 'pct_path_above', pct_path_above, ...
+    results = struct('n_npe', n_npe, 'n_pe', n_pe, ...
+        'mode_npe', mode_npe, 'ci_npe', ci_npe, ...
+        'mode_pe', mode_pe, 'ci_pe', ci_pe, ...
+        'pct_npe_above', pct_npe_above, 'pct_pe_above', pct_pe_above, ...
         'p_value', p_val, 'effect_size', effect_size, ...
-        'cn_ratios', cn_ratios, 'path_ratios', path_ratios);
+        'npe_ratios', npe_ratios, 'pe_ratios', pe_ratios);
 end
 
-function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
-% ANALYZE_HC_VS_PATHOLOGICAL - Two-group analysis: HC vs Path
+function results = analyze_hc_vs_pe(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
+% ANALYZE_HC_VS_PE - Two-group analysis: HC vs Path
 %   ("Healthy Control" vs "Patients (pathological ECG)").
 %
 % Used for PTB. The 'healthy' source-data label denotes verified
@@ -347,12 +348,12 @@ function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, 
     group = group(valid);
 
     hc_ratios   = median_ratio(strcmp(group, 'healthy'));
-    path_ratios = median_ratio(~strcmp(group, 'healthy'));
+    pe_ratios = median_ratio(~strcmp(group, 'healthy'));
     n_hc   = length(hc_ratios);
-    n_path = length(path_ratios);
+    n_pe = length(pe_ratios);
 
     fprintf('  Healthy control:             n = %d\n', n_hc);
-    fprintf('  Patients (pathological ECG): n = %d\n', n_path);
+    fprintf('  Patients (pathological ECG): n = %d\n', n_pe);
 
     if n_hc >= 3
         [mode_hc, ci_hc] = bootstrap_mode(hc_ratios, n_bootstrap);
@@ -361,18 +362,18 @@ function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, 
         mode_hc = NaN; ci_hc = [NaN NaN]; pct_hc_above = NaN;
     end
 
-    [mode_path, ci_path] = bootstrap_mode(path_ratios, n_bootstrap);
-    pct_path_above = 100 * sum(path_ratios > inv_e) / n_path;
+    [mode_pe, ci_pe] = bootstrap_mode(pe_ratios, n_bootstrap);
+    pct_pe_above = 100 * sum(pe_ratios > inv_e) / n_pe;
 
     fprintf('  HC mode:   %.4f [%.4f, %.4f]\n', mode_hc, ci_hc(1), ci_hc(2));
-    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_path, ci_path(1), ci_path(2));
+    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_pe, ci_pe(1), ci_pe(2));
 
-    if n_hc >= 3 && n_path >= 3
-        [p_val, ~, stats] = ranksum(hc_ratios, path_ratios);
+    if n_hc >= 3 && n_pe >= 3
+        [p_val, ~, stats] = ranksum(hc_ratios, pe_ratios);
         fprintf('  Wilcoxon: p = %.2e%s\n', p_val, stars(p_val));
         if isfield(stats, 'ranksum')
             U = stats.ranksum - n_hc*(n_hc+1)/2;
-            effect_size = 1 - 2*U/(n_hc*n_path);
+            effect_size = 1 - 2*U/(n_hc*n_pe);
         else
             effect_size = NaN;
         end
@@ -381,12 +382,12 @@ function results = analyze_hc_vs_pathological(beats, dataset_name, n_bootstrap, 
         p_val = NaN; effect_size = NaN;
     end
 
-    results = struct('n_hc', n_hc, 'n_path', n_path, ...
+    results = struct('n_hc', n_hc, 'n_pe', n_pe, ...
         'mode_hc', mode_hc, 'ci_hc', ci_hc, ...
-        'mode_path', mode_path, 'ci_path', ci_path, ...
-        'pct_hc_above', pct_hc_above, 'pct_path_above', pct_path_above, ...
+        'mode_pe', mode_pe, 'ci_pe', ci_pe, ...
+        'pct_hc_above', pct_hc_above, 'pct_pe_above', pct_pe_above, ...
         'p_value', p_val, 'effect_size', effect_size, ...
-        'hc_ratios', hc_ratios, 'path_ratios', path_ratios);
+        'hc_ratios', hc_ratios, 'pe_ratios', pe_ratios);
 end
 
 %% ========================================================================

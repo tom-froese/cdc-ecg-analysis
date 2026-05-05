@@ -39,8 +39,8 @@ function plot_SI_Fig7()
     %  COLOUR PALETTE (matches main figures)
     %  ================================================================
     col_hc   = [0.20 0.55 0.85];   % blue  — healthy controls
-    col_cn   = [0.25 0.70 0.35];   % green — clinically normal
-    col_path = [0.85 0.25 0.20];   % red   — pathological
+    col_npe   = [0.25 0.70 0.35];   % green — clinically normal
+    col_pe = [0.85 0.25 0.20];   % red   — pathological
 
     %% ================================================================
     %  FIGURE SETUP — Nature Aging formatting
@@ -171,12 +171,12 @@ function plot_SI_Fig7()
         plot(x, f, 'Color', col_hc * 0.7, 'LineWidth', 1.8);
     end
 
-    d_path = ptb.path_ratios - inv_e;
-    mode_path_d = ptb.mode_path - inv_e;
-    histogram(d_path, edges, 'FaceColor', col_path, ...
+    d_pe = ptb.pe_ratios - inv_e;
+    mode_pe_d = ptb.mode_pe - inv_e;
+    histogram(d_pe, edges, 'FaceColor', col_pe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
-    [f, x] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_path * 0.7, 'LineWidth', 1.8);
+    [f, x] = ksdensity(d_pe, 'NumPoints', kde_pts);
+    plot(x, f, 'Color', col_pe * 0.7, 'LineWidth', 1.8);
 
     yl = ylim;
     plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
@@ -185,8 +185,8 @@ function plot_SI_Fig7()
         plot(mode_hc_d * [1 1], [0 yl(2)], '--', ...
              'Color', col_hc * 0.7, 'LineWidth', 1.0);
     end
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
+    plot(mode_pe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     ylabel('Density', 'FontSize', lab_fs);
     title('PTB: manual T-end, algorithmic R-peak', ...
@@ -203,9 +203,9 @@ function plot_SI_Fig7()
         leg_items(1) = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
         leg_strs{1} = sprintf('Healthy control (n=%d)', ptb.n_hc);
     end
-    leg_items(2) = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    leg_items(2) = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg_strs{2} = sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ...
-                           ptb.n_path, mode_path_d);
+                           ptb.n_pe, mode_pe_d);
     legend(leg_items, leg_strs, 'Location', 'northeast', ...
            'FontSize', leg_fs, 'Box', 'off');
 
@@ -230,27 +230,27 @@ function plot_SI_Fig7()
 
     ptbxl = results.ptbxl;
 
-    d_cn = ptbxl.cn_ratios - inv_e;
-    mode_cn_d = ptbxl.mode_cn - inv_e;
-    d_path = ptbxl.path_ratios - inv_e;
-    mode_path_d = ptbxl.mode_path - inv_e;
+    d_npe = ptbxl.npe_ratios - inv_e;
+    mode_npe_d = ptbxl.mode_npe - inv_e;
+    d_pe = ptbxl.pe_ratios - inv_e;
+    mode_pe_d = ptbxl.mode_pe - inv_e;
 
-    histogram(d_cn, edges, 'FaceColor', col_cn, ...
+    histogram(d_npe, edges, 'FaceColor', col_npe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    histogram(d_path, edges, 'FaceColor', col_path, ...
+    histogram(d_pe, edges, 'FaceColor', col_pe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
 
-    [f, x] = ksdensity(d_cn, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
-    [f, x] = ksdensity(d_path, 'NumPoints', kde_pts);
-    plot(x, f, 'Color', col_path * 0.7, 'LineWidth', 1.8);
+    [f, x] = ksdensity(d_npe, 'NumPoints', kde_pts);
+    plot(x, f, 'Color', col_npe * 0.7, 'LineWidth', 1.8);
+    [f, x] = ksdensity(d_pe, 'NumPoints', kde_pts);
+    plot(x, f, 'Color', col_pe * 0.7, 'LineWidth', 1.8);
 
     yl = ylim;
     plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
-    plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_cn * 0.7, 'LineWidth', 1.0);
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
+    plot(mode_npe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_npe * 0.7, 'LineWidth', 1.0);
+    plot(mode_pe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
            'FontSize', lab_fs);
@@ -259,13 +259,13 @@ function plot_SI_Fig7()
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
-    ph = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    ph = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    pp = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     legend([ph, pp], { ...
         sprintf('Patients (non-pathological ECG) (n=%s, \\Delta=%+.3f)', ...
-                format_comma(ptbxl.n_cn), mode_cn_d), ...
+                format_comma(ptbxl.n_npe), mode_npe_d), ...
         sprintf('Patients (pathological ECG) (n=%s, \\Delta=%+.3f)', ...
-                format_comma(ptbxl.n_path), mode_path_d)}, ...
+                format_comma(ptbxl.n_pe), mode_pe_d)}, ...
         'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
@@ -275,7 +275,7 @@ function plot_SI_Fig7()
     add_p_annotation(ptbxl.p_value, ax_fs);
 
     % Total N annotation
-    n_total = ptbxl.n_cn + ptbxl.n_path;
+    n_total = ptbxl.n_npe + ptbxl.n_pe;
     text(0.03, 0.78, sprintf('N = %s patients', format_comma(n_total)), ...
          'Units', 'normalized', 'FontSize', ax_fs, 'Color', [0.3 0.3 0.3]);
     text(0.03, 0.88, 'ECGDeli (R-peak + T-end)', ...
@@ -328,9 +328,9 @@ function plot_SI_Fig7()
     fprintf('Autonomic Aging: HC n=%s (mode=%.3f, dCDC=%+.4f)\n', ...
             format_comma(aa.n_all), aa.mode_all, aa.mode_all - inv_e);
     fprintf('PTB:             HC n=%d, Path n=%d, p=%.2e\n', ...
-            ptb.n_hc, ptb.n_path, ptb.p_value);
+            ptb.n_hc, ptb.n_pe, ptb.p_value);
     fprintf('PTB-XL:          CN n=%s, Path n=%s, p=%.2e\n', ...
-            format_comma(ptbxl.n_cn), format_comma(ptbxl.n_path), ptbxl.p_value);
+            format_comma(ptbxl.n_npe), format_comma(ptbxl.n_pe), ptbxl.p_value);
 end
 
 

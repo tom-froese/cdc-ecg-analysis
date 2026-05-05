@@ -5,8 +5,11 @@ function results = analyze_code15()
 % 'tangent_automatic'). Fits a linear model:
 %   CDC ~ Age_c * Group * Sex
 %
-% where Group is ClinicallyNormal vs Pathological, determined by
-% whether all beats for a patient have source_subset = 'normal'.
+% where Group has two levels (internal categorical → display label):
+%   NonPathECG → "Patients (non-pathological ECG)"
+%   PathECG    → "Patients (pathological ECG)"
+% Group assignment: a patient is NonPathECG iff all their beats have
+% source_subset = 'normal'; otherwise PathECG.
 %
 % Subject aggregation uses unique_subject_id (format: CODE15_PatientID)
 % for consistency with the hierarchical model pipeline.
@@ -18,7 +21,7 @@ function results = analyze_code15()
     n_bootstrap = 5000;
 
     fprintf('================================================================\n');
-    fprintf('CODE-15%%: CLINICALLY NORMAL vs PATHOLOGICAL\n');
+    fprintf('CODE-15%%: PATIENTS (NON-PATHOLOGICAL ECG) vs PATIENTS (PATHOLOGICAL ECG)\n');
     fprintf('================================================================\n');
     fprintf('Reference: 1/e = %.4f\n', inv_e);
     fprintf('================================================================\n\n');
@@ -54,11 +57,11 @@ function results = analyze_code15()
     is_normal_beat = (beats.source_subset == "normal");
     total_beats_per = splitapply(@numel, beats.unique_subject_id, G);
     normal_beats_per = splitapply(@sum, is_normal_beat, G);
-    is_clinically_normal = (total_beats_per == normal_beats_per);
+    is_npe = (total_beats_per == normal_beats_per);
 
     Group_str = strings(length(patient_ids), 1);
-    Group_str(is_clinically_normal) = "ClinicallyNormal";
-    Group_str(~is_clinically_normal) = "Pathological";
+    Group_str(is_npe) = "NonPathECG";
+    Group_str(~is_npe) = "PathECG";
     Group = categorical(Group_str);
 
     all_data = table(Age, CDC, HR, Sex, Group);
@@ -69,30 +72,30 @@ function results = analyze_code15()
     all_data.Age_c = all_data.Age - mean(all_data.Age);
 
     %% Summary
-    n_cn   = sum(all_data.Group == 'ClinicallyNormal');
-    n_path = sum(all_data.Group == 'Pathological');
+    n_npe   = sum(all_data.Group == 'NonPathECG');
+    n_pe = sum(all_data.Group == 'PathECG');
 
     fprintf('Valid subjects: %d\n', height(all_data));
-    fprintf('  Patients (non-pathological ECG): %d\n', n_cn);
-    fprintf('  Patients (pathological ECG):     %d\n', n_path);
+    fprintf('  Patients (non-pathological ECG): %d\n', n_npe);
+    fprintf('  Patients (pathological ECG):     %d\n', n_pe);
     fprintf('  Age range: %.0f-%.0f (Mean: %.1f +/- %.1f)\n', ...
         min(all_data.Age), max(all_data.Age), mean(all_data.Age), std(all_data.Age));
 
     %% Distribution statistics (for SI figure)
     fprintf('\nDistribution statistics:\n');
 
-    cn_ratios   = all_data.CDC(all_data.Group == 'ClinicallyNormal');
-    path_ratios = all_data.CDC(all_data.Group == 'Pathological');
+    npe_ratios   = all_data.CDC(all_data.Group == 'NonPathECG');
+    pe_ratios = all_data.CDC(all_data.Group == 'PathECG');
 
-    [mode_cn, ci_cn]     = bootstrap_mode(cn_ratios, n_bootstrap);
-    [mode_path, ci_path] = bootstrap_mode(path_ratios, n_bootstrap);
+    [mode_npe, ci_npe]     = bootstrap_mode(npe_ratios, n_bootstrap);
+    [mode_pe, ci_pe] = bootstrap_mode(pe_ratios, n_bootstrap);
 
-    [p_ranksum, ~] = ranksum(cn_ratios, path_ratios);
+    [p_ranksum, ~] = ranksum(npe_ratios, pe_ratios);
 
-    fprintf('  CN mode:   %.4f [%.4f, %.4f]  dCDC=%+.4f\n', ...
-            mode_cn, ci_cn(1), ci_cn(2), mode_cn - inv_e);
-    fprintf('  Path mode: %.4f [%.4f, %.4f]  dCDC=%+.4f\n', ...
-            mode_path, ci_path(1), ci_path(2), mode_path - inv_e);
+    fprintf('  NonPathECG mode: %.4f [%.4f, %.4f]  dCDC=%+.4f\n', ...
+            mode_npe, ci_npe(1), ci_npe(2), mode_npe - inv_e);
+    fprintf('  PathECG mode:    %.4f [%.4f, %.4f]  dCDC=%+.4f\n', ...
+            mode_pe, ci_pe(1), ci_pe(2), mode_pe - inv_e);
     fprintf('  Wilcoxon rank-sum: p = %.2e\n', p_ranksum);
 
     %% Fit linear model
@@ -114,7 +117,7 @@ function results = analyze_code15()
     fprintf('Intercept (Patients (non-pathological ECG), Female, mean age): %.4f (SE=%.4f, p=%.2e)\n\n', ...
         coeffs.Estimate(idx), coeffs.SE(idx), coeffs.pValue(idx));
 
-    idx = strcmp(coeffs.Properties.RowNames, 'Group_Pathological');
+    idx = strcmp(coeffs.Properties.RowNames, 'Group_PathECG');
     fprintf('Patients (pathological ECG) vs Patients (non-pathological ECG): beta=%.4f, SE=%.4f, p=%.2e\n\n', ...
         coeffs.Estimate(idx), coeffs.SE(idx), coeffs.pValue(idx));
 
@@ -122,14 +125,14 @@ function results = analyze_code15()
     fprintf('Age slope (Patients (non-pathological ECG)): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
         coeffs.Estimate(idx_age), coeffs.SE(idx_age), coeffs.pValue(idx_age));
 
-    idx_age_p = strcmp(coeffs.Properties.RowNames, 'Age_c:Group_Pathological');
-    if any(idx_age_p)
+    idx_age_pe = strcmp(coeffs.Properties.RowNames, 'Age_c:Group_PathECG');
+    if any(idx_age_pe)
         fprintf('Additional slope (Patients (pathological ECG)): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
-            coeffs.Estimate(idx_age_p), coeffs.SE(idx_age_p), coeffs.pValue(idx_age_p));
+            coeffs.Estimate(idx_age_pe), coeffs.SE(idx_age_pe), coeffs.pValue(idx_age_pe));
     end
 
     %% Marginal means
-    group_ids    = {'ClinicallyNormal', 'Pathological'};
+    group_ids    = {'NonPathECG', 'PathECG'};
     group_labels = {'Patients (non-pathological ECG)', 'Patients (pathological ECG)'};
     fprintf('\nObserved means:\n');
     for gi = 1:numel(group_ids)
@@ -154,13 +157,13 @@ function results = analyze_code15()
     results.inv_e = inv_e;
 
     % Distribution statistics (for plotting)
-    results.mode_cn = mode_cn;
-    results.ci_cn = ci_cn;
-    results.mode_path = mode_path;
-    results.ci_path = ci_path;
+    results.mode_npe = mode_npe;
+    results.ci_npe = ci_npe;
+    results.mode_pe = mode_pe;
+    results.ci_pe = ci_pe;
     results.p_ranksum = p_ranksum;
-    results.n_cn = n_cn;
-    results.n_path = n_path;
+    results.n_npe = n_npe;
+    results.n_pe = n_pe;
 
     save(fullfile(paths.results, 'code15_results.mat'), '-struct', 'results');
     fprintf('\nResults saved.\n');

@@ -48,17 +48,17 @@ function plot_Fig1()
 
     % Group masks
     is_hc   = D.Group == 'HealthyControl';
-    is_cn   = D.Group == 'ClinicallyNormal';
-    is_path = D.Group == 'Pathological';
+    is_npe   = D.Group == 'NonPathECG';
+    is_pe = D.Group == 'PathECG';
 
     n_hc   = sum(is_hc);
-    n_cn   = sum(is_cn);
-    n_path = sum(is_path);
+    n_npe   = sum(is_npe);
+    n_pe = sum(is_pe);
 
     fprintf('Figure 1 — data loaded:\n');
     fprintf('  Healthy Control:   N = %s\n', format_comma(n_hc));
-    fprintf('  Patients (non-pathological ECG): N = %s\n', format_comma(n_cn));
-    fprintf('  Patients (pathological ECG):      N = %s\n', format_comma(n_path));
+    fprintf('  Patients (non-pathological ECG): N = %s\n', format_comma(n_npe));
+    fprintf('  Patients (pathological ECG):      N = %s\n', format_comma(n_pe));
     fprintf('  Total:             N = %s\n', format_comma(height(D)));
 
     %% ================================================================
@@ -66,12 +66,12 @@ function plot_Fig1()
     %  ================================================================
 
     col_hc   = [0.20 0.55 0.85];   % Blue  — verified healthy volunteers
-    col_cn   = [0.25 0.70 0.35];   % Green — clinically normal ECG
-    col_path = [0.85 0.25 0.20];   % Red   — pathological
+    col_npe   = [0.25 0.70 0.35];   % Green — clinically normal ECG
+    col_pe = [0.85 0.25 0.20];   % Red   — pathological
 
-    colors = [col_hc; col_cn; col_path];
-    masks  = {is_hc, is_cn, is_path};
-    ns     = [n_hc, n_cn, n_path];
+    colors = [col_hc; col_npe; col_pe];
+    masks  = {is_hc, is_npe, is_pe};
+    ns     = [n_hc, n_npe, n_pe];
 
     % Legend labels for panel (a): n, mode, 95% CI, 1/e containment
     % The thermodynamic prediction concerns the most probable state (mode),
@@ -97,8 +97,8 @@ function plot_Fig1()
     % Legend labels for panel (b): n only (diastole panel)
     labels_b = { ...
         sprintf('Healthy Control (\\itn\\rm = %s)', format_comma(n_hc)), ...
-        sprintf('Patients (non-pathological ECG) (\\itn\\rm = %s)', format_comma(n_cn)), ...
-        sprintf('Patients (pathological ECG) (\\itn\\rm = %s)', format_comma(n_path))};
+        sprintf('Patients (non-pathological ECG) (\\itn\\rm = %s)', format_comma(n_npe)), ...
+        sprintf('Patients (pathological ECG) (\\itn\\rm = %s)', format_comma(n_pe))};
 
     %% ================================================================
     %  FIGURE SETUP
@@ -133,11 +133,11 @@ function plot_Fig1()
     hold on; box on;
 
     % Individual scatter — back-to-front so HC visible on top
-    scatter(D.Age(is_path), D.delta_CDC(is_path), dot_size, ...
-        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_pe), D.delta_CDC(is_pe), dot_size, ...
+        col_pe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
-    scatter(D.Age(is_cn), D.delta_CDC(is_cn), dot_size, ...
-        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_npe), D.delta_CDC(is_npe), dot_size, ...
+        col_npe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
     scatter(D.Age(is_hc), D.delta_CDC(is_hc), dot_size, ...
         col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, ...
@@ -190,11 +190,11 @@ function plot_Fig1()
     hold on; box on;
 
     % Individual scatter
-    scatter(D.Age(is_path), D.Dias_ms(is_path), dot_size, ...
-        col_path, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_pe), D.Dias_ms(is_pe), dot_size, ...
+        col_pe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
-    scatter(D.Age(is_cn), D.Dias_ms(is_cn), dot_size, ...
-        col_cn, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
+    scatter(D.Age(is_npe), D.Dias_ms(is_npe), dot_size, ...
+        col_npe, 'filled', 'MarkerFaceAlpha', alpha_dot, ...
         'HandleVisibility', 'off');
     scatter(D.Age(is_hc), D.Dias_ms(is_hc), dot_size, ...
         col_hc, 'filled', 'MarkerFaceAlpha', alpha_dot * 2.5, ...
@@ -261,10 +261,10 @@ function plot_Fig1()
     fprintf('Total subjects: N = %s\n', format_comma(height(D)));
     fprintf('  HC:   N = %5s, age %d-%d yr\n', format_comma(n_hc), ...
         round(min(D.Age(is_hc))), round(max(D.Age(is_hc))));
-    fprintf('  CN:   N = %5s, age %d-%d yr\n', format_comma(n_cn), ...
-        round(min(D.Age(is_cn))), round(max(D.Age(is_cn))));
-    fprintf('  Path: N = %5s, age %d-%d yr\n', format_comma(n_path), ...
-        round(min(D.Age(is_path))), round(max(D.Age(is_path))));
+    fprintf('  CN:   N = %5s, age %d-%d yr\n', format_comma(n_npe), ...
+        round(min(D.Age(is_npe))), round(max(D.Age(is_npe))));
+    fprintf('  Path: N = %5s, age %d-%d yr\n', format_comma(n_pe), ...
+        round(min(D.Age(is_pe))), round(max(D.Age(is_pe))));
 
     fprintf('\nDiastole summary (ms):\n');
     for g = 1:3

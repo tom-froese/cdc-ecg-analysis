@@ -71,11 +71,11 @@ function results = analyze_age_stratified_mortality()
     is_normal_beat = (beats.source_subset == "normal");
     total_per  = splitapply(@numel, beats.record_id, G);
     normal_per = splitapply(@sum, is_normal_beat, G);
-    is_cn = (total_per == normal_per);
+    is_npe = (total_per == normal_per);
 
     Group_str = strings(length(subject_ids), 1);
-    Group_str(is_cn)  = "ClinicallyNormal";
-    Group_str(~is_cn) = "Pathological";
+    Group_str(is_npe)  = "NonPathECG";
+    Group_str(~is_npe) = "PathECG";
 
     % Extract numeric patient ID for merge with exams.csv
     % unique_subject_id = "CODE15_<patient_id>"
@@ -162,7 +162,7 @@ function results = analyze_age_stratified_mortality()
     data.Group = categorical(data.Group);
     data.Sex = categorical(data.Sex);
     data.CDC_dev = abs(data.CDC - inv_e);
-    data.Pathological = double(data.Group == 'Pathological');
+    data.PathECG = double(data.Group == 'PathECG');
 
     fprintf('  Valid records: %d (Deaths: %d, %.2f%%)\n', ...
         height(data), sum(data.Deceased), 100 * mean(data.Deceased));
@@ -266,8 +266,8 @@ function results = analyze_age_stratified_mortality()
         % --- 6a. Interaction model ---
         fprintf('--- Cox PH: CDC_dev × Age interaction ---\n\n');
         X_cox = [data.CDC_dev, data.Age, data.CDC_dev .* data.Age, ...
-                 data.is_male, data.Pathological];
-        cox_names = {'CDC_dev', 'Age', 'CDC_dev x Age', 'Male', 'Pathological'};
+                 data.is_male, data.PathECG];
+        cox_names = {'CDC_dev', 'Age', 'CDC_dev x Age', 'Male', 'PathECG'};
 
         [b_cox, ~, ~, stats_cox] = coxphfit(X_cox, time, ...
             'Censoring', censoring);
@@ -283,9 +283,9 @@ function results = analyze_age_stratified_mortality()
 
         X_resid = [data.CDC_dev_resid, data.Age, ...
                    data.CDC_dev_resid .* data.Age, ...
-                   data.is_male, data.Pathological];
+                   data.is_male, data.PathECG];
         resid_names = {'CDC_dev_resid', 'Age', 'Resid x Age', ...
-                       'Male', 'Pathological'};
+                       'Male', 'PathECG'};
 
         [b_resid, ~, ~, stats_resid] = coxphfit(X_resid, time, ...
             'Censoring', censoring);
@@ -296,8 +296,8 @@ function results = analyze_age_stratified_mortality()
 
         % --- 6c. Main effects only ---
         fprintf('\n--- Cox PH: main effects only ---\n\n');
-        X_main = [data.CDC_dev, data.Age, data.is_male, data.Pathological];
-        main_names = {'CDC_dev', 'Age', 'Male', 'Pathological'};
+        X_main = [data.CDC_dev, data.Age, data.is_male, data.PathECG];
+        main_names = {'CDC_dev', 'Age', 'Male', 'PathECG'};
 
         [b_main, ~, ~, stats_main] = coxphfit(X_main, time, ...
             'Censoring', censoring);

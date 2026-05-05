@@ -54,9 +54,9 @@ function plot_SI_Fig1()
     %  ================================================================
 
     col_hc   = [0.20 0.55 0.85];   % Blue  — Healthy Control
-    col_cn   = [0.25 0.70 0.35];   % Green — Patients (non-pathological ECG) (CN)
-    col_path = [0.85 0.25 0.20];   % Red   — Patients (pathological ECG) (Path)
-    colors = [col_hc; col_cn; col_path];
+    col_npe   = [0.25 0.70 0.35];   % Green — Patients (non-pathological ECG) (CN)
+    col_pe = [0.85 0.25 0.20];   % Red   — Patients (pathological ECG) (Path)
+    colors = [col_hc; col_npe; col_pe];
 
     %% ================================================================
     %  FIGURE SETUP — Nature Aging formatting

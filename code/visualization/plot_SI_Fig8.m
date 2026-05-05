@@ -22,8 +22,8 @@ function plot_SI_Fig8()
     %  LOAD PRECOMPUTED RESULTS
     %  ================================================================
     S = load(fullfile(paths.results, 'code15_results.mat'), ...
-             'all_data', 'mode_cn', 'mode_path', 'p_ranksum', ...
-             'n_cn', 'n_path', 'inv_e');
+             'all_data', 'mode_npe', 'mode_pe', 'p_ranksum', ...
+             'n_npe', 'n_pe', 'inv_e');
     all_data = S.all_data;
     all_data.dCDC = all_data.CDC - inv_e;
     all_data.RR   = 60 ./ all_data.HR;   % bpm → seconds
@@ -31,19 +31,19 @@ function plot_SI_Fig8()
     %% ================================================================
     %  COLOUR PALETTE (matches main figures)
     %  ================================================================
-    col_cn   = [0.25 0.70 0.35];   % green — clinically normal
-    col_path = [0.85 0.25 0.20];   % red   — pathological
+    col_npe   = [0.25 0.70 0.35];   % green — clinically normal
+    col_pe = [0.85 0.25 0.20];   % red   — pathological
 
     %% Group masks
-    is_cn   = all_data.Group == 'ClinicallyNormal';
-    is_path = all_data.Group == 'Pathological';
+    is_npe   = all_data.Group == 'NonPathECG';
+    is_pe = all_data.Group == 'PathECG';
 
-    n_cn   = S.n_cn;
-    n_path = S.n_path;
-    n_total = n_cn + n_path;
+    n_npe   = S.n_npe;
+    n_pe = S.n_pe;
+    n_total = n_npe + n_pe;
 
-    mode_cn_d   = S.mode_cn - inv_e;
-    mode_path_d = S.mode_path - inv_e;
+    mode_npe_d   = S.mode_npe - inv_e;
+    mode_pe_d = S.mode_pe - inv_e;
 
     %% ================================================================
     %  FIGURE SETUP — Nature Aging formatting
@@ -79,26 +79,26 @@ function plot_SI_Fig8()
     kde_pts = 500;
 
     % Histograms
-    histogram(all_data.dCDC(is_cn), edges, 'FaceColor', col_cn, ...
+    histogram(all_data.dCDC(is_npe), edges, 'FaceColor', col_npe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.55, 'Normalization', 'pdf');
-    histogram(all_data.dCDC(is_path), edges, 'FaceColor', col_path, ...
+    histogram(all_data.dCDC(is_pe), edges, 'FaceColor', col_pe, ...
               'EdgeColor', 'none', 'FaceAlpha', 0.45, 'Normalization', 'pdf');
 
     % KDE overlays
-    [f_cn, x_cn] = ksdensity(all_data.dCDC(is_cn), 'NumPoints', kde_pts);
-    plot(x_cn, f_cn, 'Color', col_cn * 0.7, 'LineWidth', 1.8);
-    [f_path, x_path] = ksdensity(all_data.dCDC(is_path), 'NumPoints', kde_pts);
-    plot(x_path, f_path, 'Color', col_path * 0.7, 'LineWidth', 1.8);
+    [f_npe, x_npe] = ksdensity(all_data.dCDC(is_npe), 'NumPoints', kde_pts);
+    plot(x_npe, f_npe, 'Color', col_npe * 0.7, 'LineWidth', 1.8);
+    [f_pe, x_pe] = ksdensity(all_data.dCDC(is_pe), 'NumPoints', kde_pts);
+    plot(x_pe, f_pe, 'Color', col_pe * 0.7, 'LineWidth', 1.8);
 
     % 1/e reference line
     yl = ylim;
     plot([0 0], [0 yl(2)], 'k-', 'LineWidth', 1.8);
 
     % Mode dashed lines
-    plot(mode_cn_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_cn * 0.7, 'LineWidth', 1.0);
-    plot(mode_path_d * [1 1], [0 yl(2)], '--', ...
-         'Color', col_path * 0.7, 'LineWidth', 1.0);
+    plot(mode_npe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_npe * 0.7, 'LineWidth', 1.0);
+    plot(mode_pe_d * [1 1], [0 yl(2)], '--', ...
+         'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', 'FontSize', lab_fs);
     ylabel('Density', 'FontSize', lab_fs);
@@ -106,11 +106,11 @@ function plot_SI_Fig8()
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
-    ph = patch(NaN, NaN, col_cn, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    pp = patch(NaN, NaN, col_path, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    ph = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
+    pp = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     legend([ph, pp], { ...
-        sprintf('Patients (non-pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_cn), mode_cn_d), ...
-        sprintf('Patients (pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_path), mode_path_d)}, ...
+        sprintf('Patients (non-pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_npe), mode_npe_d), ...
+        sprintf('Patients (pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_pe), mode_pe_d)}, ...
         'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
@@ -138,9 +138,9 @@ function plot_SI_Fig8()
     ax2 = subplot(2, 2, 3);
     hold on; box on;
 
-    groups = {'ClinicallyNormal', 'Pathological'};
-    colors = [col_cn; col_path];
-    masks  = {is_cn, is_path};
+    groups = {'NonPathECG', 'PathECG'};
+    colors = [col_npe; col_pe];
+    masks  = {is_npe, is_pe};
 
     h_lines = gobjects(2, 1);
 
@@ -171,8 +171,8 @@ function plot_SI_Fig8()
     ylabel('\DeltaCDC from 1/\ite', 'FontSize', lab_fs);
 
     legend(h_lines, { ...
-        sprintf('Patients (non-pathological ECG) (n=%s)', format_comma(n_cn)), ...
-        sprintf('Patients (pathological ECG) (n=%s)', format_comma(n_path))}, ...
+        sprintf('Patients (non-pathological ECG) (n=%s)', format_comma(n_npe)), ...
+        sprintf('Patients (pathological ECG) (n=%s)', format_comma(n_pe))}, ...
         'Location', 'northwest', 'FontSize', leg_fs, 'Box', 'off');
 
     xlim(age_lim);
@@ -212,8 +212,8 @@ function plot_SI_Fig8()
     ylabel('Median RR interval (s)', 'FontSize', lab_fs);
 
     legend(h_lines2, { ...
-        sprintf('Patients (non-pathological ECG) (n=%s)', format_comma(n_cn)), ...
-        sprintf('Patients (pathological ECG) (n=%s)', format_comma(n_path))}, ...
+        sprintf('Patients (non-pathological ECG) (n=%s)', format_comma(n_npe)), ...
+        sprintf('Patients (pathological ECG) (n=%s)', format_comma(n_pe))}, ...
         'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
 
     xlim(age_lim);
@@ -253,9 +253,9 @@ function plot_SI_Fig8()
     %  ================================================================
     fprintf('\n--- Summary for SI Fig 8 legend ---\n');
     fprintf('N = %s patients (%s CN, %s Path)\n', ...
-            format_comma(n_total), format_comma(n_cn), format_comma(n_path));
-    fprintf('CN mode: %.3f (dCDC=%+.4f)\n', S.mode_cn, mode_cn_d);
-    fprintf('Path mode: %.3f (dCDC=%+.4f)\n', S.mode_path, mode_path_d);
+            format_comma(n_total), format_comma(n_npe), format_comma(n_pe));
+    fprintf('CN mode: %.3f (dCDC=%+.4f)\n', S.mode_npe, mode_npe_d);
+    fprintf('Path mode: %.3f (dCDC=%+.4f)\n', S.mode_pe, mode_pe_d);
     fprintf('Wilcoxon p = %.2e\n', S.p_ranksum);
 
     % OLS slopes for legend

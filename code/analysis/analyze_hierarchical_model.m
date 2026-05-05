@@ -6,13 +6,13 @@ function results = analyze_hierarchical_model()
 %   CDC ~ Age_c * Group * Sex + (1|Dataset)
 %
 % where Group has three levels (internal categorical → display label):
-%   HealthyControl    → "Healthy Control" (HC)
-%                       Verified healthy volunteers (LUDB, PTB,
-%                       Fantasia, Autonomic Aging).
-%   ClinicallyNormal  → "Patients (non-pathological ECG)" (CN)
-%                       Hospital patients with normal ECG findings (PTB-XL).
-%   Pathological      → "Patients (pathological ECG)" (Path)
-%                       Hospital patients with cardiac pathology.
+%   HealthyControl  → "Healthy Control"
+%                     Verified healthy volunteers (LUDB, PTB,
+%                     Fantasia, Autonomic Aging).
+%   NonPathECG      → "Patients (non-pathological ECG)"
+%                     Hospital patients with normal ECG findings (PTB-XL).
+%   PathECG         → "Patients (pathological ECG)"
+%                     Hospital patients with cardiac pathology.
 %
 % Dataset is a random intercept absorbing annotation-method variance and
 % other between-database differences.
@@ -85,8 +85,8 @@ function results = analyze_hierarchical_model()
 
     fprintf('\nTotal subjects: %d\n', height(all_data));
     fprintf('   Healthy Control:                 %d\n', sum(all_data.Group == 'HealthyControl'));
-    fprintf('   Patients (non-pathological ECG): %d\n', sum(all_data.Group == 'ClinicallyNormal'));
-    fprintf('   Patients (pathological ECG):     %d\n\n', sum(all_data.Group == 'Pathological'));
+    fprintf('   Patients (non-pathological ECG): %d\n', sum(all_data.Group == 'NonPathECG'));
+    fprintf('   Patients (pathological ECG):     %d\n\n', sum(all_data.Group == 'PathECG'));
 
     % Per-dataset breakdown
     fprintf('Per-dataset breakdown:\n');
@@ -97,8 +97,8 @@ function results = analyze_hierarchical_model()
         fprintf('  %-16s  N=%5d  (HC=%d, CN=%d, Path=%d)  Age: %.1f+/-%.1f  Male: %.1f%%\n', ...
             ds, sum(mask), ...
             sum(mask & all_data.Group == 'HealthyControl'), ...
-            sum(mask & all_data.Group == 'ClinicallyNormal'), ...
-            sum(mask & all_data.Group == 'Pathological'), ...
+            sum(mask & all_data.Group == 'NonPathECG'), ...
+            sum(mask & all_data.Group == 'PathECG'), ...
             mean(all_data.Age(mask)), std(all_data.Age(mask)), ...
             100 * mean(all_data.Sex(mask) == 'M'));
     end
@@ -121,8 +121,8 @@ function results = analyze_hierarchical_model()
     [~, ~, stats] = fixedEffects(lme);
 
     idx_intercept = find(strcmp(stats.Name, '(Intercept)'));
-    idx_cn   = find(strcmp(stats.Name, 'Group_ClinicallyNormal'));
-    idx_path = find(strcmp(stats.Name, 'Group_Pathological'));
+    idx_npe   = find(strcmp(stats.Name, 'Group_NonPathECG'));
+    idx_pe = find(strcmp(stats.Name, 'Group_PathECG'));
     idx_age  = find(strcmp(stats.Name, 'Age_c'));
     idx_sex  = find(strcmp(stats.Name, 'Sex_M'));
 
@@ -135,9 +135,9 @@ function results = analyze_hierarchical_model()
 
     fprintf('Group effects (relative to Healthy Control):\n');
     fprintf('  Patients (non-pathological ECG): beta=%.4f, SE=%.4f, p=%.2e\n', ...
-        stats.Estimate(idx_cn), stats.SE(idx_cn), stats.pValue(idx_cn));
+        stats.Estimate(idx_npe), stats.SE(idx_npe), stats.pValue(idx_npe));
     fprintf('  Patients (pathological ECG):     beta=%.4f, SE=%.4f, p=%.2e\n\n', ...
-        stats.Estimate(idx_path), stats.SE(idx_path), stats.pValue(idx_path));
+        stats.Estimate(idx_pe), stats.SE(idx_pe), stats.pValue(idx_pe));
 
     fprintf('Age slope (Healthy Control): %.5f/yr (SE=%.5f, p=%.2e)\n', ...
         stats.Estimate(idx_age), stats.SE(idx_age), stats.pValue(idx_age));
@@ -151,7 +151,7 @@ function results = analyze_hierarchical_model()
     fprintf('OBSERVED STATISTICS PER GROUP\n');
     fprintf('================================================================\n');
 
-    groups = {'HealthyControl', 'ClinicallyNormal', 'Pathological'};
+    groups = {'HealthyControl', 'NonPathECG', 'PathECG'};
 
     % --- Means (for reference) ---
     fprintf('\nMeans:\n');
@@ -321,7 +321,7 @@ function data = process_dataset(filename, dataset_label, varargin)
 %   'ApplyFilters' - Logical, whether to apply quality filters (default: false)
 %   'GroupMap'      - Function handle: group_label = f(group_string)
 %                     Maps the raw 'group' column value to a model-level
-%                     group label (e.g., 'HealthyControl', 'Pathological')
+%                     group label (e.g., 'HealthyControl', 'NonPathECG', 'PathECG')
 %   'ClampAge'      - {sentinel_value, replacement_value} for age clamping
 %                     (e.g., {300, 90} for PTB-XL's coded age cap)
 %
@@ -417,16 +417,16 @@ function label = map_volunteer_group(raw_group)
     if strcmpi(raw_group, 'healthy')
         label = 'HealthyControl';
     else
-        label = 'Pathological';
+        label = 'PathECG';
     end
 end
 
 function label = map_clinical_group(raw_group)
 % PTB-XL 'healthy' means clinically normal ECG, not volunteer status
     if strcmpi(raw_group, 'healthy')
-        label = 'ClinicallyNormal';
+        label = 'NonPathECG';
     else
-        label = 'Pathological';
+        label = 'PathECG';
     end
 end
 

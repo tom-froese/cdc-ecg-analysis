@@ -51,7 +51,7 @@ function results = analyze_sex_stratified()
     %  2. GROUP × SEX DESCRIPTIVE STATISTICS
     %  ================================================================
 
-    groups       = {'HealthyControl', 'ClinicallyNormal', 'Pathological'};
+    groups       = {'HealthyControl', 'NonPathECG', 'PathECG'};
     group_labels = {'Healthy Control', 'Patients (non-pathological ECG)', 'Patients (pathological ECG)'};
     sexes        = {'F', 'M'};
     sex_labels   = {'Female', 'Male'};

@@ -68,11 +68,11 @@ function results = analyze_survival_curves()
     is_normal_beat = (beats.source_subset == "normal");
     total_per  = splitapply(@numel, beats.record_id, G);
     normal_per = splitapply(@sum, is_normal_beat, G);
-    is_cn = (total_per == normal_per);
+    is_npe = (total_per == normal_per);
 
     Group_str = strings(length(subject_ids), 1);
-    Group_str(is_cn)  = "ClinicallyNormal";
-    Group_str(~is_cn) = "Pathological";
+    Group_str(is_npe)  = "NonPathECG";
+    Group_str(~is_npe) = "PathECG";
 
     % Extract numeric patient ID for merge with exams.csv
     if isstring(subject_ids)
@@ -158,7 +158,7 @@ function results = analyze_survival_curves()
     data.Group = categorical(data.Group);
     data.Sex = categorical(data.Sex);
     data.CDC_dev = abs(data.CDC - inv_e);
-    data.Pathological = double(data.Group == 'Pathological');
+    data.PathECG = double(data.Group == 'PathECG');
     data.Censored = ~data.Deceased;  % ecmnfish convention: 1 = censored
 
     fprintf('  Valid records: %d (Deaths: %d, %.2f%%)\n', ...
