@@ -14,10 +14,7 @@
     root = fileparts(mfilename('fullpath'));
 
     addpath(root);
-    addpath(fullfile(root, 'code', 'preprocessing'));
-    addpath(fullfile(root, 'code', 'analysis'));
-    addpath(fullfile(root, 'code', 'visualization'));
-    addpath(fullfile(root, 'code', 'utils'));
+    addpath(genpath(fullfile(root, 'code')));
 
     fprintf('CDC Analysis project paths added.\n');
     fprintf('  Root: %s\n', root);

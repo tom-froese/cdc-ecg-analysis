@@ -3,6 +3,8 @@
 **MATLAB toolbox for Cardiac Duty Cycle (CDC) analysis of ECG data.**
 Full reproducibility package for the *Nature Aging* Brief Communication (in prep.).
 
+Authors: Tom Froese, Vaibhav Bhaskar, Ruben Fossion. An independent Python reimplementation by Vaibhav Bhaskar is available at [VAIBHAV-BHASKAR/cardiac-duty-cycle](https://github.com/VAIBHAV-BHASKAR/cardiac-duty-cycle).
+
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2024a+-blue)](https://mathworks.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zenodo Data](https://img.shields.io/badge/Data-Zenodo-blue)](https://doi.org/10.5281/zenodo.19246123)
@@ -18,15 +20,7 @@ Full reproducibility package for the *Nature Aging* Brief Communication (in prep
    cd cdc-ecg-analysis
    ```
 
-2. Download the following files from [Zenodo](https://doi.org/10.5281/zenodo.19246123) and place them in `data/preprocessed/`:
-
-   - `ptbxl_beats.csv` (28 MB)
-   - `fantasia_beats.csv` (31 MB)
-   - `autonomic_aging_beats.csv` (168 MB)
-   - `code15_beats.csv` (201 MB)
-   - `code15_exams.csv` (36 MB)
-
-   The three small CSVs (`ludb_beats.csv`, `qtdb_beats.csv`, `ptb_beats.csv`) are already included in the repository.
+2. Download the preprocessed data archive from [Zenodo](https://doi.org/10.5281/zenodo.19246123) and unzip it into `data/preprocessed/`.
 
 3. Open MATLAB and run:
 
@@ -38,6 +32,8 @@ Full reproducibility package for the *Nature Aging* Brief Communication (in prep
 All statistical results will appear in `results/` and figures in `results/figures/`.
 
 > **Note:** Supplementary Figure 3 (pipeline validation against manual annotations) requires the raw LUDB and QTDB databases from PhysioNet. See [Pipeline validation](#pipeline-validation) below.
+
+> **Figure outputs:** Each figure is exported as both PDF (vector or raster-in-PDF for large scatter plots) and PNG. A MATLAB-editable `.fig` is also saved for figures with a manageable number of graphic objects (Fig. 2, SI Fig. 1, SI Fig. 2, SI Fig. 4, SI Fig. 5). Figures with very large scatter plots (Fig. 1, SI Figs. 3, 6, 7, 8) skip the `.fig` export, since serialising every point can consume gigabytes of memory; their PDFs are produced via `exportgraphics` with `ContentType='image'` (300 dpi raster) instead.
 
 ---
 
@@ -66,24 +62,23 @@ cdc-ecg-analysis/
 ## Required software
 
 - **MATLAB R2024a** or newer
-- **Statistics and Machine Learning Toolbox** (for `fitlm`, `fitglme`, `ksdensity`)
-- **Signal Processing Toolbox** (required only for the preprocessing/export scripts in `code/preprocessing/`; not needed if reproducing from the preprocessed Zenodo CSVs)
-  
+- **Statistics and Machine Learning Toolbox** (for `fitlm`, `fitglme`)
+
+No third-party ECG processing libraries are required.
+
 ---
 
 ## Pipeline validation
 
 The automatic R-peak and T-end detectors are validated against expert manual annotations in the LUDB and QTDB databases. To reproduce this validation:
 
-1. Download [LUDB](https://doi.org/10.13026/eegm-h675) and [QTDB](https://doi.org/10.13026/C2HS3T) from PhysioNet into `data/raw/lobachevsky-university-electrocardiography-database-1.0.1/` and `data/raw/qt-database-1.0.0/`, respectively. See `config.m` for the expected directory names for all databases.
+1. Download [LUDB](https://doi.org/10.13026/eegm-h675) and [QTDB](https://doi.org/10.13026/C24K53) from PhysioNet into `data/raw/`.
 2. Run:
 
    ```matlab
-   analyze_gold_standard_validation();
-   plot_SI_Fig3();
+   analyze_gold_standard_validation();   % code/analysis/
+   plot_SI_Fig3();                       % code/visualization/
    ```
-
-The `export_*.m` scripts in `code/preprocessing/` can regenerate all Zenodo CSVs from raw PhysioNet data. Note that `export_ptb.m` requires the supplementary annotation file (`12938_2006_174_MOESM1_ESM.doc`) to be placed in the PTB database root folder; see the script header for details.
 
 ---
 

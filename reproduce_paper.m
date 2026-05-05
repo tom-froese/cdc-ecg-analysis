@@ -99,31 +99,31 @@ plot_Fig1();
 fprintf('Plotting Fig. 2  — Mortality by CDC-deviation tertile...\n');
 plot_Fig2();
 
-% Supplementary figures
-fprintf('Plotting SI Fig. 1 — CDC vs heart rate...\n');
+% Supplementary figures (in new numerical order after E3 renumbering)
+fprintf('Plotting SI Fig. 1 — Sex-stratified CDC aging...\n');
 plot_SI_Fig1();
 
-fprintf('Plotting SI Fig. 2 — Systole ceiling and RR compensation...\n');
+fprintf('Plotting SI Fig. 2 — CDC vs heart rate...\n');
 plot_SI_Fig2();
 
-% SI Fig. 3 requires raw data — see note below
-fprintf('Skipping SI Fig. 3 — pipeline validation (requires raw databases).\n');
-fprintf('  To generate, download LUDB and QTDB from PhysioNet into data/raw/,\n');
-fprintf('  then run: analyze_gold_standard_validation(); plot_SI_Fig3();\n');
+fprintf('Plotting SI Fig. 3 — Systole ceiling and RR compensation...\n');
+plot_SI_Fig3();
 
-fprintf('Plotting SI Fig. 4 — Gold-standard CDC distributions...\n');
+fprintf('Plotting SI Fig. 4 — Kaplan-Meier survival curves...\n');
 plot_SI_Fig4();
 
-fprintf('Plotting SI Fig. 5 — Large-scale CDC distributions...\n');
-plot_SI_Fig5();
+% SI Fig. 5 (was 3) requires raw data — see note below
+fprintf('Skipping SI Fig. 5 — pipeline validation (requires raw databases).\n');
+fprintf('  To generate, download LUDB and QTDB from PhysioNet into data/raw/,\n');
+fprintf('  then run: analyze_gold_standard_validation(); plot_SI_Fig5();\n');
 
-fprintf('Plotting SI Fig. 6 — CODE-15%% CDC distributions...\n');
+fprintf('Plotting SI Fig. 6 — Gold-standard CDC distributions...\n');
 plot_SI_Fig6();
 
-fprintf('Plotting SI Fig. 7 — Kaplan-Meier survival curves...\n');
+fprintf('Plotting SI Fig. 7 — Large-scale CDC distributions...\n');
 plot_SI_Fig7();
 
-fprintf('Plotting SI Fig. 8 — Sex-stratified CDC aging...\n');
+fprintf('Plotting SI Fig. 8 — CODE-15%% CDC distributions...\n');
 plot_SI_Fig8();
 
 %% ---- Done ----
@@ -133,5 +133,5 @@ fprintf('REPRODUCTION COMPLETE\n');
 fprintf('============================================================\n');
 fprintf('Results : %s\n', paths.results);
 fprintf('Figures : %s\n', paths.figures);
-fprintf('\nNote: SI Fig. 3 (pipeline validation) requires raw PhysioNet\n');
+fprintf('\nNote: SI Fig. 5 (pipeline validation) requires raw PhysioNet\n');
 fprintf('databases. See instructions above to generate it separately.\n\n');
