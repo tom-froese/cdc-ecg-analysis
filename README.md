@@ -7,7 +7,7 @@ Authors: Tom Froese, Vaibhav Bhaskar, Ruben Fossion. An independent Python reimp
 
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2024a+-blue)](https://mathworks.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Zenodo Data](https://img.shields.io/badge/Data-Zenodo-blue)](https://doi.org/10.5281/zenodo.19246123)
+[![Zenodo Data](https://img.shields.io/badge/Data-Zenodo-blue)](https://doi.org/10.5281/zenodo.19246122)
 
 ---
 
@@ -20,7 +20,7 @@ Authors: Tom Froese, Vaibhav Bhaskar, Ruben Fossion. An independent Python reimp
    cd cdc-ecg-analysis
    ```
 
-2. Download the preprocessed data archive from [Zenodo](https://doi.org/10.5281/zenodo.19246123) and unzip it into `data/preprocessed/`.
+2. Download the preprocessed data archive from [Zenodo](https://doi.org/10.5281/zenodo.19246122) and unzip it into `data/preprocessed/`.
 
 3. Open MATLAB and run:
 
@@ -86,7 +86,7 @@ The automatic R-peak and T-end detectors are validated against expert manual ann
 
 > Froese, T. et al. (in prep.). The healthy heart converges on a thermodynamic optimum (1/*e*) that predicts survival. *Nature Aging*.
 
-> Froese, T. (2026). CDC Analysis — Preprocessed Beat Data (v1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.19246123
+> Froese, T. (2026). CDC Analysis — Preprocessed Beat Data (v1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.19246122
 
 ---
 

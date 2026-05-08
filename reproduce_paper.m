@@ -7,7 +7,7 @@
 %   1. Run setup.m once to add all project paths.
 %   2. Place the preprocessed CSV files (*_beats.csv, code15_exams.csv)
 %      in data/preprocessed/. Download from Zenodo:
-%      https://doi.org/10.5281/zenodo.19246123
+%      https://doi.org/10.5281/zenodo.19246122
 %
 % Usage:
 %   >> setup
@@ -50,7 +50,7 @@ if ~isempty(missing)
         fprintf('  %s\n', missing{i});
     end
     fprintf('\nDownload from Zenodo and place in: %s\n', paths.preprocessed);
-    fprintf('https://doi.org/10.5281/zenodo.19246123\n');
+    fprintf('https://doi.org/10.5281/zenodo.19246122\n');
     error('Cannot reproduce paper without preprocessed data.');
 end
 
