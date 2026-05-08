@@ -513,8 +513,8 @@ function print_subject_level_table(a, b, p)
     fprintf([fmt '\n'], 'Pooled', p.subj_n, p.subj_mae, p.subj_bias, p.subj_loa_lo, p.subj_loa_hi, p.subj_corr, p.subj_median_ae);
     fprintf('%s\n', sep);
     fprintf('\nContext (between-group CDC differences):\n');
-    fprintf('  HC vs CN:   ~0.040   (subject MAE should be << this)\n');
-    fprintf('  HC vs Path: ~0.088   (subject MAE should be << this)\n');
+    fprintf('  HC vs NPE:  ~0.040   (subject MAE should be << this)\n');
+    fprintf('  HC vs PE:   ~0.088   (subject MAE should be << this)\n');
 end
 
 

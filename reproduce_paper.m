@@ -10,7 +10,6 @@
 %      https://doi.org/10.5281/zenodo.19246122
 %
 % Usage:
-%   >> setup
 %   >> reproduce_paper
 %
 % Output:
@@ -21,6 +20,9 @@
 % are the bottleneck due to n = 214,176 patients).
 %
 % Tom Froese, OIST Embodied Cognitive Science Unit
+
+setup_script = fullfile(fileparts(mfilename('fullpath')), 'setup.m');
+run(setup_script);
 
 fprintf('\n');
 fprintf('============================================================\n');

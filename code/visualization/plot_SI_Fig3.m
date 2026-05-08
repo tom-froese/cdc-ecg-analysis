@@ -2,9 +2,9 @@ function plot_SI_Fig3()
 % PLOT_SI_FIG3 - Supplementary Figure 3: Systole and RR interval across
 %   the lifespan
 %
-%   Panel a: Mechanical systole duration (ms) vs Age by clinical group.
+%   Panel a: Systolic duration (ms) vs Age by clinical group.
 %     Shows the gradual age-dependent prolongation of systole that is
-%     common to all groups but accelerated in pathological hearts.
+%     common to all groups but accelerated in hearts with pathological ECG findings.
 %     Together with Fig. 1b (diastole), this reveals the compensatory
 %     mechanism: healthy hearts maintain CDC near 1/e by adjusting
 %     cycle length in proportion to systolic lengthening.
@@ -82,7 +82,7 @@ function plot_SI_Fig3()
     xfit = linspace(age_lim(1), age_lim(2), 300)';
 
     %% ================================================================
-    %  PANEL (a): Mechanical systole (ms) vs Age
+    %  PANEL (a): Systolic duration (ms) vs Age
     %  ================================================================
 
     ax1 = subplot(1, 2, 1);
@@ -120,7 +120,7 @@ function plot_SI_Fig3()
 
     xlim(age_lim);
     xlabel('Age (years)', 'FontSize', lab_fs);
-    ylabel('Mechanical systole (ms)', 'FontSize', lab_fs);
+    ylabel('Systolic duration (ms)', 'FontSize', lab_fs);
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 

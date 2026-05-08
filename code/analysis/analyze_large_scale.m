@@ -6,8 +6,8 @@ function results = analyze_large_scale()
 %
 %   1. Fantasia        - HC: Database R-peaks, tangent T-end (healthy volunteers)
 %   2. Autonomic Aging - HC: Fully automatic (healthy volunteers)
-%   3. PTB             - HC vs Path: Manual T-end, algorithmic R-peak
-%   4. PTB-XL          - CN vs Path: ECGDeli validated algorithm
+%   3. PTB             - HC vs PE: Manual T-end, algorithmic R-peak
+%   4. PTB-XL          - NPE vs PE: ECGDeli validated algorithm
 %
 % Group classification follows the hierarchical model (analyze_hierarchical_model.m):
 %   Healthy Control                  → 'HealthyControl' = Fantasia, Autonomic
@@ -218,11 +218,11 @@ function results = analyze_healthy_cohort(beats, dataset_name, n_bootstrap, inv_
 end
 
 function results = analyze_npe_vs_pe(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
-% ANALYZE_NPE_VS_PE - Two-group analysis: CN vs Path
+% ANALYZE_NPE_VS_PE - Two-group analysis: NPE vs PE
 %   ("Patients (non-pathological ECG)" vs "Patients (pathological ECG)").
 %
 % Used for PTB-XL. The 'healthy' source-data label denotes hospital
-% patients with normal ECG findings — the CN cohort, not Healthy
+% patients with normal ECG findings — the NPE cohort, not Healthy
 % Control (which is reserved for verified volunteers).
 
     fprintf('Processing %s...\n', dataset_name);
@@ -278,8 +278,8 @@ function results = analyze_npe_vs_pe(beats, dataset_name, n_bootstrap, inv_e, ex
     [mode_pe, ci_pe] = bootstrap_mode(pe_ratios, n_bootstrap);
     pct_pe_above = 100 * sum(pe_ratios > inv_e) / n_pe;
 
-    fprintf('  CN mode:   %.4f [%.4f, %.4f]\n', mode_npe, ci_npe(1), ci_npe(2));
-    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_pe, ci_pe(1), ci_pe(2));
+    fprintf('  NPE mode:  %.4f [%.4f, %.4f]\n', mode_npe, ci_npe(1), ci_npe(2));
+    fprintf('  PE mode:   %.4f [%.4f, %.4f]\n', mode_pe, ci_pe(1), ci_pe(2));
 
     if n_npe >= 3 && n_pe >= 3
         [p_val, ~, stats] = ranksum(npe_ratios, pe_ratios);
@@ -305,7 +305,7 @@ function results = analyze_npe_vs_pe(beats, dataset_name, n_bootstrap, inv_e, ex
 end
 
 function results = analyze_hc_vs_pe(beats, dataset_name, n_bootstrap, inv_e, excluded_subjects)
-% ANALYZE_HC_VS_PE - Two-group analysis: HC vs Path
+% ANALYZE_HC_VS_PE - Two-group analysis: HC vs PE
 %   ("Healthy Control" vs "Patients (pathological ECG)").
 %
 % Used for PTB. The 'healthy' source-data label denotes verified
@@ -366,7 +366,7 @@ function results = analyze_hc_vs_pe(beats, dataset_name, n_bootstrap, inv_e, exc
     pct_pe_above = 100 * sum(pe_ratios > inv_e) / n_pe;
 
     fprintf('  HC mode:   %.4f [%.4f, %.4f]\n', mode_hc, ci_hc(1), ci_hc(2));
-    fprintf('  Path mode: %.4f [%.4f, %.4f]\n', mode_pe, ci_pe(1), ci_pe(2));
+    fprintf('  PE mode:   %.4f [%.4f, %.4f]\n', mode_pe, ci_pe(1), ci_pe(2));
 
     if n_hc >= 3 && n_pe >= 3
         [p_val, ~, stats] = ranksum(hc_ratios, pe_ratios);

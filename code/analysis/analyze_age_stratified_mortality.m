@@ -2,7 +2,7 @@ function results = analyze_age_stratified_mortality()
 % ANALYZE_AGE_STRATIFIED_MORTALITY - Proximity to 1/e predicts survival
 %   at every age decade
 %
-% Tests whether patients whose CDC is closer to the thermodynamic optimum
+% Tests whether patients whose CDC is closer to the optimum (1/e)
 % (1/e) have lower all-cause mortality within each age decade, using the
 % full CODE-15% cohort with pathological status as a covariate.
 %

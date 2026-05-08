@@ -54,8 +54,8 @@ function plot_SI_Fig1()
     %  ================================================================
 
     col_hc   = [0.20 0.55 0.85];   % Blue  — Healthy Control
-    col_npe   = [0.25 0.70 0.35];   % Green — Patients (non-pathological ECG) (CN)
-    col_pe = [0.85 0.25 0.20];   % Red   — Patients (pathological ECG) (Path)
+    col_npe   = [0.25 0.70 0.35];   % Green — Patients (non-pathological ECG) (NPE)
+    col_pe = [0.85 0.25 0.20];   % Red   — Patients (pathological ECG) (PE)
     colors = [col_hc; col_npe; col_pe];
 
     %% ================================================================
@@ -98,7 +98,7 @@ function plot_SI_Fig1()
         % Reference line at ΔCDC = 0 (optimal)
         yline(0, 'k--', 'LineWidth', 1.0, 'HandleVisibility', 'off');
 
-        % Scatter and OLS per group (back-to-front: Path, CN, HC)
+        % Scatter and OLS per group (back-to-front: PE, NPE, HC)
         h_lines = gobjects(3, 1);
         xfit = linspace(age_lim(1), age_lim(2), 300)';
 

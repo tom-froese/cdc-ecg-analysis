@@ -31,7 +31,7 @@ function plot_SI_Fig8()
     %% ================================================================
     %  COLOUR PALETTE (matches main figures)
     %  ================================================================
-    col_npe   = [0.25 0.70 0.35];   % green — clinically normal
+    col_npe   = [0.25 0.70 0.35];   % green — Patients (non-pathological ECG)
     col_pe = [0.85 0.25 0.20];   % red   — pathological
 
     %% Group masks
@@ -144,7 +144,7 @@ function plot_SI_Fig8()
 
     h_lines = gobjects(2, 1);
 
-    % Plot back to front: pathological first, then CN on top
+    % Plot back to front: pathological first, then NPE on top
     for g = [2, 1]
         idx = masks{g};
 
@@ -252,10 +252,10 @@ function plot_SI_Fig8()
     %  CONSOLE SUMMARY (for SI figure legend)
     %  ================================================================
     fprintf('\n--- Summary for SI Fig 8 legend ---\n');
-    fprintf('N = %s patients (%s CN, %s Path)\n', ...
+    fprintf('N = %s patients (%s NPE, %s PE)\n', ...
             format_comma(n_total), format_comma(n_npe), format_comma(n_pe));
-    fprintf('CN mode: %.3f (dCDC=%+.4f)\n', S.mode_npe, mode_npe_d);
-    fprintf('Path mode: %.3f (dCDC=%+.4f)\n', S.mode_pe, mode_pe_d);
+    fprintf('NPE mode: %.3f (dCDC=%+.4f)\n', S.mode_npe, mode_npe_d);
+    fprintf('PE mode: %.3f (dCDC=%+.4f)\n', S.mode_pe, mode_pe_d);
     fprintf('Wilcoxon p = %.2e\n', S.p_ranksum);
 
     % OLS slopes for legend

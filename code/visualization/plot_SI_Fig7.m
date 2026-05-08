@@ -19,7 +19,7 @@ function plot_SI_Fig7()
 %
 % Group classification follows the hierarchical model:
 %   Fantasia, Autonomic Aging, PTB 'healthy' → HC (Blue)
-%   PTB-XL 'healthy'                         → CN (Green)
+%   PTB-XL 'healthy'                         → NPE (Green)
 %   PTB, PTB-XL other                        → Patients (pathological ECG) (Red)
 %
 % Data source: large_scale_results.mat (via analyze_large_scale.m)
@@ -39,7 +39,7 @@ function plot_SI_Fig7()
     %  COLOUR PALETTE (matches main figures)
     %  ================================================================
     col_hc   = [0.20 0.55 0.85];   % blue  — healthy controls
-    col_npe   = [0.25 0.70 0.35];   % green — clinically normal
+    col_npe   = [0.25 0.70 0.35];   % green — Patients (non-pathological ECG)
     col_pe = [0.85 0.25 0.20];   % red   — pathological
 
     %% ================================================================
@@ -289,17 +289,17 @@ function plot_SI_Fig7()
     %% ================================================================
     %  LAYOUT AND SAVE
     %  ================================================================
-    % Four evenly spaced panels
-    panel_h = 0.19;
-    gap = 0.045;
+    % Four evenly spaced panels (a at top, d at bottom)
+    panel_h = 0.175;
+    gap = 0.06;
     left = 0.14;
     width = 0.80;
-    bottom_start = 0.06;
+    bottom_start = 0.065;
 
+    axes_list = [ax1, ax2, ax3, ax4];
     for k = 1:4
-        ax = findobj(fig, 'Type', 'axes');
-        % Axes are stored in reverse order
-        set(ax(k), 'Position', [left, bottom_start + (4-k)*(panel_h + gap), width, panel_h]);
+        set(axes_list(k), 'Position', ...
+            [left, bottom_start + (4-k)*(panel_h + gap), width, panel_h]);
     end
 
     set(fig, 'PaperUnits', 'centimeters');
@@ -327,9 +327,9 @@ function plot_SI_Fig7()
             fant.n_all, fant.mode_all, fant.mode_all - inv_e);
     fprintf('Autonomic Aging: HC n=%s (mode=%.3f, dCDC=%+.4f)\n', ...
             format_comma(aa.n_all), aa.mode_all, aa.mode_all - inv_e);
-    fprintf('PTB:             HC n=%d, Path n=%d, p=%.2e\n', ...
+    fprintf('PTB:             HC n=%d, PE n=%d, p=%.2e\n', ...
             ptb.n_hc, ptb.n_pe, ptb.p_value);
-    fprintf('PTB-XL:          CN n=%s, Path n=%s, p=%.2e\n', ...
+    fprintf('PTB-XL:          NPE n=%s, PE n=%s, p=%.2e\n', ...
             format_comma(ptbxl.n_npe), format_comma(ptbxl.n_pe), ptbxl.p_value);
 end
 

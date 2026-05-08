@@ -29,7 +29,7 @@ function plot_Fig2()
     %  COLOUR SCHEME
     %  ================================================================
     %  Green / amber / red for Near / Moderate / Far from 1/e.
-    %  Slightly differentiated from the HC/CN/Path blues and greens in
+    %  Slightly differentiated from the HC/NPE/PE blues and greens in
     %  Figure 1 to avoid confusion across figures.
 
     col_near = [0.30 0.65 0.40];   % Green  — nearest to 1/e

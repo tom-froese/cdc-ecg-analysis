@@ -84,7 +84,7 @@ The automatic R-peak and T-end detectors are validated against expert manual ann
 
 ## Citation
 
-> Froese, T. et al. (in prep.). The healthy heart converges on a thermodynamic optimum (1/*e*) that predicts survival. *Nature Aging*.
+> Froese, T. et al. (in prep.). The healthy heart converges on an optimum (1/*e*) that predicts survival. *Nature Aging*.
 
 > Froese, T. (2026). CDC Analysis — Preprocessed Beat Data (v1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.19246122
 

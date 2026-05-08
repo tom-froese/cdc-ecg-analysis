@@ -37,7 +37,7 @@ function plot_Fig1()
              'all_data', 'group_modes', 'group_mode_cis', 'inv_e');
     D = S.all_data;
 
-    % Bootstrap mode results (order: HC, CN, Path — matches analyze_hierarchical_model)
+    % Bootstrap mode results (order: HC, NPE, PE — matches analyze_hierarchical_model)
     group_modes    = S.group_modes;
     group_mode_cis = S.group_mode_cis;
 
@@ -66,7 +66,7 @@ function plot_Fig1()
     %  ================================================================
 
     col_hc   = [0.20 0.55 0.85];   % Blue  — verified healthy volunteers
-    col_npe   = [0.25 0.70 0.35];   % Green — clinically normal ECG
+    col_npe   = [0.25 0.70 0.35];   % Green — Patients (non-pathological ECG)
     col_pe = [0.85 0.25 0.20];   % Red   — pathological
 
     colors = [col_hc; col_npe; col_pe];
@@ -261,9 +261,9 @@ function plot_Fig1()
     fprintf('Total subjects: N = %s\n', format_comma(height(D)));
     fprintf('  HC:   N = %5s, age %d-%d yr\n', format_comma(n_hc), ...
         round(min(D.Age(is_hc))), round(max(D.Age(is_hc))));
-    fprintf('  CN:   N = %5s, age %d-%d yr\n', format_comma(n_npe), ...
+    fprintf('  NPE:  N = %5s, age %d-%d yr\n', format_comma(n_npe), ...
         round(min(D.Age(is_npe))), round(max(D.Age(is_npe))));
-    fprintf('  Path: N = %5s, age %d-%d yr\n', format_comma(n_pe), ...
+    fprintf('  PE:   N = %5s, age %d-%d yr\n', format_comma(n_pe), ...
         round(min(D.Age(is_pe))), round(max(D.Age(is_pe))));
 
     fprintf('\nDiastole summary (ms):\n');

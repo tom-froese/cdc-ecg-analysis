@@ -94,7 +94,7 @@ function results = analyze_hierarchical_model()
     for d = 1:length(datasets)
         ds = datasets{d};
         mask = all_data.Dataset == ds;
-        fprintf('  %-16s  N=%5d  (HC=%d, CN=%d, Path=%d)  Age: %.1f+/-%.1f  Male: %.1f%%\n', ...
+        fprintf('  %-16s  N=%5d  (HC=%d, NPE=%d, PE=%d)  Age: %.1f+/-%.1f  Male: %.1f%%\n', ...
             ds, sum(mask), ...
             sum(mask & all_data.Group == 'HealthyControl'), ...
             sum(mask & all_data.Group == 'NonPathECG'), ...
@@ -422,7 +422,7 @@ function label = map_volunteer_group(raw_group)
 end
 
 function label = map_clinical_group(raw_group)
-% PTB-XL 'healthy' means clinically normal ECG, not volunteer status
+% PTB-XL 'healthy' means non-pathological ECG, not volunteer status
     if strcmpi(raw_group, 'healthy')
         label = 'NonPathECG';
     else

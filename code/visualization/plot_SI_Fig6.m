@@ -40,7 +40,7 @@ function plot_SI_Fig6()
     %  COLOUR PALETTE (matches main figures)
     %  ================================================================
     col_hc   = [0.20 0.55 0.85];   % blue    — healthy controls (LUDB)
-    col_npe   = [0.25 0.70 0.35];   % green   — clinically normal (QTDB healthy)
+    col_npe   = [0.25 0.70 0.35];   % green   — Patients (non-pathological ECG) (QTDB healthy)
     col_pe = [0.85 0.25 0.20];   % red     — pathological
     col_sd   = [0.55 0.00 0.15];   % crimson — sudden death (QTDB only)
 

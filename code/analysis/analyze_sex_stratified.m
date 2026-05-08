@@ -2,7 +2,7 @@ function results = analyze_sex_stratified()
 % ANALYZE_SEX_STRATIFIED - Sex-stratified CDC aging trajectories
 %
 % Tests whether the core Figure 1 finding — healthy hearts converge on
-% 1/e while pathological hearts deviate with age — holds separately in
+% 1/e while hearts with pathological ECG findings deviate with age — holds separately in
 % females and males.
 %
 % Analyses:

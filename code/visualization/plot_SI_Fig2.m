@@ -7,7 +7,7 @@ function plot_SI_Fig2()
 %      CDC-HR regression intersects CDC = 1/e at 66.2 bpm [65.8, 66.7],
 %      within the textbook optimal resting HR range.
 %
-%   b) CDC deviation predicts mortality in clinically normal patients.
+%   b) CDC deviation predicts mortality in patients with non-pathological ECG.
 %      CODE-15% patients with normal ECG: within 5-bpm HR strata,
 %      those whose CDC deviates further from 1/e show higher all-cause
 %      mortality. Only bins where every CDC-deviation tertile contains
@@ -116,7 +116,7 @@ function plot_SI_Fig2()
 
   
     %% ================================================================
-    %  RIGHT PANEL (b): Hidden risk in clinically normal patients
+    %  RIGHT PANEL (b): Hidden risk in patients with non-pathological ECG
     %  ================================================================
 
     ax2 = subplot(1, 2, 2);
@@ -217,7 +217,7 @@ function plot_SI_Fig2()
 
     xlabel('Heart Rate (bpm)', 'FontSize', 13, 'FontWeight', 'bold');
     ylabel('All-Cause Mortality (%)', 'FontSize', 13, 'FontWeight', 'bold');
-    title({'{\bfb}  CDC deviation predicts mortality in clinically normal patients', ...
+    title({'{\bfb}  CDC deviation predicts mortality in patients with non-pathological ECG', ...
            sprintf('CODE-15%% normal ECG subgroup (N = %s)', format_comma(n_npe))}, ...
         'FontSize', 12, 'FontWeight', 'normal');
     hold off;
