@@ -47,7 +47,7 @@ function plot_SI_Fig7()
     %  ================================================================
     %  120 mm width, four-panel stacked layout.
 
-    fig_w_cm = 12.0;
+    fig_w_cm = 18.3;
     fig_h_cm = 22.0;
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
@@ -58,7 +58,7 @@ function plot_SI_Fig7()
     lab_fs   = 8;    % axis labels
     title_fs = 8;    % panel titles
     panel_fs = 10;   % panel letters
-    leg_fs   = 6;    % legend
+    leg_fs   = 7;    % legend (matches tick/p-value font)
 
     % Histogram and KDE parameters
     edges = (0.20:0.01:0.65) - inv_e;   % ΔCDC bin edges
@@ -95,17 +95,18 @@ function plot_SI_Fig7()
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend(ph, {sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ...
+    leg1 = legend(ph, {sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ...
            fant.n_all, mode_fant_d)}, ...
-           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+           'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    text(0.03, 0.88, 'Database R-peaks, tangent T-end', ...
+    text(0.03, 0.92, {'\bullet Database R-peaks', '\bullet Tangent T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
     text(-0.12, 1.06, ['\bf' panel_letters{1}], 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
@@ -138,17 +139,18 @@ function plot_SI_Fig7()
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     pa = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend(pa, {sprintf('Healthy controls (n=%s, \\Delta=%+.3f)', ...
+    leg2 = legend(pa, {sprintf('Healthy controls (n=%s, \\Delta=%+.3f)', ...
            format_comma(aa.n_all), mode_aa_d)}, ...
-           'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+           'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    text(0.03, 0.88, 'Fully automatic (Pan-Tompkins + tangent)', ...
+    text(0.03, 0.92, {'\bullet Pan-Tompkins R-peaks', '\bullet Tangent T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
     text(-0.12, 1.06, ['\bf' panel_letters{2}], 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
@@ -189,7 +191,7 @@ function plot_SI_Fig7()
          'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     ylabel('Density', 'FontSize', lab_fs);
-    title('PTB: manual T-end, algorithmic R-peak', ...
+    title('PTB: healthy controls and cardiac patients', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
@@ -206,17 +208,17 @@ function plot_SI_Fig7()
     leg_items(2) = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg_strs{2} = sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ...
                            ptb.n_pe, mode_pe_d);
-    legend(leg_items, leg_strs, 'Location', 'northeast', ...
+    leg3 = legend(leg_items, leg_strs, ...
            'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    add_p_annotation(ptb.p_value, ax_fs);
-    text(0.03, 0.88, 'Manual T-end (5 referees), Pan-Tompkins R-peak', ...
+    text(0.03, 0.92, {'\bullet Manual T-end (5 referees)', '\bullet Pan-Tompkins R-peaks'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
     text(-0.12, 1.06, ['\bf' panel_letters{3}], 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
@@ -255,32 +257,27 @@ function plot_SI_Fig7()
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
            'FontSize', lab_fs);
     ylabel('Density', 'FontSize', lab_fs);
-    title('PTB-XL: ECGDeli automatic annotation', ...
+    title('PTB-XL: clinical ECG patients', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
 
     % Legend
     ph = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     pp = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend([ph, pp], { ...
+    leg4 = legend([ph, pp], { ...
         sprintf('Patients (non-pathological ECG) (n=%s, \\Delta=%+.3f)', ...
                 format_comma(ptbxl.n_npe), mode_npe_d), ...
         sprintf('Patients (pathological ECG) (n=%s, \\Delta=%+.3f)', ...
                 format_comma(ptbxl.n_pe), mode_pe_d)}, ...
-        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+        'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax4, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-    add_p_annotation(ptbxl.p_value, ax_fs);
-
-    % Total N annotation
-    n_total = ptbxl.n_npe + ptbxl.n_pe;
-    text(0.03, 0.78, sprintf('N = %s patients', format_comma(n_total)), ...
-         'Units', 'normalized', 'FontSize', ax_fs, 'Color', [0.3 0.3 0.3]);
-    text(0.03, 0.88, 'ECGDeli (R-peak + T-end)', ...
+    text(0.03, 0.92, {'\bullet ECGDeli R-peaks', '\bullet ECGDeli T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
     text(-0.12, 1.06, ['\bf' panel_letters{4}], 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
@@ -292,8 +289,8 @@ function plot_SI_Fig7()
     % Four evenly spaced panels (a at top, d at bottom)
     panel_h = 0.175;
     gap = 0.06;
-    left = 0.14;
-    width = 0.80;
+    left = 0.08;
+    width = 0.48;
     bottom_start = 0.065;
 
     axes_list = [ax1, ax2, ax3, ax4];
@@ -301,6 +298,38 @@ function plot_SI_Fig7()
         set(axes_list(k), 'Position', ...
             [left, bottom_start + (4-k)*(panel_h + gap), width, panel_h]);
     end
+
+    % Legends on the right side — left-edge aligned, auto-width
+    leg_left = 0.58;
+    legs = [leg1, leg2, leg3, leg4];
+    for k = 1:4
+        set(legs(k), 'Units', 'normalized');
+        auto_pos = get(legs(k), 'Position');
+        panel_top = bottom_start + (4-k)*(panel_h + gap) + panel_h;
+        set(legs(k), 'Position', ...
+            [leg_left, panel_top - auto_pos(4) - 0.01, auto_pos(3), auto_pos(4)]);
+    end
+
+    % p-value annotations below legends for panels c and d
+    if ptb.p_value < 0.001
+        p3_str = 'Wilcoxon rank-sum p < 0.001';
+    else
+        p3_str = sprintf('Wilcoxon rank-sum p = %.3f', ptb.p_value);
+    end
+    p3_top = bottom_start + (4-3)*(panel_h + gap) + panel_h - 0.10;
+    annotation('textbox', [leg_left, p3_top, 0.40, 0.03], 'String', p3_str, ...
+        'FontSize', ax_fs, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
+        'FitBoxToText', 'on');
+
+    if ptbxl.p_value < 0.001
+        p4_str = 'Wilcoxon rank-sum p < 0.001';
+    else
+        p4_str = sprintf('Wilcoxon rank-sum p = %.3f', ptbxl.p_value);
+    end
+    p4_top = bottom_start + (4-4)*(panel_h + gap) + panel_h - 0.10;
+    annotation('textbox', [leg_left, p4_top, 0.40, 0.03], 'String', p4_str, ...
+        'FontSize', ax_fs, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
+        'FitBoxToText', 'on');
 
     set(fig, 'PaperUnits', 'centimeters');
     set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
@@ -337,18 +366,6 @@ end
 %% ========================================================================
 %  LOCAL FUNCTIONS
 %  ========================================================================
-
-function add_p_annotation(p_val, fs)
-    if isnan(p_val), return; end
-    if p_val < 0.001
-        p_str = 'p < 0.001';
-    else
-        p_str = sprintf('p = %.3f', p_val);
-    end
-    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
-         'FontSize', fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-end
 
 function s = format_comma(n)
     s = num2str(n);

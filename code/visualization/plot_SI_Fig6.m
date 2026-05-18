@@ -4,7 +4,7 @@ function plot_SI_Fig6()
 %
 % Two-panel figure:
 %   a: LUDB — Healthy Controls vs Patients (pathological ECG) (full manual annotation)
-%   b: QTDB — Patients (non-pathological ECG) vs Patients (pathological ECG) vs Sudden Death (full manual)
+%   b: QTDB — Patients (non-pathological ECG) vs Patients (pathological ECG) vs Patients (sudden death) (full manual)
 %
 % X-axis: ΔCDC from theoretical optimum (1/e ≈ 0.3679).
 % Subject-level median CDC (computed in analyze_gold_standard.m).
@@ -13,7 +13,7 @@ function plot_SI_Fig6()
 %   Blue    [0.20 0.55 0.85]  = Healthy Control (verified healthy volunteers)
 %   Green   [0.25 0.70 0.35]  = Patients (non-pathological ECG; hospital patients with normal ECG)
 %   Red     [0.85 0.25 0.20]  = Patients (pathological ECG)
-%   Crimson [0.55 0.00 0.15]  = Sudden Death (QTDB only)
+%   Crimson [0.55 0.00 0.15]  = Patients (sudden death) (QTDB only)
 %
 % LUDB "Healthy" are genuine healthy volunteers (Kalyakulina et al. 2020,
 % IEEE Access: "healthy volunteers and patients of the Nizhny Novgorod
@@ -42,14 +42,14 @@ function plot_SI_Fig6()
     col_hc   = [0.20 0.55 0.85];   % blue    — healthy controls (LUDB)
     col_npe   = [0.25 0.70 0.35];   % green   — Patients (non-pathological ECG) (QTDB healthy)
     col_pe = [0.85 0.25 0.20];   % red     — pathological
-    col_sd   = [0.55 0.00 0.15];   % crimson — sudden death (QTDB only)
+    col_sd   = [0.55 0.00 0.15];   % crimson — patients (sudden death) (QTDB only)
 
     %% ================================================================
     %  FIGURE SETUP — Nature Aging formatting
     %  ================================================================
     %  120 mm width, stacked two-panel layout.
 
-    fig_w_cm = 12.0;
+    fig_w_cm = 18.3;
     fig_h_cm = 14.0;
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
@@ -60,7 +60,7 @@ function plot_SI_Fig6()
     lab_fs   = 8;    % axis labels
     title_fs = 8;    % panel titles
     panel_fs = 10;   % panel letters (a, b)
-    leg_fs   = 6.5;  % legend
+    leg_fs   = 7;    % legend (matches tick/p-value font)
 
     % Histogram and KDE parameters
     edges = (0.20:0.01:0.60) - inv_e;   % ΔCDC bin edges
@@ -104,27 +104,26 @@ function plot_SI_Fig6()
          'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     ylabel('Density', 'FontSize', lab_fs);
-    title('LUDB: full manual annotation', 'FontSize', title_fs, 'FontWeight', 'bold');
+    t1 = title('LUDB: healthy volunteers and cardiac patients', 'FontSize', title_fs, 'FontWeight', 'bold');
+    t1.Units = 'normalized'; t1.Position(2) = t1.Position(2) + 0.04;
 
     % Legend
     ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     pp = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend([ph, pp], { ...
+    leg1 = legend([ph, pp], { ...
         sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ludb.n_healthy, mode_hc_d), ...
         sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ludb.n_pe, mode_pe_d)}, ...
-        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+        'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    % p-value annotation
-    add_p_annotation(ludb.p_value, ax_fs);
-
-    % Annotation method note
-    text(0.03, 0.88, 'Manual R-peaks, manual T-end', ...
+    % Annotation method note (bullet list)
+    text(0.03, 0.92, {'\bullet Manual R-peaks', '\bullet Manual T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
 
     % Panel label (Nature: bold lowercase, outside axes)
     text(-0.12, 1.06, '\bfa', 'Units', 'normalized', ...
@@ -134,7 +133,7 @@ function plot_SI_Fig6()
     hold off;
 
     %% ================================================================
-    %  PANEL (b): QTDB — Patients (non-pathological ECG) vs Patients (pathological ECG) vs Sudden Death
+    %  PANEL (b): QTDB — Patients (non-pathological ECG) vs Patients (pathological ECG) vs Patients (sudden death)
     %  ================================================================
     ax2 = subplot(2, 1, 2);
     hold on; box on;
@@ -186,7 +185,8 @@ function plot_SI_Fig6()
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
            'FontSize', lab_fs);
     ylabel('Density', 'FontSize', lab_fs);
-    title('QTDB: full manual annotation', 'FontSize', title_fs, 'FontWeight', 'bold');
+    t2 = title('QTDB: cardiac and sudden death patients', 'FontSize', title_fs, 'FontWeight', 'bold');
+    t2.Units = 'normalized'; t2.Position(2) = t2.Position(2) + 0.04;
 
     % Legend — three groups
     leg_items = gobjects(3, 1);
@@ -204,30 +204,21 @@ function plot_SI_Fig6()
     leg_strs{2} = sprintf('Patients (pathological ECG) (n=%d, \\Delta=%+.3f)', ...
                            qtdb.n_pe, mode_pe_d);
     leg_items(3) = patch(NaN, NaN, col_sd, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    leg_strs{3} = sprintf('Sudden death (n=%d, \\Delta=%+.3f)', ...
+    leg_strs{3} = sprintf('Patients (sudden death) (n=%d, \\Delta=%+.3f)', ...
                            qtdb.n_fatal, mode_sd_d);
 
-    legend(leg_items, leg_strs, 'Location', 'northeast', ...
+    leg2 = legend(leg_items, leg_strs, ...
            'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-    % Kruskal-Wallis p-value
-    if qtdb.p_kruskal < 0.001
-        p_str = 'Kruskal-Wallis p < 0.001';
-    else
-        p_str = sprintf('Kruskal-Wallis p = %.3f', qtdb.p_kruskal);
-    end
-    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
-         'FontSize', ax_fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-
-    % Annotation method note
-    text(0.03, 0.88, 'Manual R-peaks, manual T-end', ...
+    % Annotation method note (bullet list)
+    text(0.03, 0.92, {'\bullet Manual R-peaks', '\bullet Manual T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
 
     % Panel label
     text(-0.12, 1.06, '\bfb', 'Units', 'normalized', ...
@@ -239,8 +230,39 @@ function plot_SI_Fig6()
     %% ================================================================
     %  LAYOUT AND SAVE
     %  ================================================================
-    set(ax1, 'Position', [0.14  0.56  0.80  0.37]);
-    set(ax2, 'Position', [0.14  0.10  0.80  0.37]);
+    set(ax1, 'Position', [0.10  0.56  0.48  0.37]);
+    set(ax2, 'Position', [0.10  0.10  0.48  0.37]);
+    % Legends — left-edge aligned, auto-width
+    leg_left = 0.60;
+    legs = [leg1, leg2];
+    panel_bottoms = [0.56, 0.10];
+    panel_h = 0.37;
+    for k = 1:2
+        set(legs(k), 'Units', 'normalized');
+        auto_pos = get(legs(k), 'Position');
+        leg_y = panel_bottoms(k) + (panel_h - auto_pos(4)) / 2;
+        set(legs(k), 'Position', ...
+            [leg_left, leg_y, auto_pos(3), auto_pos(4)]);
+    end
+
+    % p-value annotations below each legend
+    if ludb.p_value < 0.001
+        p1_str = 'Wilcoxon rank-sum p < 0.001';
+    else
+        p1_str = sprintf('Wilcoxon rank-sum p = %.3f', ludb.p_value);
+    end
+    annotation('textbox', [leg_left 0.64 0.38 0.05], 'String', p1_str, ...
+        'FontSize', ax_fs, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
+        'FitBoxToText', 'on');
+
+    if qtdb.p_kruskal < 0.001
+        p2_str = 'Kruskal-Wallis p < 0.001';
+    else
+        p2_str = sprintf('Kruskal-Wallis p = %.3f', qtdb.p_kruskal);
+    end
+    annotation('textbox', [leg_left 0.16 0.38 0.05], 'String', p2_str, ...
+        'FontSize', ax_fs, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
+        'FitBoxToText', 'on');
 
     set(fig, 'PaperUnits', 'centimeters');
     set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
@@ -273,25 +295,9 @@ function plot_SI_Fig6()
             qtdb.n_npe, qtdb.mode_npe);
     fprintf('Patients (pathological ECG) n=%d (mode=%.3f), ', ...
             qtdb.n_pe, qtdb.mode_pe);
-    fprintf('Sudden death n=%d (mode=%.3f)\n', ...
+    fprintf('Patients (sudden death) n=%d (mode=%.3f)\n', ...
             qtdb.n_fatal, qtdb.mode_fatal);
     fprintf('  Kruskal-Wallis p = %.2e\n', qtdb.p_kruskal);
 end
 
 
-%% ========================================================================
-%  LOCAL FUNCTIONS
-%  ========================================================================
-
-function add_p_annotation(p_val, fs)
-% ADD_P_ANNOTATION - Place a formatted p-value in the lower right
-    if isnan(p_val), return; end
-    if p_val < 0.001
-        p_str = 'p < 0.001';
-    else
-        p_str = sprintf('p = %.3f', p_val);
-    end
-    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
-         'FontSize', fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-end

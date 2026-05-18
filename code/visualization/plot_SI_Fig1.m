@@ -131,9 +131,9 @@ function plot_SI_Fig1()
 
         % Optimal label
         if si == 1
-            text(age_lim(2) - 1, 0.004, 'Optimal (1/\ite\rm)', ...
+            text(age_lim(2) - 1, -0.004, 'Optimal (1/\ite\rm)', ...
                 'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+                'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
         end
 
         xlim(age_lim);
@@ -145,19 +145,17 @@ function plot_SI_Fig1()
         set(ax(si), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
             'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-        % Legend (panel a only)
-        if si == 1
-            leg_strs = cell(3, 1);
-            for gi = 1:3
-                leg_strs{gi} = sprintf('%s (n=%s)', ...
-                    group_labels{gi}, format_comma(desc(gi, si).n));
-            end
-            leg = legend(h_lines, leg_strs, ...
-                'Location', 'northwest', 'FontSize', leg_fs, 'Box', 'off');
-            leg.ItemTokenSize = [12 8];
+        % Legend with group counts: panel a (Female), panel b (Male)
+        leg_strs = cell(3, 1);
+        for gi = 1:3
+            leg_strs{gi} = sprintf('%s (n=%s)', ...
+                group_labels{gi}, format_comma(desc(gi, si).n));
         end
+        leg = legend(h_lines, leg_strs, ...
+            'Location', 'southwest', 'FontSize', leg_fs, 'Box', 'off');
+        leg.ItemTokenSize = [12 8];
 
-        % Slope annotations (top-right, compact)
+        % Slope annotations (top-left, below title)
         for gi = 1:3
             slope = ols_dcdc(gi, si).slope;
             p_val = ols_dcdc(gi, si).p_slope;
@@ -168,12 +166,12 @@ function plot_SI_Fig1()
                 p_str = sprintf('%.3f', p_val);
             end
 
-            y_pos = 0.97 - (gi - 1) * 0.09;
-            text(0.97, y_pos, ...
+            y_pos = 0.97 - (gi - 1) * 0.045;
+            text(0.02, y_pos, ...
                 sprintf('%+.5f/yr (\\itp\\rm=%s)', slope, p_str), ...
                 'Units', 'normalized', 'FontSize', ax_fs - 0.5, ...
                 'Color', colors(gi, :) * 0.7, ...
-                'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+                'HorizontalAlignment', 'left', 'VerticalAlignment', 'top');
         end
 
         % Panel label
@@ -224,17 +222,7 @@ function plot_SI_Fig1()
         set(ax(si + 2), 'FontSize', ax_fs, 'LineWidth', 0.5, ...
             'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-        % Legend (panel c only)
-        if si == 1
-            leg_strs2 = cell(3, 1);
-            for gi = 1:3
-                leg_strs2{gi} = sprintf('%s (n=%s)', ...
-                    group_labels{gi}, format_comma(desc(gi, si).n));
-            end
-            leg2 = legend(h_lines2, leg_strs2, ...
-                'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
-            leg2.ItemTokenSize = [12 8];
-        end
+        % No legend in panels c/d (counts shown in a/b above)
 
         % Slope annotations
         for gi = 1:3
@@ -247,7 +235,7 @@ function plot_SI_Fig1()
                 p_str = sprintf('%.3f', p_val);
             end
 
-            y_pos = 0.97 - (gi - 1) * 0.09;
+            y_pos = 0.97 - (gi - 1) * 0.045;
             text(0.97, y_pos, ...
                 sprintf('%+.2f ms/yr (\\itp\\rm=%s)', slope, p_str), ...
                 'Units', 'normalized', 'FontSize', ax_fs - 0.5, ...
@@ -361,8 +349,6 @@ function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)
 
     % FIG — skip for large figures
     fprintf('  Skipped: %s (too many graphic objects for .fig format)\n', out_fig);
-
-    close(fig);
 end
 
 
