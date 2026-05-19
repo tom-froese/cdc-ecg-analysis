@@ -12,8 +12,8 @@ function plot_SI_Fig4()
 %   Amber  [0.85 0.65 0.13]  = Moderate  (T2, middle third)
 %   Red    [0.80 0.30 0.25]  = Far from 1/e (T3, farthest third)
 %
-% Each panel includes a number-at-risk table below the axes, consistent
-% with standard survival analysis reporting (CONSORT guidelines).
+% Group sample sizes are shown in the legend. Survival probability on the
+% y-axis allows assessment of numbers at risk at each follow-up time.
 %
 % Data source: survival_curve_results.mat (via analyze_survival_curves.m)
 %
@@ -56,7 +56,7 @@ function plot_SI_Fig4()
     %  ================================================================
 
     fig_w_cm = 18.3;   % double-column width
-    fig_h_cm = 20.0;   % tall to accommodate three panels + at-risk tables
+    fig_h_cm = 22.0;   % three stacked panels with spacing for labels
 
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2 1 fig_w_cm fig_h_cm]);
@@ -66,8 +66,7 @@ function plot_SI_Fig4()
     lab_fs   = 8;    % axis labels
     title_fs = 8;    % panel titles
     panel_fs = 10;   % panel letters
-    leg_fs   = 6;    % legend
-    risk_fs  = 5.5;  % at-risk table
+    leg_fs   = 7;    % legend (matches tick/p-value font)
 
     %% ================================================================
     %  PANEL (a): Overall KM curves
@@ -80,36 +79,30 @@ function plot_SI_Fig4()
 
     xlabel('Follow-up (years)', 'FontSize', lab_fs);
     ylabel('Survival probability', 'FontSize', lab_fs);
-    title(sprintf('Overall (N = %s; %s deaths)', ...
+    t1 = title(sprintf('Overall (N = %s; %s deaths)', ...
         format_comma(S.n_total), format_comma(S.n_deceased)), ...
         'FontSize', title_fs, 'FontWeight', 'bold');
+    t1.Units = 'normalized'; t1.Position(2) = t1.Position(2) + 0.04;
 
-    ylim([0.90 1.005]);
+    ylim([0.88 1.005]);
     xlim([0 tau]);
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.015 0.015], ...
-        'YTick', 0.90:0.02:1.00);
+        'YTick', 0.88:0.02:1.00);
 
-    % Legend
+    % Legend (positioned in layout section)
     leg_strs = cell(3, 1);
     for ti = 1:3
         leg_strs{ti} = sprintf('%s (n=%s)', ...
             tert_labels{ti}, format_comma(km_overall(ti).n));
     end
-    leg = legend(h_lines, leg_strs, ...
-        'Location', 'southwest', 'FontSize', leg_fs, 'Box', 'off');
-    leg.ItemTokenSize = [12 8];
-
-    % Log-rank p-value
-    add_logrank_annotation(S.logrank_omnibus.p, ax_fs);
+    leg1 = legend(h_lines, leg_strs, ...
+        'FontSize', leg_fs, 'Box', 'off');
+    leg1.ItemTokenSize = [12 8];
 
     % Panel label
     text(-0.08, 1.06, '\bfa', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    % Number-at-risk table
-    add_risk_table(ax1, risk_times, at_risk_all, tert_labels, ...
-                   colors, risk_fs, tau);
 
     hold off;
 
@@ -124,26 +117,30 @@ function plot_SI_Fig4()
 
     xlabel('Follow-up (years)', 'FontSize', lab_fs);
     ylabel('Survival probability', 'FontSize', lab_fs);
-    title(sprintf('%s (n = %s; %d deaths)', ...
-        sex_labels{1}, format_comma(km_by_sex(1).n), km_by_sex(1).d), ...
+    t2 = title(sprintf('%s (n = %s; %s deaths)', ...
+        sex_labels{1}, format_comma(km_by_sex(1).n), format_comma(km_by_sex(1).d)), ...
         'FontSize', title_fs, 'FontWeight', 'bold');
+    t2.Units = 'normalized'; t2.Position(2) = t2.Position(2) + 0.04;
 
-    ylim([0.90 1.005]);
+    ylim([0.88 1.005]);
     xlim([0 tau]);
     set(ax2, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.015 0.015], ...
-        'YTick', 0.90:0.02:1.00);
+        'YTick', 0.88:0.02:1.00);
 
-    % Log-rank p-value
-    add_logrank_annotation(km_by_sex(1).logrank_p, ax_fs);
+    % Legend (positioned in layout section)
+    leg_strs_f = cell(3, 1);
+    for ti = 1:3
+        leg_strs_f{ti} = sprintf('%s (n=%s)', ...
+            tert_labels{ti}, format_comma(km_by_sex(1).km(ti).n));
+    end
+    leg2 = legend(h_lines_f, leg_strs_f, ...
+        'FontSize', leg_fs, 'Box', 'off');
+    leg2.ItemTokenSize = [12 8];
 
     % Panel label
     text(-0.08, 1.06, '\bfb', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    % Number-at-risk table
-    add_risk_table(ax2, risk_times, at_risk_sex{1}, tert_labels, ...
-                   colors, risk_fs, tau);
 
     hold off;
 
@@ -158,44 +155,76 @@ function plot_SI_Fig4()
 
     xlabel('Follow-up (years)', 'FontSize', lab_fs);
     ylabel('Survival probability', 'FontSize', lab_fs);
-    title(sprintf('%s (n = %s; %d deaths)', ...
-        sex_labels{2}, format_comma(km_by_sex(2).n), km_by_sex(2).d), ...
+    t3 = title(sprintf('%s (n = %s; %s deaths)', ...
+        sex_labels{2}, format_comma(km_by_sex(2).n), format_comma(km_by_sex(2).d)), ...
         'FontSize', title_fs, 'FontWeight', 'bold');
+    t3.Units = 'normalized'; t3.Position(2) = t3.Position(2) + 0.04;
 
-    ylim([0.90 1.005]);
+    ylim([0.88 1.005]);
     xlim([0 tau]);
     set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.015 0.015], ...
-        'YTick', 0.90:0.02:1.00);
+        'YTick', 0.88:0.02:1.00);
 
-    % Log-rank p-value
-    add_logrank_annotation(km_by_sex(2).logrank_p, ax_fs);
+    % Legend (positioned in layout section)
+    leg_strs_m = cell(3, 1);
+    for ti = 1:3
+        leg_strs_m{ti} = sprintf('%s (n=%s)', ...
+            tert_labels{ti}, format_comma(km_by_sex(2).km(ti).n));
+    end
+    leg3 = legend(h_lines_m, leg_strs_m, ...
+        'FontSize', leg_fs, 'Box', 'off');
+    leg3.ItemTokenSize = [12 8];
 
     % Panel label
     text(-0.08, 1.06, '\bfc', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
-
-    % Number-at-risk table
-    add_risk_table(ax3, risk_times, at_risk_sex{2}, tert_labels, ...
-                   colors, risk_fs, tau);
 
     hold off;
 
     %% ================================================================
     %  LAYOUT AND SAVE
     %  ================================================================
-    %  Three stacked panels with room below each for the at-risk table.
+    %  Three stacked panels, evenly spaced.
 
     % Panel positions: [left, bottom, width, height]
-    % Leave extra space at the bottom of each panel for the risk table
-    panel_w = 0.82;
+    panel_w = 0.50;
     panel_h = 0.22;
-    left    = 0.12;
-    gap     = 0.105;  % gap includes risk table space
+    left    = 0.10;
+    gap     = 0.10;
+    panel_bottoms = [0.72, 0.40, 0.08];
 
-    set(ax1, 'Position', [left, 0.72, panel_w, panel_h]);
-    set(ax2, 'Position', [left, 0.39, panel_w, panel_h]);
-    set(ax3, 'Position', [left, 0.06, panel_w, panel_h]);
+    set(ax1, 'Position', [left, panel_bottoms(1), panel_w, panel_h]);
+    set(ax2, 'Position', [left, panel_bottoms(2), panel_w, panel_h]);
+    set(ax3, 'Position', [left, panel_bottoms(3), panel_w, panel_h]);
+
+    % Legends — right side, one per panel, left-aligned, vertically centered
+    leg_left = 0.62;
+    legs = [leg1, leg2, leg3];
+    for k = 1:3
+        set(legs(k), 'Units', 'normalized');
+        auto_pos = get(legs(k), 'Position');
+        leg_y = panel_bottoms(k) + (panel_h - auto_pos(4)) / 2;
+        set(legs(k), 'Position', ...
+            [leg_left, leg_y, auto_pos(3), auto_pos(4)]);
+    end
+
+    % Log-rank p-values — right side, below each legend
+    p_vals = [S.logrank_omnibus.p, km_by_sex(1).logrank_p, km_by_sex(2).logrank_p];
+    for k = 1:3
+        if p_vals(k) < 0.001
+            pk_str = 'Log-rank \itp\rm < 0.001';
+        else
+            pk_str = sprintf('Log-rank \\itp\\rm = %.3f', p_vals(k));
+        end
+        pk_y = panel_bottoms(k) + 0.01;
+        annotation('textbox', [leg_left, pk_y, 0.36, 0.03], ...
+            'String', pk_str, 'FontSize', ax_fs, 'FontWeight', 'bold', ...
+            'EdgeColor', 'none', 'FitBoxToText', 'on');
+    end
+
+    % Number-at-risk tables removed — full n per group shown in legend,
+    % and y-axis (survival probability) allows assessment at each time point.
 
     out_pdf = fullfile(paths.figures, 'SI_Fig4_survival_curves.pdf');
     out_png = fullfile(paths.figures, 'SI_Fig4_survival_curves.png');
@@ -273,96 +302,6 @@ function h_lines = plot_km_panel(km_struct, colors, ci_alpha, n_groups)
     end
 end
 
-
-function add_logrank_annotation(p_val, fs)
-% ADD_LOGRANK_ANNOTATION - Place log-rank p-value in lower-left corner
-
-    if isnan(p_val), return; end
-
-    if p_val < 0.001
-        p_str = 'Log-rank \itp\rm < 0.001';
-    else
-        p_str = sprintf('Log-rank \\itp\\rm = %.3f', p_val);
-    end
-
-    text(0.97, 0.06, p_str, 'Units', 'normalized', ...
-        'FontSize', fs, 'FontWeight', 'bold', ...
-        'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', ...
-        'BackgroundColor', [1 1 1 0.8], 'EdgeColor', [0.5 0.5 0.5]);
-end
-
-
-function add_risk_table(ax, risk_times, at_risk, tert_labels, colors, fs, tau)
-% ADD_RISK_TABLE - Number-at-risk table below KM axes
-%
-%   Displays only times within [0, tau] and thins labels for readability.
-
-    % Select time points to display (thin if > 8)
-    valid = risk_times <= tau;
-    disp_times = risk_times(valid);
-    disp_risk  = at_risk(:, valid);
-
-    if length(disp_times) > 8
-        step = ceil(length(disp_times) / 8);
-        idx = [1:step:length(disp_times), length(disp_times)];
-        idx = unique(idx);
-        disp_times = disp_times(idx);
-        disp_risk  = disp_risk(:, idx);
-    end
-
-    % Get axes position in normalised figure coordinates
-    ax_pos = get(ax, 'Position');  % [left, bottom, width, height]
-
-    n_groups = size(at_risk, 1);
-    row_h = 0.012;    % height of each row in normalised units
-    table_top = ax_pos(2) - 0.015;  % start just below axes
-
-    % Short labels for the risk table
-    short_labels = {'T1 (Near)', 'T2 (Mod.)', 'T3 (Far)'};
-    if n_groups > length(short_labels)
-        short_labels = tert_labels;
-    end
-
-    for ti = 1:n_groups
-        y_row = table_top - (ti - 1) * row_h;
-
-        % Row label
-        annotation('textbox', ...
-            [ax_pos(1) - 0.09, y_row - row_h/2, 0.08, row_h], ...
-            'String', short_labels{ti}, ...
-            'FontSize', fs, 'FontWeight', 'bold', ...
-            'Color', colors(ti, :) * 0.8, ...
-            'EdgeColor', 'none', ...
-            'HorizontalAlignment', 'right', ...
-            'VerticalAlignment', 'middle', ...
-            'FitBoxToText', 'off');
-
-        % Numbers
-        for ri = 1:length(disp_times)
-            x_frac = ax_pos(1) + ax_pos(3) * disp_times(ri) / tau;
-            annotation('textbox', ...
-                [x_frac - 0.02, y_row - row_h/2, 0.04, row_h], ...
-                'String', format_comma(disp_risk(ti, ri)), ...
-                'FontSize', fs, ...
-                'Color', [0.3 0.3 0.3], ...
-                'EdgeColor', 'none', ...
-                'HorizontalAlignment', 'center', ...
-                'VerticalAlignment', 'middle', ...
-                'FitBoxToText', 'off');
-        end
-    end
-
-    % "No. at risk" header
-    annotation('textbox', ...
-        [ax_pos(1) - 0.09, table_top + row_h * 0.3, 0.08, row_h], ...
-        'String', 'No. at risk', ...
-        'FontSize', fs, 'FontAngle', 'italic', ...
-        'Color', [0.4 0.4 0.4], ...
-        'EdgeColor', 'none', ...
-        'HorizontalAlignment', 'right', ...
-        'VerticalAlignment', 'middle', ...
-        'FitBoxToText', 'off');
-end
 
 
 function save_large_figure(fig, out_pdf, out_png, out_fig, w_cm, h_cm)

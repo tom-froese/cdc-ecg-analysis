@@ -59,7 +59,7 @@ function plot_SI_Fig8()
     lab_fs   = 8;    % axis labels
     title_fs = 8;    % panel titles
     panel_fs = 10;   % panel letters
-    leg_fs   = 6;    % legend
+    leg_fs   = 7;    % legend (matches tick/p-value font)
 
     % Scatter aesthetics
     dot_size  = 2;
@@ -74,8 +74,8 @@ function plot_SI_Fig8()
     ax1 = subplot(2, 2, [1 2]);
     hold on; box on;
 
-    edges = (0.20:0.01:0.65) - inv_e;
-    x_limits = [0.20 - inv_e, 0.65 - inv_e];
+    edges = (0.17:0.01:0.65) - inv_e;
+    x_limits = [0.17 - inv_e, 0.65 - inv_e];
     kde_pts = 500;
 
     % Histograms
@@ -102,32 +102,29 @@ function plot_SI_Fig8()
 
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', 'FontSize', lab_fs);
     ylabel('Density', 'FontSize', lab_fs);
-    title('CODE-15%: Patients (non-pathological ECG) vs Patients (pathological ECG)', ...
+    t1 = title(sprintf('CODE-15%%: clinical ECG patients (N = %s)', format_comma(n_total)), ...
           'FontSize', title_fs, 'FontWeight', 'bold');
+    t1.Units = 'normalized'; t1.Position(2) = t1.Position(2) + 0.04;
 
-    % Legend
+    % Legend (positioned in layout section)
     ph = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     pp = patch(NaN, NaN, col_pe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
-    legend([ph, pp], { ...
-        sprintf('Patients (non-pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_npe), mode_npe_d), ...
-        sprintf('Patients (pathological ECG) (n=%s, \\Delta=%+.3f)', format_comma(n_pe), mode_pe_d)}, ...
-        'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
+    leg1 = legend([ph, pp], { ...
+        sprintf('Patients (non-pathological ECG)\n(n=%s, \\Delta=%+.3f)', format_comma(n_npe), mode_npe_d), ...
+        sprintf('Patients (pathological ECG)\n(n=%s, \\Delta=%+.3f)', format_comma(n_pe), mode_pe_d)}, ...
+        'FontSize', leg_fs, 'Box', 'off');
 
     xlim(x_limits); grid on;
     set(ax1, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
-    % p-value
-    add_p_annotation(S.p_ranksum, ax_fs);
-
-    % N and method annotations
-    text(0.03, 0.88, sprintf('N = %s patients', format_comma(n_total)), ...
-         'Units', 'normalized', 'FontSize', ax_fs, 'Color', [0.3 0.3 0.3]);
-    text(0.03, 0.78, 'Fully automatic (Pan-Tompkins + tangent)', ...
+    % Annotation method (bullet list)
+    text(0.03, 0.92, {'\bullet Pan-Tompkins R-peaks', '\bullet Tangent T-end'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
-         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45]);
+         'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
+         'VerticalAlignment', 'top');
 
-    text(-0.08, 1.06, '\bfa', 'Units', 'normalized', ...
+    text(-0.12, 1.06, '\bfa', 'Units', 'normalized', ...
         'FontSize', panel_fs, 'FontWeight', 'bold', 'VerticalAlignment', 'top');
 
     hold off;
@@ -163,9 +160,11 @@ function plot_SI_Fig8()
 
     % Reference line
     yline(0, 'k--', 'LineWidth', 1.0, 'HandleVisibility', 'off');
-    text(age_lim(2) - 1, 0.004, 'Optimal (1/\ite\rm)', ...
+    text(age_lim(2) - 1, -0.008, 'Optimal (1/\ite\rm)', ...
         'FontSize', ax_fs, 'Color', [0.3 0.3 0.3], ...
-        'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+        'HorizontalAlignment', 'right', 'VerticalAlignment', 'top', ...
+        'BackgroundColor', [1 1 1 0.8], 'EdgeColor', [0.7 0.7 0.7], ...
+        'Margin', 2);
 
     xlabel('Age (years)', 'FontSize', lab_fs);
     ylabel('\DeltaCDC from 1/\ite', 'FontSize', lab_fs);
@@ -217,6 +216,7 @@ function plot_SI_Fig8()
         'Location', 'northeast', 'FontSize', leg_fs, 'Box', 'off');
 
     xlim(age_lim);
+    ylim([0.3 1.8]);   % cap at 1.8 s (>99.5th percentile; excludes 20 extreme outliers)
     set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02]);
 
@@ -228,10 +228,28 @@ function plot_SI_Fig8()
     %% ================================================================
     %  LAYOUT AND SAVE
     %  ================================================================
-    % Top panel spans full width; bottom two panels side by side
-    set(ax1, 'Position', [0.10  0.58  0.85  0.36]);
+    % Top panel narrowed for legend; bottom two panels side by side
+    panel_a_pos = [0.10  0.58  0.50  0.36];
+    set(ax1, 'Position', panel_a_pos);
     set(ax2, 'Position', [0.10  0.08  0.38  0.40]);
     set(ax3, 'Position', [0.58  0.08  0.38  0.40]);
+
+    % Legend — right side of panel (a), vertically centered
+    leg_left_a = 0.62;
+    set(leg1, 'Units', 'normalized');
+    auto_pos = get(leg1, 'Position');
+    leg_y = panel_a_pos(2) + (panel_a_pos(4) - auto_pos(4)) / 2;
+    set(leg1, 'Position', [leg_left_a, leg_y, auto_pos(3), auto_pos(4)]);
+
+    % p-value below legend
+    if S.p_ranksum < 0.001
+        p1_str = 'Wilcoxon rank-sum \itp\rm < 0.001';
+    else
+        p1_str = sprintf('Wilcoxon rank-sum \\itp\\rm = %.3f', S.p_ranksum);
+    end
+    annotation('textbox', [leg_left_a, leg_y - 0.03, 0.36, 0.03], ...
+        'String', p1_str, 'FontSize', ax_fs, 'FontWeight', 'bold', ...
+        'EdgeColor', 'none', 'FitBoxToText', 'on');
 
     set(fig, 'PaperUnits', 'centimeters');
     set(fig, 'PaperSize', [fig_w_cm fig_h_cm]);
@@ -283,17 +301,6 @@ end
 %  LOCAL FUNCTIONS
 %  ========================================================================
 
-function add_p_annotation(p_val, fs)
-    if isnan(p_val), return; end
-    if p_val < 0.001
-        p_str = 'p < 0.001';
-    else
-        p_str = sprintf('p = %.3f', p_val);
-    end
-    text(0.97, 0.08, p_str, 'Units', 'normalized', ...
-         'FontSize', fs, 'FontWeight', 'bold', ...
-         'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-end
 
 function s = format_comma(n)
     s = num2str(n);

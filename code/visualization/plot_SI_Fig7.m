@@ -91,8 +91,9 @@ function plot_SI_Fig7()
     end
 
     ylabel('Density', 'FontSize', lab_fs);
-    title('Fantasia: healthy volunteers (ages 21–85)', ...
+    t1 = title('Fantasia: healthy volunteers (ages 21–85)', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
+    t1.Units = 'normalized'; t1.Position(2) = t1.Position(2) + 0.04;
 
     ph = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg1 = legend(ph, {sprintf('Healthy controls (n=%d, \\Delta=%+.3f)', ...
@@ -135,8 +136,9 @@ function plot_SI_Fig7()
     end
 
     ylabel('Density', 'FontSize', lab_fs);
-    title('Autonomic Aging: healthy volunteers (ages 18–92)', ...
+    t2 = title('Autonomic Aging: healthy volunteers (ages 18–92)', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
+    t2.Units = 'normalized'; t2.Position(2) = t2.Position(2) + 0.04;
 
     pa = patch(NaN, NaN, col_hc, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
     leg2 = legend(pa, {sprintf('Healthy controls (n=%s, \\Delta=%+.3f)', ...
@@ -191,8 +193,9 @@ function plot_SI_Fig7()
          'Color', col_pe * 0.7, 'LineWidth', 1.0);
 
     ylabel('Density', 'FontSize', lab_fs);
-    title('PTB: healthy controls and cardiac patients', ...
+    t3 = title('PTB: healthy controls and cardiac patients', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
+    t3.Units = 'normalized'; t3.Position(2) = t3.Position(2) + 0.04;
 
     % Legend
     leg_items = gobjects(2, 1);
@@ -215,7 +218,7 @@ function plot_SI_Fig7()
     set(ax3, 'FontSize', ax_fs, 'LineWidth', 0.5, ...
         'TickDir', 'out', 'TickLength', [0.02 0.02], 'XTickLabel', []);
 
-    text(0.03, 0.92, {'\bullet Manual T-end (5 referees)', '\bullet Pan-Tompkins R-peaks'}, ...
+    text(0.03, 0.92, {'\bullet Pan-Tompkins R-peaks', '\bullet Manual T-end (5 referees)'}, ...
          'Units', 'normalized', 'FontSize', ax_fs - 1, ...
          'FontAngle', 'italic', 'Color', [0.45 0.45 0.45], ...
          'VerticalAlignment', 'top');
@@ -257,8 +260,9 @@ function plot_SI_Fig7()
     xlabel('\DeltaCDC from optimal (1/\ite\rm \approx 0.368)', ...
            'FontSize', lab_fs);
     ylabel('Density', 'FontSize', lab_fs);
-    title('PTB-XL: clinical ECG patients', ...
+    t4 = title('PTB-XL: clinical ECG patients', ...
           'FontSize', title_fs, 'FontWeight', 'bold');
+    t4.Units = 'normalized'; t4.Position(2) = t4.Position(2) + 0.04;
 
     % Legend
     ph = patch(NaN, NaN, col_npe, 'EdgeColor', 'none', 'FaceAlpha', 0.6);
@@ -305,9 +309,10 @@ function plot_SI_Fig7()
     for k = 1:4
         set(legs(k), 'Units', 'normalized');
         auto_pos = get(legs(k), 'Position');
-        panel_top = bottom_start + (4-k)*(panel_h + gap) + panel_h;
+        panel_bottom = bottom_start + (4-k)*(panel_h + gap);
+        leg_y = panel_bottom + (panel_h - auto_pos(4)) / 2;
         set(legs(k), 'Position', ...
-            [leg_left, panel_top - auto_pos(4) - 0.01, auto_pos(3), auto_pos(4)]);
+            [leg_left, leg_y, auto_pos(3), auto_pos(4)]);
     end
 
     % p-value annotations below legends for panels c and d
@@ -316,8 +321,9 @@ function plot_SI_Fig7()
     else
         p3_str = sprintf('Wilcoxon rank-sum p = %.3f', ptb.p_value);
     end
-    p3_top = bottom_start + (4-3)*(panel_h + gap) + panel_h - 0.10;
-    annotation('textbox', [leg_left, p3_top, 0.40, 0.03], 'String', p3_str, ...
+    leg3_pos = get(legs(3), 'Position');
+    p3_y = leg3_pos(2) - 0.035;
+    annotation('textbox', [leg_left, p3_y, 0.40, 0.03], 'String', p3_str, ...
         'FontSize', ax_fs, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
         'FitBoxToText', 'on');
 
@@ -326,8 +332,9 @@ function plot_SI_Fig7()
     else
         p4_str = sprintf('Wilcoxon rank-sum p = %.3f', ptbxl.p_value);
     end
-    p4_top = bottom_start + (4-4)*(panel_h + gap) + panel_h - 0.10;
-    annotation('textbox', [leg_left, p4_top, 0.40, 0.03], 'String', p4_str, ...
+    leg4_pos = get(legs(4), 'Position');
+    p4_y = leg4_pos(2) - 0.035;
+    annotation('textbox', [leg_left, p4_y, 0.40, 0.03], 'String', p4_str, ...
         'FontSize', ax_fs, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
         'FitBoxToText', 'on');
 
