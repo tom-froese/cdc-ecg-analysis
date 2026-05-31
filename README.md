@@ -1,7 +1,7 @@
 # CDC-ECG Analysis
 
 **MATLAB toolbox for Cardiac Duty Cycle (CDC) analysis of ECG data.**
-Full reproducibility package for the *Nature Aging* Brief Communication (in prep.).
+Full reproducibility package for the *Nature Aging* Brief Communication (submitted; under review).
 
 Authors: Tom Froese, Vaibhav Bhaskar, Ruben Fossion. An independent Python reimplementation by Vaibhav Bhaskar is available at [VAIBHAV-BHASKAR/cardiac-duty-cycle](https://github.com/VAIBHAV-BHASKAR/cardiac-duty-cycle).
 
@@ -84,7 +84,7 @@ The automatic R-peak and T-end detectors are validated against expert manual ann
 
 ## Citation
 
-> Froese, T. et al. (in prep.). The healthy heart converges on an optimum (1/*e*) that predicts survival. *Nature Aging*.
+> Froese, T., Bhaskar, V., & Fossion, R. (2026). The cardiac duty cycle maintains an optimal ratio (1/*e*) in healthy aging. *Nature Aging* (submitted; under review).
 
 > Froese, T. (2026). CDC Analysis — Preprocessed Beat Data (v1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.19246122
 
