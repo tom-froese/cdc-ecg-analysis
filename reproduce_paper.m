@@ -1,7 +1,7 @@
 % REPRODUCE_PAPER - One-command reproduction of all analyses, figures, and tables
 %
 % Reproduces every result in:
-%   Froese, T. et al. (in prep.). Nature Aging.
+%   Froese, T. et al. (under review).
 %
 % Prerequisites:
 %   1. Run setup.m once to add all project paths.
